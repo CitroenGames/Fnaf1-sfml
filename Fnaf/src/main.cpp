@@ -19,6 +19,8 @@ int main() {
         p.createPakFromFolder("assets.pak", "assets");
     }
 
+    p.listPak("assets.pak");
+
     Resources::Load("assets.pak");
     
     Application::Init();

@@ -1,82 +1,82 @@
 #include "Flipbook.h"
 
-Flipbook::Flipbook() : layer(layer), frameDuration(0), elapsedTime(0.f), currentFrame(0), isPlayingFlag(false), loop(false) {}
+Flipbook::Flipbook() : m_Layer(m_Layer), m_FrameDuration(0), m_ElapsedTime(0.f), m_CurrentFrame(0), m_IsPlayingFlag(false), m_Loop(false) {}
 
-Flipbook::Flipbook(int layer, float frameDuration, bool loop)
-    : layer(layer), frameDuration(frameDuration), elapsedTime(0.f), currentFrame(0), isPlayingFlag(false), loop(loop) {}
+Flipbook::Flipbook(int m_Layer, float m_FrameDuration, bool m_Loop)
+    : m_Layer(m_Layer), m_FrameDuration(m_FrameDuration), m_ElapsedTime(0.f), m_CurrentFrame(0), m_IsPlayingFlag(false), m_Loop(m_Loop) {}
 
-void Flipbook::addFrame(const sf::Texture& texture) {
-    frames.push_back(sf::Sprite(texture));
+void Flipbook::AddFrame(const sf::Texture& texture) {
+    m_Frames.push_back(sf::Sprite(texture));
 }
 
-void Flipbook::addFrame(const sf::Sprite& sprite) {
-	frames.push_back(sprite);
+void Flipbook::AddFrame(const sf::Sprite& sprite) {
+	m_Frames.push_back(sprite);
 }
 
-void Flipbook::addFrames(const std::vector<sf::Sprite>& sprites)
+void Flipbook::AddFrames(const std::vector<sf::Sprite>& sprites)
 {
 	for (auto sprite : sprites)
 	{
-		frames.push_back(sprite);
+		m_Frames.push_back(sprite);
 	}
 }
 
-void Flipbook::addFrames(const std::vector<sf::Texture>& Textures)
+void Flipbook::AddFrames(const std::vector<sf::Texture>& Textures)
 {
 	for (auto Texture : Textures)
 	{
-		frames.push_back(sf::Sprite(Texture));
+		m_Frames.push_back(sf::Sprite(Texture));
 	}
 }
 
-void Flipbook::update(float deltaTime) {
-    if (!isPlayingFlag || frames.empty()) return;
+void Flipbook::Update(float deltaTime) {
+    if (!m_IsPlayingFlag || m_Frames.empty()) return;
 
-    elapsedTime += deltaTime;
-    if (elapsedTime >= frameDuration) {
-        elapsedTime = 0.f;
-        if (currentFrame + 1 < frames.size()) {
-            currentFrame++;
+    m_ElapsedTime += deltaTime;
+    if (m_ElapsedTime >= m_FrameDuration) {
+        m_ElapsedTime = 0.f;
+        if (m_CurrentFrame + 1 < m_Frames.size()) {
+            m_CurrentFrame++;
         }
-        else if (loop) {
-            currentFrame = 0;  // Reset to the first frame if looping is enabled
+        else if (m_Loop) {
+            m_CurrentFrame = 0;  // Reset to the first frame if looping is enabled
         }
         else {
-            isPlayingFlag = false;  // Stop the animation if not looping
+            m_IsPlayingFlag = false;  // Stop the animation if not looping
         }
     }
 }
 
-void Flipbook::registerToLayerManager() {
-    if (!frames.empty()) {
-        LayerManager::RemoveDrawable(frames[currentFrame]);
-        LayerManager::AddDrawable(layer, frames[currentFrame]);
+void Flipbook::RegisterToLayerManager() {
+    if (!m_Frames.empty()) {
+        LayerManager::RemoveDrawable(m_Frames[m_CurrentFrame]);
+        LayerManager::AddDrawable(m_Layer, m_Frames[m_CurrentFrame]);
     }
 }
 
-void Flipbook::play() {
-    isPlayingFlag = true;
+void Flipbook::Play() {
+    m_IsPlayingFlag = true;
 }
 
-void Flipbook::pause() {
-    isPlayingFlag = false;
+void Flipbook::Pause() {
+    m_IsPlayingFlag = false;
 }
 
-void Flipbook::stop() {
-    isPlayingFlag = false;
-    currentFrame = 0;
-    elapsedTime = 0.f;
+void Flipbook::Stop() {
+    m_IsPlayingFlag = false;
+    m_CurrentFrame = 0;
+    m_ElapsedTime = 0.f;
 }
 
-void Flipbook::setFrameDuration(float duration) {
-    frameDuration = duration;
+void Flipbook::SetFrameDuration(float duration) {
+    m_FrameDuration = duration;
 }
 
-void Flipbook::setLoop(bool shouldLoop) {
-    loop = shouldLoop;
+void Flipbook::SetLoop(bool shouldLoop) {
+    m_Loop = shouldLoop;
 }
 
-bool Flipbook::isPlaying() const {
-    return isPlayingFlag;
+bool Flipbook::IsPlaying() const {
+    return m_IsPlayingFlag;
 }
 

@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include "Layers/LayerManager.h"
+#include "Graphics/LayerManager.h"
 
 class Flipbook {
 public:
@@ -10,54 +10,43 @@ public:
     Flipbook(int layer, float frameDuration = 0.1f, bool loop = true);
 
     // Add a new frame to the flipbook
-    void addFrame(const sf::Texture& texture);
-    void addFrame(const sf::Sprite& sprite);
+    void AddFrame(const sf::Texture& texture);
+    void AddFrame(const sf::Sprite& sprite);
 
-    void addFrames(const std::vector<sf::Sprite>& sprites);
-	void addFrames(const std::vector<sf::Texture>& textures);
+    void AddFrames(const std::vector<sf::Sprite>& sprites);
+	void AddFrames(const std::vector<sf::Texture>& textures);
 
-    // Update the flipbook (to be called every frame)
-    void update(float deltaTime);
+    void Update(float deltaTime);
 
     // Register the current frame to the LayerManager
-    void registerToLayerManager();
+    void RegisterToLayerManager();
 
-    // Start playing the flipbook
-    void play();
+    void Play();
+    void Pause();
+    void Stop();
+    void SetFrameDuration(float duration);
+    void SetLoop(bool shouldLoop);
 
-    // Pause the flipbook
-    void pause();
+    bool IsPlaying() const;
 
-    // Stop the flipbook and reset to the first frame
-    void stop();
-
-    // Set the speed of the animation
-    void setFrameDuration(float duration);
-
-    // Set whether the animation should loop
-    void setLoop(bool shouldLoop);
-
-    // Check if the flipbook is currently playing
-    bool isPlaying() const;
-
-    void setPosition(float x, float y) {
-        for (auto& frame : frames) {
+    void SetPosition(float x, float y) {
+        for (auto& frame : m_Frames) {
             frame.setPosition(x, y);
         }
     }
 
     void Destroy() {
-        for (const auto& frame : frames) {
+        for (const auto& frame : m_Frames) {
             LayerManager::RemoveDrawable(frame);
         }
     }
 
 private:
-    std::vector<sf::Sprite> frames;
-    float frameDuration;
-    float elapsedTime;
-    std::size_t currentFrame;
-    bool isPlayingFlag;
-    bool loop;  // Whether the animation should loop
-    int layer;  // The layer to which this flipbook's frames will be added
+    std::vector<sf::Sprite> m_Frames;
+    float m_FrameDuration;
+    float m_ElapsedTime;
+    std::size_t m_CurrentFrame;
+    bool m_IsPlayingFlag;
+    bool m_Loop;  // Whether the animation should loop
+    int m_Layer;  // The layer to which this flipbook's frames will be added
 };

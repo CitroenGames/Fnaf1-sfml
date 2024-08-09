@@ -13,7 +13,6 @@ public:
     static void Draw(sf::RenderWindow& window);
 
 private:
-    // Static members to hold layer and drawable information
     static std::map<int, Layer> Layers;
     static std::map<const sf::Drawable*, int> DrawableToLayer;
 };

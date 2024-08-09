@@ -2,7 +2,7 @@
 #include "Application.h"
 #include <chrono>
 #include "Scene/SceneManager.h"
-#include "Layers/LayerManager.h"
+#include "Graphics/LayerManager.h"
 #include <thread>
 
 sf::RenderWindow* Application::window = nullptr;
@@ -12,7 +12,7 @@ const double FRAME_TIME = 1.0 / TICKRATE;  // Time per tick (seconds)
 
 void Application::Init()
 {
-	window = Window::Init(800, 600, "Window");
+	window = Window::Init(1024, 576, "Window");
 }
 
 void Application::Run()
@@ -41,24 +41,26 @@ void Application::Run()
             previousTime = currentTime;
             accumulator += elapsedTime.count();
 
+            // Fixed Update
             while (accumulator >= FRAME_TIME) {
                 SceneManager::FixedUpdate();
                 accumulator -= FRAME_TIME;
             }
 
+            // Update
             double deltaTime = elapsedTime.count();
             SceneManager::Update(deltaTime);
 
+            // Render
             window->clear();
-            SceneManager::Render();
             LayerManager::Draw(*window);
+            SceneManager::Render();
             window->display();
         }
         else {
-            // sleep to keep the cpu usage low
+            // Sleep to reduce CPU usage
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
-
     }
 }
 

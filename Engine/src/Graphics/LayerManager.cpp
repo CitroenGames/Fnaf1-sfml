@@ -31,6 +31,7 @@ void LayerManager::RemoveDrawable(const sf::Drawable& drawable)
 
 void LayerManager::Clear()
 {
+    Layers.clear();
     DrawableToLayer.clear();
 }
 

@@ -4,3 +4,6 @@ out
 .idea
 .vs
 .vscode
+*.dll
+*.exe
+*.pak

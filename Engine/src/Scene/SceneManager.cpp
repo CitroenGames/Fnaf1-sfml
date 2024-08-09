@@ -28,9 +28,16 @@ void SceneManager::Render()
 
 void SceneManager::SwitchScene(Scene* scene)
 {
-	Destroy();
+	if (activeScene)
+	{
+		activeScene->Destroy();
+		delete activeScene;
+	}
 	activeScene = scene;
-	activeScene->Init();
+	if (activeScene)
+	{
+		activeScene->Init();
+	}
 }
 
 Scene* SceneManager::GetActiveScene()
