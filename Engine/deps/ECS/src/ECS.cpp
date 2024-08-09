@@ -12,11 +12,11 @@ Entity::Entity(int id) : id(id) {
     nextId = std::max(nextId, id + 1);
 }
 
-int Entity::getId() const {
+int Entity::GetId() const {
     return id;
 }
 
-json Entity::serialize() const {
+json Entity::Serialize() const {
     json j;
     j["id"] = id;
     j["components"] = json::array();
@@ -29,7 +29,7 @@ json Entity::serialize() const {
     return j;
 }
 
-void Entity::deserialize(const json& j) {
+void Entity::Deserialize(const json& j) {
     id = j["id"];
     //for (const auto& componentJson : j["components"]) {
     //    std::string typeName = componentJson["type"];
@@ -43,7 +43,7 @@ void Entity::deserialize(const json& j) {
     //}
 }
 
-std::shared_ptr<Entity> World::createEntity() {
+std::shared_ptr<Entity> World::CreateEntity() {
     auto entity = std::make_shared<Entity>();
     entities.push_back(entity);
     return entity;
@@ -57,26 +57,50 @@ void World::addSystem(std::unique_ptr<System> system) {
     systems.push_back(std::move(system));
 }
 
-void World::update() {
+void World::update(double deltaTime) {
+    // Tick components
+    for (auto& component : tickableComponents) {
+        component->Update(deltaTime);
+    }
+
+    // Update systems
     for (auto& system : systems) {
         system->update(entities);
     }
 }
 
-json World::serialize() const {
+void World::fixedupdate()
+{
+    for (auto& component : tickableComponents) {
+        component->FixedUpdate();
+    }
+}
+
+json World::Serialize() const {
     json j;
     j["entities"] = json::array();
     for (const auto& entity : entities) {
-        j["entities"].push_back(entity->serialize());
+        j["entities"].push_back(entity->Serialize());
     }
     return j;
 }
 
-void World::deserialize(const json& j) {
+void World::addTickableComponent(std::shared_ptr<TickableComponent> component) {
+    tickableComponents.push_back(component);
+}
+
+void World::removeTickableComponent(std::shared_ptr<TickableComponent> component) {
+    tickableComponents.erase(
+        std::remove(tickableComponents.begin(), tickableComponents.end(), component),
+        tickableComponents.end()
+    );
+}
+
+void World::Deserialize(const json& j) {
     entities.clear();
     for (const auto& entityJson : j["entities"]) {
         auto entity = std::make_shared<Entity>();
-        entity->deserialize(entityJson);
+        entity->Deserialize(entityJson);
         entities.push_back(entity);
     }
 }

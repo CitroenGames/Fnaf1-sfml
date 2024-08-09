@@ -24,6 +24,12 @@ public:
     virtual std::string getTypeName() const = 0;
 };
 
+class TickableComponent : public Component {
+public:
+    virtual void Update(double deltaTime) = 0;
+    virtual void FixedUpdate() = 0;
+};
+
 class Entity {
 private:
     static int nextId;
@@ -33,24 +39,24 @@ private:
 public:
     Entity();
     explicit Entity(int id);
-    int getId() const;
+    int GetId() const;
 
     template<typename T, typename... Args>
-    void addComponent(Args&&... args);
+    std::shared_ptr<T> AddComponent(Args&&... args);
 
     template<typename T>
-    void removeComponent();
+    void RemoveComponent();
 
     template<typename T>
-    bool hasComponent() const;
+    bool HasComponent() const;
 
     template<typename T>
-    std::shared_ptr<T> getComponent() const;
+    std::shared_ptr<T> GetComponent() const;
 
-    void createComponentFromTypeName() {};
+    void CreateComponentFromTypeName() {};
 
-    json serialize() const;
-    void deserialize(const json& j);
+    json Serialize() const;
+    void Deserialize(const json& j);
 };
 
 class System {
@@ -59,39 +65,45 @@ public:
 };
 
 class World {
+
+public:
+    std::shared_ptr<Entity> CreateEntity();
+    void removeEntity(std::shared_ptr<Entity> entity);
+    void addSystem(std::unique_ptr<System> system);
+    void update(double deltaTime);
+    void fixedupdate();
+    void addTickableComponent(std::shared_ptr<TickableComponent> component);
+    void removeTickableComponent(std::shared_ptr<TickableComponent> component);
+
+    json Serialize() const;
+    void Deserialize(const json& j);
+
 private:
     std::vector<std::shared_ptr<Entity>> entities;
     std::vector<std::unique_ptr<System>> systems;
-
-public:
-    std::shared_ptr<Entity> createEntity();
-    void removeEntity(std::shared_ptr<Entity> entity);
-    void addSystem(std::unique_ptr<System> system);
-    void update();
-
-    json serialize() const;
-    void deserialize(const json& j);
+    std::vector<std::shared_ptr<TickableComponent>> tickableComponents;
 };
-
 
 // Template implementations
 template<typename T, typename... Args>
-void Entity::addComponent(Args&&... args) {
-    components[std::type_index(typeid(T))] = std::make_shared<T>(std::forward<Args>(args)...);
+std::shared_ptr<T> Entity::AddComponent(Args&&... args) {
+    auto component = std::make_shared<T>(std::forward<Args>(args)...);
+    components[std::type_index(typeid(T))] = component;
+    return component;
 }
 
 template<typename T>
-void Entity::removeComponent() {
+void Entity::RemoveComponent() {
     components.erase(std::type_index(typeid(T)));
 }
 
 template<typename T>
-bool Entity::hasComponent() const {
+bool Entity::HasComponent() const {
     return components.find(std::type_index(typeid(T))) != components.end();
 }
 
 template<typename T>
-std::shared_ptr<T> Entity::getComponent() const {
+std::shared_ptr<T> Entity::GetComponent() const {
     auto it = components.find(std::type_index(typeid(T)));
     if (it != components.end()) {
         return std::static_pointer_cast<T>(it->second);

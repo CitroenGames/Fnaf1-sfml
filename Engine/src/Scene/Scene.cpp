@@ -3,7 +3,12 @@
 
 void Scene::Update(double deltaTime)
 {
-	world.update();
+	world.update(deltaTime);
+}
+
+void Scene::FixedUpdate()
+{
+	world.fixedupdate();
 }
 
 void Scene::Destroy()
