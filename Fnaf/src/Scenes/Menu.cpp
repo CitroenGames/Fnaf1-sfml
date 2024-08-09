@@ -22,25 +22,24 @@ void Menu::Init()
         bgaudio2->setVolume(100.f);
 	}
 
-    texture1.loadFromFile("Assets/Graphics/MenuMenu/FreddyBackground/MainMenu1.png");
-    texture2.loadFromFile("Assets/Graphics/MenuMenu/FreddyBackground/MainMenu2.png");
-    texture3.loadFromFile("Assets/Graphics/MenuMenu/FreddyBackground/MainMenu3.png");
-    texture4.loadFromFile("Assets/Graphics/MenuMenu/FreddyBackground/MainMenu4.png");
-
-
     flipbook = Flipbook(0, 0.2f, true);  // Passing true for looping
-    flipbook.AddFrame(texture1);
-    flipbook.AddFrame(texture2);
-    flipbook.AddFrame(texture3);
-    flipbook.AddFrame(texture4);
+    flipbook.AddFrame(*Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu1.png"));
+    flipbook.AddFrame(*Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu2.png"));
+    flipbook.AddFrame(*Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu3.png"));
+    flipbook.AddFrame(*Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu4.png"));
 
     flipbook.SetPosition(-250, 0);
 
-    m_Logo.loadFromFile("Assets/Graphics/MenuMenu/Logo.png");
-    m_LogoSprite = sf::Sprite(m_Logo);
+    m_Logo = Resources::GetTexture("Graphics/MenuMenu/Logo.png");
+
+    m_LogoSprite = sf::Sprite(*m_Logo);
     m_LogoSprite.setPosition(100, 0);
     LayerManager::AddDrawable(BUTTON_LAYER, m_LogoSprite);
     flipbook.Play();
+
+
+    // TODO: this doesnt work
+    button.SetTexture("Graphics/MenuMenu/NewGame.png");
 }
 
 void Menu::Update(double deltaTime)
@@ -66,7 +65,6 @@ void Menu::FixedUpdate()
     if (button.isClicked(*window)) {
         SwitchToGameplay();
     }
-
 }
 
 void Menu::Render()

@@ -21,8 +21,7 @@ public:
 
 private:
 	std::shared_ptr<sf::Music> bgaudio2;
-	sf::Texture texture1, texture2, texture3, texture4;
-	sf::Texture m_Logo;
+	std::shared_ptr<sf::Texture> m_Logo;
 	sf::Sprite m_LogoSprite;
 	Flipbook flipbook;
 	Button button;

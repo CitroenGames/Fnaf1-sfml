@@ -3,30 +3,36 @@
 #include <SFML/Graphics.hpp>
 #include "Core/Window.h"
 #include "Graphics/LayerManager.h"
+#include "assets/Resources.h"
 
 void Gameplay::Init()
 {
-    officeTexture.loadFromFile("Assets/Graphics/office/NormalOffice.png");
-    buttonTexture.loadFromFile("assets/graphics/office/button.png");
-    doorTexture.loadFromFile("assets/graphics/office/door.png");
+    officeTexture = Resources::GetTexture("Graphics/Office/NormalOffice.png");
+    buttonTexture = Resources::GetTexture("Graphics/Office/button.png");
+    doorTexture = Resources::GetTexture("Graphics/Office/door.png");
 
     // Load music
-    bgaudio1.openFromFile("Assets/Audio/Ambience/ambience2.wav");
-    bgaudio1.setLoop(true);
-    bgaudio1.play();
-    bgaudio1.setVolume(100.f);
+    bgaudio1 = Resources::GetMusic("Audio/Ambience/ambience2.wav");
+    bgaudio1->setLoop(true);
+    bgaudio1->play();
+    bgaudio1->setVolume(100.f);
 
-    bgaudio2.openFromFile("Assets/Audio/Ambience/EerieAmbienceLargeSca_MV005.wav");
-    bgaudio2.setLoop(true);
-    bgaudio2.play();
-    bgaudio2.setVolume(50.f);
+    bgaudio2 = Resources::GetMusic("Audio/Ambience/EerieAmbienceLargeSca_MV005.wav");
+    bgaudio2->setLoop(true);
+    bgaudio2->play();
+    bgaudio2->setVolume(50.f);
+
+    m_FanBuzzing = Resources::GetMusic("Audio/Office/Buzz_Fan_Florescent2.wav");
+	m_FanBuzzing->setLoop(true);
+	m_FanBuzzing->play();
+	m_FanBuzzing->setVolume(40.f);
 
     // Create sprites
-    officeSprite = sf::Sprite(officeTexture);
-    leftButtonSprite = sf::Sprite(buttonTexture);
-    rightButtonSprite = sf::Sprite(buttonTexture);
-    leftDoorSprite = sf::Sprite(doorTexture);
-    rightDoorSprite = sf::Sprite(doorTexture);
+    officeSprite = sf::Sprite(*officeTexture);
+    leftButtonSprite = sf::Sprite(*buttonTexture);
+    rightButtonSprite = sf::Sprite(*buttonTexture);
+    leftDoorSprite = sf::Sprite(*doorTexture);
+    rightDoorSprite = sf::Sprite(*doorTexture);
 
     LayerManager::AddDrawable(0, officeSprite);
     LayerManager::AddDrawable(1, leftButtonSprite);

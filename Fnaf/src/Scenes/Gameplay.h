@@ -21,15 +21,14 @@ private:
 
 	// Create sprites
 	sf::Sprite officeSprite;
-	sf::Sprite leftButtonSprite;
-	sf::Sprite rightButtonSprite;
-	sf::Sprite leftDoorSprite;
-	sf::Sprite rightDoorSprite;
+	sf::Sprite leftButtonSprite, rightButtonSprite;
+	sf::Sprite leftDoorSprite, rightDoorSprite;
 
-	sf::Texture officeTexture;
-	sf::Texture buttonTexture;
-	sf::Texture doorTexture;
+	std::shared_ptr<sf::Texture> officeTexture;
+	std::shared_ptr<sf::Texture> buttonTexture;
+	std::shared_ptr<sf::Texture> doorTexture;
 
-	sf::Music bgaudio1;
-	sf::Music bgaudio2;
+	std::shared_ptr<sf::Music> bgaudio1;
+	std::shared_ptr<sf::Music> bgaudio2;
+	std::shared_ptr<sf::Music> m_FanBuzzing;
 };

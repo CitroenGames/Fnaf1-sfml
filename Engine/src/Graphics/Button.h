@@ -1,24 +1,17 @@
 #pragma once
-
 #include <SFML/Graphics.hpp>
 #include "LayerManager.h"
+#include "assets/Resources.h"
 #include <iostream>
+#include <memory>
 
 class Button : public sf::Drawable {
 public:
     Button(float x, float y, const std::string& textureFile, int layer)
         : m_Layer(layer)
     {
-        // Load the button's texture
-        if (!m_ButtonTexture.loadFromFile(textureFile)) {
-            std::cerr << "Error loading texture\n";
-        }
-
-        // Set up the button's sprite
-        m_ButtonSprite.setTexture(m_ButtonTexture);
+        SetTexture(textureFile);
         m_ButtonSprite.setPosition(x, y);
-
-        // Add the button to the layer manager
         LayerManager::AddDrawable(layer, *this);
     }
 
@@ -26,6 +19,17 @@ public:
 
     void setPosition(float x, float y) {
         m_ButtonSprite.setPosition(x, y);
+    }
+
+    void SetTexture(const std::string& textureFile) {
+        m_ButtonTexture = Resources::GetTexture(textureFile);
+        if (m_ButtonTexture) {
+            m_ButtonSprite.setTexture(*m_ButtonTexture);
+            LayerManager::AddDrawable(m_Layer, *this);
+        }
+        else {
+            std::cerr << "Error loading texture: " << textureFile << std::endl;
+        }
     }
 
     bool isMouseOver(sf::RenderWindow& window) const {
@@ -45,10 +49,9 @@ public:
 
 private:
     sf::Sprite m_ButtonSprite;
-    sf::Texture m_ButtonTexture;
+    std::shared_ptr<sf::Texture> m_ButtonTexture;
     int m_Layer;
 
-    // Override the draw method from sf::Drawable
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override {
         target.draw(m_ButtonSprite, states);
     }

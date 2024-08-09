@@ -244,13 +244,21 @@ bool Pakker::addFileToPak(const std::string& pakFilename, const std::string& fil
     return true;
 }
 
-bool Pakker::createPakFromFolder(const std::string& pakFilename, const std::string& folderPath)
+// helper function to normalize path separators
+std::string normalizePathSeparators(const std::string& path) {
+    std::string normalized = path;
+    std::replace(normalized.begin(), normalized.end(), '\\', '/');
+    return normalized;
+}
+
+bool Pakker::createPakFromFolder(const std::string& pakFilename, const std::string& folderPath) 
 {
     std::map<std::string, std::vector<uint8_t>> files;
 
     for (const auto& entry : fs::recursive_directory_iterator(folderPath)) {
         if (fs::is_regular_file(entry.path())) {
             std::string relativePath = fs::relative(entry.path(), folderPath).string();
+            relativePath = normalizePathSeparators(relativePath);  // Normalize to forward slashes
             std::ifstream file(entry.path(), std::ios::binary);
             std::vector<uint8_t> content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
             files[relativePath] = content;
