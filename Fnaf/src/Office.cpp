@@ -3,33 +3,44 @@
 #include "Graphics/LayerManager.h"
 #include "assets/Resources.h"
 
+void LeftTopButtonCallback()
+{
+	std::cout << "Left Top Button Pressed" << std::endl;
+}
+
+void LeftBottomButtonCallback()
+{
+	std::cout << "Right Bottom Button Pressed" << std::endl;
+}
+
 void Office::Init()
 {
-    officeTexture = Resources::GetTexture("Graphics/Office/NormalOffice.png");
-    buttonTexture = Resources::GetTexture("Graphics/Office/button.png");
-    doorTexture = Resources::GetTexture("Graphics/Office/door.png");
+    m_OfficeTexture = Resources::GetTexture("Graphics/Office/NormalOffice.png");
+    m_LeftButtonTexture = Resources::GetTexture("Graphics/Office/button.png");
+    m_DoorTexture = Resources::GetTexture("Graphics/Office/door.png");
 
     // Create sprites
-    officeSprite = sf::Sprite(*officeTexture);
-    leftButtonSprite = sf::Sprite(*buttonTexture);
-    rightButtonSprite = sf::Sprite(*buttonTexture);
-    leftDoorSprite = sf::Sprite(*doorTexture);
-    rightDoorSprite = sf::Sprite(*doorTexture);
+    m_OfficeSprite = sf::Sprite(*m_OfficeTexture);
+    m_LeftButtonSprite = sf::Sprite(*m_LeftButtonTexture);
+    m_RightButtonSprite = sf::Sprite(*m_LeftButtonTexture);
+    m_LeftDoorSprite = sf::Sprite(*m_DoorTexture);
+    m_RightDoorSprite = sf::Sprite(*m_DoorTexture);
 
-    LayerManager::AddDrawable(0, officeSprite);
-    LayerManager::AddDrawable(1, leftButtonSprite);
-    LayerManager::AddDrawable(1, rightButtonSprite);
-    LayerManager::AddDrawable(1, leftDoorSprite);
-    LayerManager::AddDrawable(1, rightDoorSprite);
+    m_LeftButtons.SetTexture(m_LeftButtonTexture);
+    m_LeftButtons.SetLayer(2);
+    m_LeftButtons.SetCallbacks(LeftTopButtonCallback, LeftBottomButtonCallback);
+
+    LayerManager::AddDrawable(0, m_OfficeSprite);
+    LayerManager::AddDrawable(1, m_LeftDoorSprite);
+    LayerManager::AddDrawable(1, m_RightDoorSprite);
 
     // Scale the office sprite
-    officeSprite.setScale(0.9f, 0.9f);
+    m_OfficeSprite.setScale(0.9f, 0.9f);
 
     // Initial positions
-    leftButtonSprite.setPosition(50, 500);   // Example position
-    rightButtonSprite.setPosition(700, 500); // Example position
-    leftDoorSprite.setPosition(100, 500);    // Example position
-    rightDoorSprite.setPosition(650, 500);   // Example position
+    m_RightButtonSprite.setPosition(700, 500); // Example position
+    m_LeftDoorSprite.setPosition(100, 500);    // Example position
+    m_RightDoorSprite.setPosition(650, 500);   // Example position
 }
 
 void Office::Update(double deltaTime)
@@ -43,9 +54,6 @@ void Office::FixedUpdate()
     sf::RenderWindow* window = Window::GetWindow();
 
     while (window->pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
-            Window::Destroy();
-        }
         if (event.type == sf::Event::KeyPressed) {
             if (event.key.code == sf::Keyboard::Right) {
                 scrollOffset -= 10.0f; // Scroll right
@@ -59,6 +67,8 @@ void Office::FixedUpdate()
             }
         }
     }
+
+    m_LeftButtons.checkClick(*window);
 
     // FNAF-style mouse look and screen scrolling
     sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
@@ -77,28 +87,19 @@ void Office::FixedUpdate()
         scrollOffset -= 10.0f; // Scroll right
     }
 
-    // limit the scroll offset to the size of the office texture
-    if (scrollOffset < 0.0f) {
-        scrollOffset = 0.0f;
-    }
-    else if (scrollOffset > (officeTexture->getSize().x * 2)) {
-        scrollOffset = officeTexture->getSize().x * 2;
-    }
+    //// limit the scroll offset to the size of the office texture
+    //if (scrollOffset < 0.0f) {
+    //    scrollOffset = 0.0f;
+    //}
+    //else if (scrollOffset > (m_OfficeTexture->getSize().x * 2)) {
+    //    scrollOffset = m_OfficeTexture->getSize().x * 2;
+    //}
 
-    officeSprite.setPosition(scrollOffset, 0);
-    officeSprite.setRotation(lookAngle);
-
-    leftButtonSprite.setPosition(50 + scrollOffset, 500);
-    leftButtonSprite.setRotation(lookAngle);
-
-    rightButtonSprite.setPosition(700 + scrollOffset, 500);
-    rightButtonSprite.setRotation(lookAngle);
-
-    leftDoorSprite.setPosition(100 + scrollOffset, 500);
-    leftDoorSprite.setRotation(lookAngle);
-
-    rightDoorSprite.setPosition(650 + scrollOffset, 500);
-    rightDoorSprite.setRotation(lookAngle);
+    m_OfficeSprite.setPosition(scrollOffset, 0);
+    m_LeftButtons.SetPosition(scrollOffset, 250);
+    m_RightButtonSprite.setPosition(700 + scrollOffset, 500);
+    m_LeftDoorSprite.setPosition(100 + scrollOffset, 500);
+    m_RightDoorSprite.setPosition(650 + scrollOffset, 500);
 }
 
 void Office::Render()

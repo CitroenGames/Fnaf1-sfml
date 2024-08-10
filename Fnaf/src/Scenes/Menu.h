@@ -3,15 +3,12 @@
 #include "Scene/Scene.h"
 #include "sfml/Audio.hpp"
 #include "animation/Flipbook.h"
-#include "Graphics/Button.h"
+#include "UI/ImageButton.h"
 #include <memory>
 
 class Menu : public Scene
 {
 public:
-	Menu();
-	~Menu() {};
-
 	void Init() override;
 	void Update(double deltaTime) override;
 	void FixedUpdate() override;
@@ -24,5 +21,5 @@ private:
 	std::shared_ptr<sf::Texture> m_Logo;
 	sf::Sprite m_LogoSprite;
 	Flipbook flipbook;
-	Button button;
+	ImageButton button;
 };

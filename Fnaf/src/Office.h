@@ -3,6 +3,7 @@
 #include "sfml/Graphics.hpp"
 #include "ECS.h"
 #include "nlohmann/json.hpp"
+#include "UI/TopBottomButtons.h"
 
 class Office : public ECS::TickableComponent
 {
@@ -20,13 +21,14 @@ public:
 
 private:
 	float scrollOffset = 0.0f; // Initial scroll offset
-	float lookAngle = 0.0f; // Initial look angle
 
-	sf::Sprite officeSprite;
-	sf::Sprite leftButtonSprite, rightButtonSprite;
-	sf::Sprite leftDoorSprite, rightDoorSprite;
+	sf::Sprite m_OfficeSprite;
+	sf::Sprite m_LeftButtonSprite, m_RightButtonSprite;
+	sf::Sprite m_LeftDoorSprite, m_RightDoorSprite;
 
-	std::shared_ptr<sf::Texture> officeTexture;
-	std::shared_ptr<sf::Texture> buttonTexture;
-	std::shared_ptr<sf::Texture> doorTexture;
+	std::shared_ptr<sf::Texture> m_OfficeTexture;
+	std::shared_ptr<sf::Texture> m_LeftButtonTexture;
+	std::shared_ptr<sf::Texture> m_DoorTexture;
+
+	TopBottomButtons m_LeftButtons, m_Rightbuttons;
 };

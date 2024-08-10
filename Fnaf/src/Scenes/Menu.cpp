@@ -8,10 +8,6 @@
 
 #define BUTTON_LAYER 2
 
-Menu::Menu() : button(100, 300, "Assets/Graphics/MenuMenu/NewGame.png", BUTTON_LAYER)
-{
-}
-
 void Menu::Init()
 {
     bgaudio2 = Resources::GetMusic("Audio/Menu/darknessmusic.wav");
@@ -40,6 +36,8 @@ void Menu::Init()
 
     // TODO: this doesnt work
     button.SetTexture("Graphics/MenuMenu/NewGame.png");
+    button.SetPosition(100, 300);
+    button.SetLayer(BUTTON_LAYER);
 }
 
 void Menu::Update(double deltaTime)

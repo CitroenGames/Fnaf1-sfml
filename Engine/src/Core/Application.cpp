@@ -25,7 +25,8 @@ void Application::Run()
         sf::Event event;
         while (window->pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
-                window->close();
+                // this will close the window
+                return;
             }
             else if (event.type == sf::Event::LostFocus) {
                 hasFocus = false;
@@ -66,5 +67,6 @@ void Application::Run()
 
 void Application::Destroy()
 {
+    //TODO: Add a proper way to close the application
 	Window::Destroy();
 }

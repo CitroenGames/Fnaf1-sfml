@@ -19,13 +19,11 @@ int main() {
         p.createPakFromFolder("assets.pak", "assets");
     }
 
-    p.listPak("assets.pak");
-
     Resources::Load("assets.pak");
     
     Application::Init();
     SceneManager::SwitchScene(new Menu());
     Application::Run();
-
+    Application::Destroy();
     return 0;
 }
