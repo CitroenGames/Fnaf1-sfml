@@ -13,9 +13,14 @@ public:
 
 	std::shared_ptr<ECS::Entity> CreateEntity()
 	{
-		return world.CreateEntity();
+		return m_World.CreateEntity();
 	}
 
-protected:
-	ECS::World world;
+	void AddTickableComponent(std::shared_ptr<ECS::TickableComponent> entity)
+	{
+		m_World.AddTickableComponent(entity);
+	}
+
+private:
+	ECS::World m_World;
 };

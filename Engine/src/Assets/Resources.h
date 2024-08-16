@@ -15,17 +15,19 @@ public:
 
     static std::shared_ptr<sf::Texture> GetTexture(const std::string& filename);
     static std::shared_ptr<sf::SoundBuffer> GetSoundBuffer(const std::string& filename);
-    
-    // Load music from a PAK file and return a shared pointer to sf::Music
     static std::shared_ptr<sf::Music> GetMusic(const std::string& filename);
+    
+    // Load font from a PAK file and return a shared pointer to sf::Font
+    static std::shared_ptr<sf::Font> GetFont(const std::string& filename);
 
 private:
-    static std::string pakFile;
-    static Pakker pakHandler;
+    static std::string m_PakFile;
+    static Pakker m_PakHandler;
 
-    static std::map<std::string, std::shared_ptr<sf::Texture>> textures;
-    static std::map<std::string, std::shared_ptr<sf::SoundBuffer>> soundBuffers;
+    static std::map<std::string, std::shared_ptr<sf::Texture>> m_Textures;
+    static std::map<std::string, std::shared_ptr<sf::SoundBuffer>> m_SoundBuffers;
+    static std::map<std::string, std::shared_ptr<std::vector<uint8_t>>> m_MusicBuffers;
     
-    // Store the raw data buffers for music files to ensure they persist
-    static std::map<std::string, std::shared_ptr<std::vector<uint8_t>>> musicBuffers;
+    // Store the loaded fonts
+    static std::map<std::string, std::shared_ptr<sf::Font>> m_Fonts;
 };

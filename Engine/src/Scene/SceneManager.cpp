@@ -1,56 +1,69 @@
 #include "SceneManager.h"
 
-Scene* SceneManager::activeScene = nullptr;
+Scene* SceneManager::m_ActiveScene = nullptr;
+Scene* SceneManager::m_QueuedScene = nullptr;
 
 void SceneManager::Update(double deltaTime)
 {
-	if (activeScene)
+	// Switch scene if a new one is queued
+	if (m_QueuedScene)
 	{
-		activeScene->Update(deltaTime);
+		SwitchSceneNow(m_QueuedScene);
+		m_QueuedScene = nullptr;
+	}
+
+	if (m_ActiveScene)
+	{
+		m_ActiveScene->Update(deltaTime);
 	}
 }
 
 void SceneManager::FixedUpdate()
 {
-	if (activeScene)
+	if (m_ActiveScene)
 	{
-		activeScene->FixedUpdate();
+		m_ActiveScene->FixedUpdate();
 	}
 }
 
 void SceneManager::Render()
 {
-	if (activeScene)
+	if (m_ActiveScene)
 	{
-		activeScene->Render();
+		m_ActiveScene->Render();
 	}
 }
 
-void SceneManager::SwitchScene(Scene* scene)
+void SceneManager::QueueSwitchScene(Scene* scene)
 {
-	if (activeScene)
+	m_QueuedScene = scene;
+}
+
+void SceneManager::SwitchSceneNow(Scene* scene)
+{
+	if (m_ActiveScene)
 	{
-		activeScene->Destroy();
-		delete activeScene;
+		m_ActiveScene->Destroy();
+		delete m_ActiveScene;
 	}
-	activeScene = scene;
-	if (activeScene)
+	m_ActiveScene = scene;
+	if (m_ActiveScene)
 	{
-		activeScene->Init();
+		m_ActiveScene->Init();
 	}
 }
 
 Scene* SceneManager::GetActiveScene()
 {
-	return activeScene;
+	return m_ActiveScene;
 }
 
 void SceneManager::Destroy()
 {
-	if (activeScene)
+	if (m_ActiveScene)
 	{
-		activeScene->Destroy();
-		delete activeScene;
-		activeScene = nullptr;
+		m_ActiveScene->Destroy();
+		delete m_ActiveScene;
+		m_ActiveScene = nullptr;
 	}
 }

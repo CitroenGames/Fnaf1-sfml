@@ -22,8 +22,8 @@ json Entity::Serialize() const {
     j["components"] = json::array();
     for (const auto& [type, component] : components) {
         json componentJson;
-        componentJson["type"] = component->getTypeName();
-        componentJson["data"] = component->serialize();
+        componentJson["type"] = component->GetTypeName();
+        componentJson["data"] = component->Serialize();
         j["components"].push_back(componentJson);
     }
     return j;
@@ -49,15 +49,15 @@ std::shared_ptr<Entity> World::CreateEntity() {
     return entity;
 }
 
-void World::removeEntity(std::shared_ptr<Entity> entity) {
+void World::RemoveEntity(std::shared_ptr<Entity> entity) {
     entities.erase(std::remove(entities.begin(), entities.end(), entity), entities.end());
 }
 
-void World::addSystem(std::unique_ptr<System> system) {
+void World::AddSystem(std::unique_ptr<System> system) {
     systems.push_back(std::move(system));
 }
 
-void World::update(double deltaTime) {
+void World::Update(double deltaTime) {
     // Tick components
     for (auto& component : tickableComponents) {
         component->Update(deltaTime);
@@ -69,7 +69,7 @@ void World::update(double deltaTime) {
     }
 }
 
-void World::fixedupdate()
+void World::FixedUpdate()
 {
     for (auto& component : tickableComponents) {
         component->FixedUpdate();
@@ -85,11 +85,11 @@ json World::Serialize() const {
     return j;
 }
 
-void World::addTickableComponent(std::shared_ptr<TickableComponent> component) {
+void World::AddTickableComponent(std::shared_ptr<TickableComponent> component) {
     tickableComponents.push_back(component);
 }
 
-void World::removeTickableComponent(std::shared_ptr<TickableComponent> component) {
+void World::RemoveTickableComponent(std::shared_ptr<TickableComponent> component) {
     tickableComponents.erase(
         std::remove(tickableComponents.begin(), tickableComponents.end(), component),
         tickableComponents.end()

@@ -5,14 +5,14 @@
 #include "Graphics/LayerManager.h"
 #include <thread>
 
-sf::RenderWindow* Application::window = nullptr;
+sf::RenderWindow* Application::m_Window = nullptr;
 
 const int TICKRATE = 66;  // Desired tickrate (ticks per second)
 const double FRAME_TIME = 1.0 / TICKRATE;  // Time per tick (seconds)
 
 void Application::Init()
 {
-	window = Window::Init(1024, 576, "Window");
+	m_Window = Window::Init(1024, 576, "Window");
 }
 
 void Application::Run()
@@ -20,10 +20,10 @@ void Application::Run()
     auto previousTime = std::chrono::high_resolution_clock::now();
     double accumulator = 0.0;
     bool hasFocus = true;
+    sf::Event event;
 
-    while (window->isOpen()) {
-        sf::Event event;
-        while (window->pollEvent(event)) {
+    while (m_Window->isOpen()) {
+        while (m_Window->pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 // this will close the window
                 return;
@@ -34,6 +34,7 @@ void Application::Run()
             else if (event.type == sf::Event::GainedFocus) {
                 hasFocus = true;
             }
+
         }
 
         if (hasFocus) {
@@ -53,10 +54,10 @@ void Application::Run()
             SceneManager::Update(deltaTime);
 
             // Render
-            window->clear();
-            LayerManager::Draw(*window);
+            m_Window->clear();
+            LayerManager::Draw(*m_Window);
             SceneManager::Render();
-            window->display();
+            m_Window->display();
         }
         else {
             // Sleep to reduce CPU usage

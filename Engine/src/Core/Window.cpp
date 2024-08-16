@@ -1,16 +1,16 @@
 #include "Window.h"
 
-sf::RenderWindow* Window::window = nullptr;
+sf::RenderWindow* Window::m_Window = nullptr;
 
 sf::RenderWindow* Window::Init(int width, int height, std::string title)
 {
-	window = new sf::RenderWindow(sf::VideoMode(width, height), title);
+	m_Window = new sf::RenderWindow(sf::VideoMode(width, height), title);
 
-	return window;
+	return m_Window;
 }
 
 void Window::Destroy()
 {
-	window->close();
-	delete window;
+	m_Window->close();
+	delete m_Window;
 }

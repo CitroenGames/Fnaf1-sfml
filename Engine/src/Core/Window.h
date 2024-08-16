@@ -11,9 +11,9 @@ public:
 
 	static sf::RenderWindow* const GetWindow()
 	{
-		return window;
+		return m_Window;
 	}
 
 private:
-	static sf::RenderWindow* window;
+	static sf::RenderWindow* m_Window;
 };

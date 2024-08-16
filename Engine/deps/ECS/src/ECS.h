@@ -19,9 +19,9 @@ class World;
 class Component {
 public:
     virtual ~Component() = default;
-    virtual json serialize() const = 0;
-    virtual void deserialize(const json& j) = 0;
-    virtual std::string getTypeName() const = 0;
+    virtual json Serialize() const = 0;
+    virtual void Deserialize(const json& j) = 0;
+    virtual std::string GetTypeName() const = 0;
 };
 
 class TickableComponent : public Component {
@@ -68,12 +68,12 @@ class World {
 
 public:
     std::shared_ptr<Entity> CreateEntity();
-    void removeEntity(std::shared_ptr<Entity> entity);
-    void addSystem(std::unique_ptr<System> system);
-    void update(double deltaTime);
-    void fixedupdate();
-    void addTickableComponent(std::shared_ptr<TickableComponent> component);
-    void removeTickableComponent(std::shared_ptr<TickableComponent> component);
+    void RemoveEntity(std::shared_ptr<Entity> entity);
+    void AddSystem(std::unique_ptr<System> system);
+    void Update(double deltaTime);
+    void FixedUpdate();
+    void AddTickableComponent(std::shared_ptr<TickableComponent> component);
+    void RemoveTickableComponent(std::shared_ptr<TickableComponent> component);
 
     json Serialize() const;
     void Deserialize(const json& j);

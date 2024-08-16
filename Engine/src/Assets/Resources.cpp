@@ -1,24 +1,27 @@
 #include "Resources.h"
+#include <iostream>
 
-std::string Resources::pakFile;
-Pakker Resources::pakHandler;
-std::map<std::string, std::shared_ptr<sf::Texture>> Resources::textures;
-std::map<std::string, std::shared_ptr<sf::SoundBuffer>> Resources::soundBuffers;
-std::map<std::string, std::shared_ptr<std::vector<uint8_t>>> Resources::musicBuffers;
+std::string Resources::m_PakFile;
+Pakker Resources::m_PakHandler;
+std::map<std::string, std::shared_ptr<sf::Texture>> Resources::m_Textures;
+std::map<std::string, std::shared_ptr<sf::SoundBuffer>> Resources::m_SoundBuffers;
+std::map<std::string, std::shared_ptr<std::vector<uint8_t>>> Resources::m_MusicBuffers;
+std::map<std::string, std::shared_ptr<sf::Font>> Resources::m_Fonts;
 
 void Resources::Load(const std::string& pakFilename) {
-    pakFile = pakFilename;
+    m_PakFile = pakFilename;
 }
 
 void Resources::Unload() {
-    textures.clear();
-    soundBuffers.clear();
-    musicBuffers.clear();
+    m_Textures.clear();
+    m_SoundBuffers.clear();
+    m_MusicBuffers.clear();
+    m_Fonts.clear();
 }
 
 std::shared_ptr<sf::Texture> Resources::GetTexture(const std::string& filename) {
-    if (textures.find(filename) == textures.end()) {
-        auto textureData = pakHandler.loadFile(pakFile, filename);
+    if (m_Textures.find(filename) == m_Textures.end()) {
+        auto textureData = m_PakHandler.LoadFile(m_PakFile, filename);
         if (!textureData) {
             return nullptr;
         }
@@ -28,15 +31,15 @@ std::shared_ptr<sf::Texture> Resources::GetTexture(const std::string& filename) 
             return nullptr;
         }
 
-        textures[filename] = texture;
+        m_Textures[filename] = texture;
     }
 
-    return textures[filename];
+    return m_Textures[filename];
 }
 
 std::shared_ptr<sf::SoundBuffer> Resources::GetSoundBuffer(const std::string& filename) {
-    if (soundBuffers.find(filename) == soundBuffers.end()) {
-        auto soundData = pakHandler.loadFile(pakFile, filename);
+    if (m_SoundBuffers.find(filename) == m_SoundBuffers.end()) {
+        auto soundData = m_PakHandler.LoadFile(m_PakFile, filename);
         if (!soundData) {
             return nullptr;
         }
@@ -46,28 +49,45 @@ std::shared_ptr<sf::SoundBuffer> Resources::GetSoundBuffer(const std::string& fi
             return nullptr;
         }
 
-        soundBuffers[filename] = buffer;
+        m_SoundBuffers[filename] = buffer;
     }
 
-    return soundBuffers[filename];
+    return m_SoundBuffers[filename];
 }
 
 std::shared_ptr<sf::Music> Resources::GetMusic(const std::string& filename) {
-    if (musicBuffers.find(filename) == musicBuffers.end()) {
-        auto musicData = pakHandler.loadFile(pakFile, filename);
+    if (m_MusicBuffers.find(filename) == m_MusicBuffers.end()) {
+        auto musicData = m_PakHandler.LoadFile(m_PakFile, filename);
         if (!musicData) {
             return nullptr;
         }
 
-        // Store the buffer to ensure its memory persists
-        musicBuffers[filename] = musicData;
+        m_MusicBuffers[filename] = musicData;
     }
 
-    // Create and initialize sf::Music from memory
     std::shared_ptr<sf::Music> music = std::make_shared<sf::Music>();
-    if (!music->openFromMemory(musicBuffers[filename]->data(), musicBuffers[filename]->size())) {
+    if (!music->openFromMemory(m_MusicBuffers[filename]->data(), m_MusicBuffers[filename]->size())) {
         return nullptr;
     }
 
     return music;
+}
+
+std::shared_ptr<sf::Font> Resources::GetFont(const std::string& filename) {
+    if (m_Fonts.find(filename) == m_Fonts.end()) {
+        auto fontData = m_PakHandler.LoadFile(m_PakFile, filename);
+        if (!fontData) {
+            std::cout << "Failed to load font: " << filename << std::endl;
+            return nullptr;
+        }
+
+        std::shared_ptr<sf::Font> font = std::make_shared<sf::Font>();
+        if (!font->loadFromMemory(fontData->data(), fontData->size())) {
+            return nullptr;
+        }
+
+        m_Fonts[filename] = font;
+    }
+
+    return m_Fonts[filename];
 }

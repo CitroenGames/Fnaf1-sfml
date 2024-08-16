@@ -3,32 +3,46 @@
 #include "Graphics/LayerManager.h"
 #include "assets/Resources.h"
 
-void LeftTopButtonCallback()
+void LeftTopButtonCallback(bool active)
 {
 	std::cout << "Left Top Button Pressed" << std::endl;
 }
 
-void LeftBottomButtonCallback()
+void LeftBottomButtonCallback(bool active)
 {
-	std::cout << "Right Bottom Button Pressed" << std::endl;
+	std::cout << "Left Bottom Button Pressed" << std::endl;
+}
+
+Office::Office()
+{
+    m_OfficeTexture = Resources::GetTexture("Graphics/Office/NormalOffice.png");
+    m_DoorTexture = Resources::GetTexture("Graphics/Office/door.png");
+
+    std::vector<sf::Texture> ButtonsTextures;
+
+    ButtonsTextures.push_back(*Resources::GetTexture("Graphics/Office/ButtonsLeft/NoActive.png"));
+    ButtonsTextures.push_back(*Resources::GetTexture("Graphics/Office/ButtonsLeft/TopActive.png"));
+    ButtonsTextures.push_back(*Resources::GetTexture("Graphics/Office/ButtonsLeft/BothActive.png"));
+    ButtonsTextures.push_back(*Resources::GetTexture("Graphics/Office/ButtonsLeft/BottomActive.png"));
+    m_LeftButtons.SetTextures(ButtonsTextures);
+
+    //TODO: add right button textures
+    m_RightButtons.SetTextures(ButtonsTextures);
+
+    m_LeftButtons.SetLayer(2);
+    m_LeftButtons.SetCallbacks(LeftTopButtonCallback, LeftBottomButtonCallback);
+
+
+    m_RightButtons.SetLayer(2);
+    m_RightButtons.SetCallbacks(LeftTopButtonCallback, LeftBottomButtonCallback);
 }
 
 void Office::Init()
 {
-    m_OfficeTexture = Resources::GetTexture("Graphics/Office/NormalOffice.png");
-    m_LeftButtonTexture = Resources::GetTexture("Graphics/Office/button.png");
-    m_DoorTexture = Resources::GetTexture("Graphics/Office/door.png");
-
     // Create sprites
     m_OfficeSprite = sf::Sprite(*m_OfficeTexture);
-    m_LeftButtonSprite = sf::Sprite(*m_LeftButtonTexture);
-    m_RightButtonSprite = sf::Sprite(*m_LeftButtonTexture);
     m_LeftDoorSprite = sf::Sprite(*m_DoorTexture);
     m_RightDoorSprite = sf::Sprite(*m_DoorTexture);
-
-    m_LeftButtons.SetTexture(m_LeftButtonTexture);
-    m_LeftButtons.SetLayer(2);
-    m_LeftButtons.SetCallbacks(LeftTopButtonCallback, LeftBottomButtonCallback);
 
     LayerManager::AddDrawable(0, m_OfficeSprite);
     LayerManager::AddDrawable(1, m_LeftDoorSprite);
@@ -38,7 +52,8 @@ void Office::Init()
     m_OfficeSprite.setScale(0.9f, 0.9f);
 
     // Initial positions
-    m_RightButtonSprite.setPosition(700, 500); // Example position
+    m_LeftButtons.SetPosition(0, 250);
+    m_RightButtonSprite.setPosition(700, 250); // Example position
     m_LeftDoorSprite.setPosition(100, 500);    // Example position
     m_RightDoorSprite.setPosition(650, 500);   // Example position
 }
@@ -81,25 +96,16 @@ void Office::FixedUpdate()
     // Scroll the screen based on the mouse position
     const float scrollThreshold = 50.0f; // Adjust the threshold as needed
     if (mousePos.x < scrollThreshold) {
-        scrollOffset += 10.0f; // Scroll left
+        scrollOffset -= 10.0f; // Scroll left
     }
     else if (mousePos.x > windowSize.x - scrollThreshold) {
-        scrollOffset -= 10.0f; // Scroll right
+        scrollOffset += 10.0f; // Scroll right
     }
 
-    //// limit the scroll offset to the size of the office texture
-    //if (scrollOffset < 0.0f) {
-    //    scrollOffset = 0.0f;
-    //}
-    //else if (scrollOffset > (m_OfficeTexture->getSize().x * 2)) {
-    //    scrollOffset = m_OfficeTexture->getSize().x * 2;
-    //}
-
-    m_OfficeSprite.setPosition(scrollOffset, 0);
-    m_LeftButtons.SetPosition(scrollOffset, 250);
-    m_RightButtonSprite.setPosition(700 + scrollOffset, 500);
-    m_LeftDoorSprite.setPosition(100 + scrollOffset, 500);
-    m_RightDoorSprite.setPosition(650 + scrollOffset, 500);
+    // Update the camera view based on scrollOffset
+    sf::View view = window->getView(); // Get the current view
+    view.setCenter(scrollOffset + windowSize.x / 2.0f, windowSize.y / 2.0f); // Set the center of the view
+    window->setView(view); // Apply the updated view
 }
 
 void Office::Render()

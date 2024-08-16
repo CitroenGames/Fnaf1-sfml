@@ -4,13 +4,15 @@
 #include "Core/Window.h"
 #include "Graphics/LayerManager.h"
 #include "assets/Resources.h"
+#include "Power.h"
 
 void Gameplay::Init()
 {
     auto entity = CreateEntity();
-    entity->AddComponent<Office>()->Init();;
+    entity->AddComponent<PowerIndicator>()->Init();
+    entity->AddComponent<Office>()->Init();
     auto officeComponent = entity->GetComponent<Office>();
-    world.addTickableComponent(officeComponent);
+    AddTickableComponent(officeComponent);
     
     // Load music
     bgaudio1 = Resources::GetMusic("Audio/Ambience/ambience2.wav");
@@ -31,12 +33,12 @@ void Gameplay::Init()
 
 void Gameplay::FixedUpdate()
 {
-    world.fixedupdate();
+    Scene::FixedUpdate();
 }
 
 void Gameplay::Update(double deltaTime)
 {
-    world.update(deltaTime);
+    Scene::Update(deltaTime);
 }
 
 void Gameplay::Render()

@@ -26,6 +26,18 @@ public:
         }
     }
 
+    void SetTexture(const sf::Texture& texture)
+    {
+		m_ButtonTexture = std::make_shared<sf::Texture>(texture);
+		if (m_ButtonTexture) {
+			m_ButtonSprite.setTexture(*m_ButtonTexture);
+			LayerManager::AddDrawable(m_Layer, *this);
+		}
+		else {
+			std::cerr << "Error: Provided texture is null." << std::endl;
+		}
+    }
+
     void SetTexture(std::shared_ptr<sf::Texture> texture) 
     {
         m_ButtonTexture = texture;
@@ -38,7 +50,7 @@ public:
         }
     }
 
-    bool isMouseOver(sf::RenderWindow& window) const override
+    bool IsMouseOver(sf::RenderWindow& window) const override
     {
         // Get mouse position in window coordinates
         sf::Vector2i mousePos = sf::Mouse::getPosition(window);
@@ -53,9 +65,9 @@ public:
         return buttonBounds.contains(viewPos);
     }
 
-    virtual bool isClicked(sf::RenderWindow& window) override
+    virtual bool IsClicked(sf::RenderWindow& window) override
     {
-        bool isCurrentlyPressed = (isMouseOver(window) && sf::Mouse::isButtonPressed(sf::Mouse::Left));
+        bool isCurrentlyPressed = (IsMouseOver(window) && sf::Mouse::isButtonPressed(sf::Mouse::Left));
 
         if (isCurrentlyPressed && !m_IsPressed)
         {
@@ -81,5 +93,10 @@ protected:
     }
     sf::Sprite m_ButtonSprite;
     std::shared_ptr<sf::Texture> m_ButtonTexture;
-    int m_Layer;
+    int m_Layer = 0;
+
+private:
+    void setPosition() = delete;
+    void setPosition(sf::Vector2f) = delete;
+    void setPosition(float, float) = delete;
 };

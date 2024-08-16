@@ -1,43 +1,43 @@
 #include "LayerManager.h"
 
-std::map<int, Layer> LayerManager::Layers;
-std::map<const sf::Drawable*, int> LayerManager::DrawableToLayer;
+std::map<int, Layer> LayerManager::m_Layers;
+std::map<const sf::Drawable*, int> LayerManager::m_DrawableToLayer;
 
 void LayerManager::AddDrawable(int layer, const sf::Drawable& drawable)
 {
-    Layers[layer].addDrawable(drawable);
-    DrawableToLayer[&drawable] = layer;
+    m_Layers[layer].addDrawable(drawable);
+    m_DrawableToLayer[&drawable] = layer;
 }
 
 void LayerManager::ChangeLayer(const sf::Drawable& drawable, int newLayer)
 {
-    auto it = DrawableToLayer.find(&drawable);
-    if (it != DrawableToLayer.end()) {
+    auto it = m_DrawableToLayer.find(&drawable);
+    if (it != m_DrawableToLayer.end()) {
         int currentLayer = it->second;
-        Layers[currentLayer].removeDrawable(drawable); // Remove from the current layer
+        m_Layers[currentLayer].removeDrawable(drawable); // Remove from the current layer
         AddDrawable(newLayer, drawable);               // Add to the new layer
     }
 }
 
 void LayerManager::RemoveDrawable(const sf::Drawable& drawable)
 {
-    auto it = DrawableToLayer.find(&drawable);
-    if (it != DrawableToLayer.end()) {
+    auto it = m_DrawableToLayer.find(&drawable);
+    if (it != m_DrawableToLayer.end()) {
         int layer = it->second;
-        Layers[layer].removeDrawable(drawable);
-        DrawableToLayer.erase(it);
+        m_Layers[layer].removeDrawable(drawable);
+        m_DrawableToLayer.erase(it);
     }
 }
 
 void LayerManager::Clear()
 {
-    Layers.clear();
-    DrawableToLayer.clear();
+    m_Layers.clear();
+    m_DrawableToLayer.clear();
 }
 
 void LayerManager::Draw(sf::RenderWindow& window)
 {
-    for (const auto& layer : Layers) {
+    for (const auto& layer : m_Layers) {
         layer.second.draw(window);
     }
 }

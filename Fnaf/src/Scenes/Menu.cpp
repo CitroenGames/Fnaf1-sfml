@@ -5,8 +5,8 @@
 #include "assets/Resources.h"
 #include "Graphics/LayerManager.h"
 #include "Core/Window.h"
+#include "layerdefines.h"
 
-#define BUTTON_LAYER 2
 
 void Menu::Init()
 {
@@ -44,12 +44,37 @@ void Menu::Update(double deltaTime)
 {
     flipbook.Update(deltaTime);
     flipbook.RegisterToLayerManager();
+
+    //accumulatedTime += (float)deltaTime;
+
+    //switch (m_State) {
+    //case FADE_IN:
+    //    if (fadeIn.update(deltaTime)) {
+    //        m_State = WAIT;
+    //    }
+    //    break;
+    //case WAIT:
+    //    accumulatedTime += deltaTime;
+    //    if (accumulatedTime >= waitTime) {
+    //        m_State = FADE_OUT;
+    //        accumulatedTime = sf::Time::Zero;
+    //    }
+    //    break;
+    //case FADE_OUT:
+    //    if (fadeOut.update(deltaTime)) {
+    //        m_State = DONE;
+    //    }
+    //    break;
+    //case DONE:
+    //    // Fade out completed, you can do other things here or exit the application.
+    //    break;
+    //}
 }
 
 void Menu::SwitchToGameplay()
 {
     Destroy();
-	SceneManager::SwitchScene(new Gameplay());
+	SceneManager::QueueSwitchScene(new Gameplay());
 }
 
 void Menu::FixedUpdate()
@@ -60,7 +85,7 @@ void Menu::FixedUpdate()
         SwitchToGameplay();
 	}
 
-    if (button.isClicked(*window)) {
+    if (button.IsClicked(*window)) {
         SwitchToGameplay();
     }
 }

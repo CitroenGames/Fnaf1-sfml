@@ -5,11 +5,18 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-file(GLOB_RECURSE GameSources src/**.cpp src/**.h src/**.hpp)
-add_executable(${PROJECT_NAME} ${GameSources})
+file(GLOB_RECURSE GAMESOURCES src/*.cpp src/*.h src/*.hpp)
 
-target_include_directories(${PROJECT_NAME} PRIVATE src engine)
+if(MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+    group_sources(GAMESOURCES)
+endif()
+
+add_executable(${PROJECT_NAME} ${GAMESOURCES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE src)
 target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-audio Engine)
+
 
 if(WIN32)
     add_custom_command(

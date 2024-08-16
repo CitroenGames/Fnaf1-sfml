@@ -16,13 +16,15 @@ int main() {
             std::cerr << "Error: assets folder not found" << std::endl;
 			return 1;
 		}
-        p.createPakFromFolder("assets.pak", "assets");
+        p.CreatePakFromFolder("assets.pak", "assets");
     }
+
+    p.ListPak("assets.pak");
 
     Resources::Load("assets.pak");
     
     Application::Init();
-    SceneManager::SwitchScene(new Menu());
+    SceneManager::QueueSwitchScene(new Menu());
     Application::Run();
     Application::Destroy();
     return 0;

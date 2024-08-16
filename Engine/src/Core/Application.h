@@ -11,5 +11,5 @@ public:
 	static void Destroy();
 
 private:
-	static sf::RenderWindow* window;
+	static sf::RenderWindow* m_Window;
 };

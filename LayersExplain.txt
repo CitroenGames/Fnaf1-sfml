@@ -1,0 +1,4 @@
+office = 0
+office props (exaple door, light buttosn) = 1/2/3
+UI = 9
+Camera = 10/11/12/13

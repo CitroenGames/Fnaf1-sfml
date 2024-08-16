@@ -6,11 +6,11 @@
 #include <iostream>
 #include <memory>
 
-class BaseButton : public sf::Drawable {
+class BaseButton : public sf::Sprite {
 public:
-    virtual bool isMouseOver(sf::RenderWindow& window) const { return false; }
+    virtual bool IsMouseOver(sf::RenderWindow& window) const { return false; }
 
-    virtual bool isClicked(sf::RenderWindow& window) { return false; }
+    virtual bool IsClicked(sf::RenderWindow& window) { return false; }
 
 protected:
     bool m_IsPressed;
