@@ -4,6 +4,7 @@
 #include "Scene/SceneManager.h"
 #include "Graphics/LayerManager.h"
 #include <thread>
+#include "imgui/imgui-SFML.h"
 
 sf::RenderWindow* Application::m_Window = nullptr;
 
@@ -13,6 +14,7 @@ const double FRAME_TIME = 1.0 / TICKRATE;  // Time per tick (seconds)
 void Application::Init()
 {
 	m_Window = Window::Init(1024, 576, "Window");
+    ImGui::SFML::Init(*m_Window, true);
 }
 
 void Application::Run()
@@ -21,6 +23,7 @@ void Application::Run()
     double accumulator = 0.0;
     bool hasFocus = true;
     sf::Event event;
+    sf::Clock deltaClock;
 
     while (m_Window->isOpen()) {
         while (m_Window->pollEvent(event)) {
@@ -34,8 +37,10 @@ void Application::Run()
             else if (event.type == sf::Event::GainedFocus) {
                 hasFocus = true;
             }
-
+            ImGui::SFML::ProcessEvent(event);
         }
+
+        ImGui::SFML::Update(*m_Window, deltaClock.restart());
 
         if (hasFocus) {
             auto currentTime = std::chrono::high_resolution_clock::now();
@@ -57,6 +62,7 @@ void Application::Run()
             m_Window->clear();
             LayerManager::Draw(*m_Window);
             SceneManager::Render();
+            ImGui::SFML::Render(*m_Window);
             m_Window->display();
         }
         else {
@@ -64,10 +70,13 @@ void Application::Run()
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
+
+    Application::Destroy();
 }
 
 void Application::Destroy()
 {
     //TODO: Add a proper way to close the application
+    ImGui::SFML::Shutdown();
 	Window::Destroy();
 }
