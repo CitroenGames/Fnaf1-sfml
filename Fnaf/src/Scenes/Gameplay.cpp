@@ -5,6 +5,7 @@
 #include "Graphics/LayerManager.h"
 #include "assets/Resources.h"
 #include "Power.h"
+#include "Imgui.h"
 
 void Gameplay::Init()
 {
@@ -43,6 +44,9 @@ void Gameplay::Update(double deltaTime)
 
 void Gameplay::Render()
 {
+    ImGui::Begin("Gameplay");
+	ImGui::Text("Gameplay");
+	ImGui::End();
 }
 
 void Gameplay::Destroy()

@@ -40,13 +40,13 @@ void Application::Run()
             ImGui::SFML::ProcessEvent(event);
         }
 
-        ImGui::SFML::Update(*m_Window, deltaClock.restart());
-
         if (hasFocus) {
             auto currentTime = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsedTime = currentTime - previousTime;
             previousTime = currentTime;
             accumulator += elapsedTime.count();
+
+            ImGui::SFML::Update(*m_Window, deltaClock.restart());
 
             // Fixed Update
             while (accumulator >= FRAME_TIME) {
