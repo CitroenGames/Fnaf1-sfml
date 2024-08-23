@@ -77,6 +77,7 @@ void Application::Run()
 void Application::Destroy()
 {
     //TODO: Add a proper way to close the application
+    SceneManager::Destroy();
     ImGui::SFML::Shutdown();
 	Window::Destroy();
 }
