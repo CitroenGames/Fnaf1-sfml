@@ -13,7 +13,7 @@ void Gameplay::Init()
     entity->AddComponent<PowerIndicator>()->Init();
     entity->AddComponent<Office>()->Init();
     auto officeComponent = entity->GetComponent<Office>();
-    AddTickableComponent(officeComponent);
+    //AddComponent(officeComponent);
     
     // Load music
     bgaudio1 = Resources::GetMusic("Audio/Ambience/ambience2.wav");

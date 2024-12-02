@@ -1,5 +1,5 @@
 #pragma once
-#include "ECS.h"
+#include "Composable.h"
 
 class Scene
 {
@@ -11,16 +11,11 @@ public:
 	virtual void Render() = 0;
 	virtual void Destroy();
 
-	std::shared_ptr<ECS::Entity> CreateEntity()
+	std::shared_ptr<Composable::Node> CreateEntity()
 	{
-		return m_World.CreateEntity();
-	}
-
-	void AddTickableComponent(std::shared_ptr<ECS::TickableComponent> entity)
-	{
-		m_World.AddTickableComponent(entity);
+		return m_World.CreateNode();
 	}
 
 private:
-	ECS::World m_World;
+	Composable::Scene m_World;
 };

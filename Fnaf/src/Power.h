@@ -3,12 +3,12 @@
 #include <SFML/Graphics.hpp>
 #include <cmath>
 #include <iostream>
-#include "ECS.h"
+#include "Composable.h"
 #include "nlohmann/json.hpp"
 
 #define MAX_POWER_USAGE 5
 
-class PowerIndicator : public ECS::TickableComponent {
+class PowerIndicator : public Composable::Component {
 public:
     //ECS STUFF
     nlohmann::json Serialize()const override { return nlohmann::json(); };

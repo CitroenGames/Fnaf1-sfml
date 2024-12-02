@@ -1,11 +1,11 @@
 #pragma once
 
 #include "sfml/Graphics.hpp"
-#include "ECS.h"
+#include "composable.h"
 #include "nlohmann/json.hpp"
 #include "UI/TopBottomButtons.h"
 
-class Office : public ECS::TickableComponent
+class Office : public Composable::Component
 {
 public:
 	Office();
