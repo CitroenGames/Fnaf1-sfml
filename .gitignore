@@ -8,3 +8,4 @@ out
 *.exe
 *.pak
 imgui.ini
+*.pdb
