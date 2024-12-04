@@ -10,21 +10,21 @@ int main() {
     Pakker p("example_key");
 
     // Create PAK if it doesn't exist
-    if (!std::filesystem::exists("assets.pak")) {
-        std::cout << "Packing assets.pak" << std::endl;
+    if (!std::filesystem::exists("Assets.pak")) {
+        std::cout << "Packing Assets.pak" << std::endl;
         // Check if assets folder exists
-        if (!std::filesystem::exists("assets")) {
-            std::cerr << "Error: assets folder not found" << std::endl;
+        if (!std::filesystem::exists("Assets")) {
+            std::cerr << "Error: Assets folder not found" << std::endl;
             return 1;
         }
-        if (!p.CreatePakFromFolder("assets.pak", "assets")) {
-            std::cerr << "Error: Failed to create assets.pak" << std::endl;
+        if (!p.CreatePakFromFolder("Assets.pak", "Assets")) {
+            std::cerr << "Error: Failed to create Assets.pak" << std::endl;
             return 1;
         }
     }
 
     // List contents of the PAK
-    if (!p.ListPak("assets.pak")) {
+    if (!p.ListPak("Assets.pak")) {
         std::cerr << "Error: Failed to list contents of assets.pak" << std::endl;
         return 1;
     }
@@ -33,7 +33,7 @@ int main() {
     Resources::SetPakker(&p);
 
     // Load Resources
-    Resources::Load("assets.pak");
+    Resources::Load("Assets.pak");
     
     Application::Init();
     SceneManager::QueueSwitchScene(new Menu());

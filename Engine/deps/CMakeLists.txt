@@ -4,6 +4,11 @@ set(BUILD_EXAMPLES "Build examples" OFF FORCE CACHE BOOL "Build examples")
 # First, try to find the system-installed SFML
 find_package(SFML 2.6 COMPONENTS graphics window system QUIET)
 
+if(LINUX)
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+endif()
+
 # If system SFML is not found, use the local directory
 if(NOT SFML_FOUND)
     # Check if the local SFML directory exists
