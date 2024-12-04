@@ -4,6 +4,7 @@
 #include "SFML/Graphics.hpp"
 #include "SFML/Audio.hpp"
 #include "Office.h"
+#include "Components/Camera.h"
 
 constexpr float scrollspeed = 10.0f;
 
@@ -19,7 +20,12 @@ public:
 private:
 	std::shared_ptr<sf::Music> bgaudio1;
 	std::shared_ptr<sf::Music> bgaudio2;
+
+	//TODO: MOVE THIS TO OFFICE
 	std::shared_ptr<sf::Music> m_FanBuzzing;
 
+	float scrollOffset = 0.0f; // Initial scroll offset
+
 	Office m_Office;
+	std::unique_ptr<Camera2D> m_Camera;
 };

@@ -2,13 +2,12 @@
 
 std::shared_ptr<sf::RenderWindow> Window::m_Window = nullptr;
 sf::View Window::m_GameView;
-sf::Vector2f Window::cameraPosition;
 
 std::shared_ptr<sf::RenderWindow> Window::Init(int width, int height, std::string title) {
     m_Window = std::make_shared<sf::RenderWindow>(sf::VideoMode(width, height), title);
     m_GameView.setSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-    cameraPosition = sf::Vector2f(VIEWPORT_WIDTH / 2.0f, VIEWPORT_HEIGHT / 2.0f);
-    m_GameView.setCenter(cameraPosition);
+    
+    m_GameView.setCenter(sf::Vector2f(VIEWPORT_WIDTH / 2.0f, VIEWPORT_HEIGHT / 2.0f));
     m_Window->setView(m_GameView);
     return m_Window;
 }

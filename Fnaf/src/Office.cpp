@@ -84,26 +84,6 @@ void Office::FixedUpdate()
 {
     std::shared_ptr<sf::RenderWindow> window = Window::GetWindow();
     m_LeftButtons.checkClick(*window);
-
-    // Get mouse position
-    sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
-    sf::Vector2u windowSize = window->getSize();
-
-    // Screen scrolling based on mouse position
-    const float scrollThreshold = 50.0f;
-    if (mousePos.x < scrollThreshold) {
-        scrollOffset -= 10.0f; // Scroll left
-    }
-    else if (mousePos.x > windowSize.x - scrollThreshold) {
-        scrollOffset += 10.0f; // Scroll right
-    }
-
-    // Clamp the scroll offset to half the viewport width
-    scrollOffset = std::clamp(scrollOffset, 0.0f, 360.0f);  // 360 = 720/2
-
-    // Calculate new camera position using viewport dimensions instead of window size
-    sf::Vector2f newCameraPos(scrollOffset + (VIEWPORT_WIDTH / 2), (VIEWPORT_HEIGHT / 2));
-    Window::setCameraPosition(newCameraPos);
 }
 
 void Office::Render()

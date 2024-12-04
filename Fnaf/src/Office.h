@@ -21,7 +21,6 @@ public:
 	std::string GetTypeName() const override { return "Office"; }
 
 private:
-	float scrollOffset = 0.0f; // Initial scroll offset
 
 	sf::Sprite m_OfficeSprite;
 	sf::Sprite m_LeftDoorSprite, m_RightDoorSprite;
