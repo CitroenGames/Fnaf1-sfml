@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Scene/Scene.h"
-#include "sfml/Audio.hpp"
-#include "animation/Flipbook.h"
+#include "SFML/Audio.hpp"
+#include "Animation/Flipbook.h"
 #include "UI/ImageButton.h"
 #include <memory>
 #include "Graphics/FadeEffect.h"

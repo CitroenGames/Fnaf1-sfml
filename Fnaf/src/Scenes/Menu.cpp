@@ -1,11 +1,11 @@
 #include "Menu.h"
-#include "sfml/Window.hpp"
+#include "SFML/Window.hpp"
 #include "Scene/SceneManager.h"
-#include "scenes/Gameplay.h"
-#include "assets/Resources.h"
+#include "Scenes/Gameplay.h"
+#include "Assets/Resources.h"
 #include "Graphics/LayerManager.h"
 #include "Core/Window.h"
-#include "layerdefines.h"
+#include "LayerDefines.h"
 
 
 void Menu::Init()

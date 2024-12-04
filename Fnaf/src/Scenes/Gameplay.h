@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Scene/Scene.h"
-#include "sfml/Graphics.hpp"
-#include "sfml/Audio.hpp"
-#include "office.h"
+#include "SFML/Graphics.hpp"
+#include "SFML/Audio.hpp"
+#include "Office.h"
 
 constexpr float scrollspeed = 10.0f;
 

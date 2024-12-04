@@ -2,7 +2,7 @@
 #include "Core/Window.h"
 #include "Assets/Resources.h"
 #include "Graphics/LayerManager.h"
-#include "layerdefines.h"
+#include "LayerDefines.h"
 
 void PowerIndicator::Init()
 {

@@ -2,5 +2,5 @@
 
 #include "node.h"
 #include "scene.h"
-#include "components/component.h"
-#include "components/transform.h"
+#include "Components/Component.h"
+#include "Components/Transform.h"

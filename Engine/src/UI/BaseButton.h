@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "Graphics/LayerManager.h"
-#include "assets/Resources.h"
+#include "Assets/Resources.h"
 #include <iostream>
 #include <memory>
 

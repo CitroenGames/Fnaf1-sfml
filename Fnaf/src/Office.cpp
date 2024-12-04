@@ -1,7 +1,7 @@
-#include "office.h"
+#include "Office.h"
 #include "Core/Window.h"
 #include "Graphics/LayerManager.h"
-#include "assets/Resources.h"
+#include "Assets/Resources.h"
 
 void LeftTopButtonCallback(bool active)
 {

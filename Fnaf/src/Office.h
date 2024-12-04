@@ -1,7 +1,7 @@
 #pragma once
 
-#include "sfml/Graphics.hpp"
-#include "composable.h"
+#include "SFML/Graphics.hpp"
+#include "Composable.h"
 #include "nlohmann/json.hpp"
 #include "UI/TopBottomButtons.h"
 

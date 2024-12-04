@@ -2,7 +2,7 @@
 #include "Core/Application.h"
 #include "Scenes/Gameplay.h"
 #include "Scenes/Menu.h"
-#include "pak.h"
+#include "Pak.h"
 #include "filesystem"
 #include "Assets/Resources.h"
 

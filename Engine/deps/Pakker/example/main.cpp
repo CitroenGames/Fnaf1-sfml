@@ -1,6 +1,6 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
-#include "pak.h"
+#include "Pak.h"
 #include <iostream>
 #include <filesystem>
 #include <fstream>

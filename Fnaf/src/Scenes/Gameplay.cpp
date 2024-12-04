@@ -1,11 +1,11 @@
 #include "Gameplay.h"
-#include "sfml/Window.hpp"
+#include "SFML/Window.hpp"
 #include <SFML/Graphics.hpp>
 #include "Core/Window.h"
 #include "Graphics/LayerManager.h"
-#include "assets/Resources.h"
+#include "Assets/Resources.h"
 #include "Power.h"
-#include "Imgui.h"
+#include "imgui.h"
 
 void Gameplay::Init()
 {
