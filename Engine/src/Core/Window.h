@@ -2,18 +2,19 @@
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <memory>
 
 class Window
 {
 public:
-	static sf::RenderWindow* Init(int width, int height, std::string title);
+	static std::shared_ptr<sf::RenderWindow> Init(int width, int height, std::string title);
 	static void Destroy();
 
-	static sf::RenderWindow* const GetWindow()
+	static std::shared_ptr<sf::RenderWindow> const GetWindow()
 	{
 		return m_Window;
 	}
 
 private:
-	static sf::RenderWindow* m_Window;
+	static std::shared_ptr<sf::RenderWindow> m_Window;
 };

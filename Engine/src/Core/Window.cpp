@@ -1,10 +1,10 @@
 #include "Window.h"
 
-sf::RenderWindow* Window::m_Window = nullptr;
+std::shared_ptr<sf::RenderWindow> Window::m_Window = nullptr;
 
-sf::RenderWindow* Window::Init(int width, int height, std::string title)
+std::shared_ptr<sf::RenderWindow> Window::Init(int width, int height, std::string title)
 {
-	m_Window = new sf::RenderWindow(sf::VideoMode(width, height), title);
+	m_Window = std::make_shared<sf::RenderWindow>(sf::VideoMode(width, height), title);
 
 	return m_Window;
 }
@@ -12,5 +12,5 @@ sf::RenderWindow* Window::Init(int width, int height, std::string title)
 void Window::Destroy()
 {
 	m_Window->close();
-	delete m_Window;
+	m_Window.reset();
 }

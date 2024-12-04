@@ -81,7 +81,7 @@ void Office::FixedUpdate()
 {
     // Handle events
     sf::Event event;
-    sf::RenderWindow* window = Window::GetWindow();
+    std::shared_ptr<sf::RenderWindow> window = Window::GetWindow();
 
     while (window->pollEvent(event)) {
         if (event.type == sf::Event::KeyPressed) {

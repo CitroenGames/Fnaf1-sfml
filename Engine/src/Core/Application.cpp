@@ -6,7 +6,7 @@
 #include <thread>
 #include "imgui/imgui-SFML.h"
 
-sf::RenderWindow* Application::m_Window = nullptr;
+std::shared_ptr<sf::RenderWindow> Application::m_Window = nullptr;
 
 const int TICKRATE = 66;  // Desired tickrate (ticks per second)
 const double FRAME_TIME = 1.0 / TICKRATE;  // Time per tick (seconds)
@@ -28,8 +28,8 @@ void Application::Run()
     while (m_Window->isOpen()) {
         while (m_Window->pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
-                // this will close the window
-                return;
+                m_Window->close();
+                break;
             }
             else if (event.type == sf::Event::LostFocus) {
                 hasFocus = false;
@@ -65,7 +65,7 @@ void Application::Run()
             ImGui::SFML::Render(*m_Window);
             m_Window->display();
         }
-        else {
+        else { // NOTE: THIS IS REALLY STUPID AND SHOULD BE FIXED
             // Sleep to reduce CPU usage
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }

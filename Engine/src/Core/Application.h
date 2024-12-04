@@ -11,5 +11,5 @@ public:
 	static void Destroy();
 
 private:
-	static sf::RenderWindow* m_Window;
+	static std::shared_ptr<sf::RenderWindow> m_Window;
 };

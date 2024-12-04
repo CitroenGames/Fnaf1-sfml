@@ -79,7 +79,7 @@ void Menu::SwitchToGameplay()
 
 void Menu::FixedUpdate()
 {
-	sf::RenderWindow* window = Window::GetWindow();
+    std::shared_ptr<sf::RenderWindow> window = Window::GetWindow();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 	{
         SwitchToGameplay();
