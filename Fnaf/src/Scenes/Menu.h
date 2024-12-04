@@ -17,12 +17,15 @@ public:
 	void Destroy() override;
 	void SwitchToGameplay();
 
+	void ShowNewsPaper();
+
 private:
 	std::shared_ptr<sf::Music> bgaudio2;
 	std::shared_ptr<sf::Texture> m_Logo;
 	sf::Sprite m_LogoSprite;
 	Flipbook flipbook;
-	ImageButton button;
+	ImageButton newbutton;
+	std::shared_ptr<sf::Texture> NewsPaperTexture;
 
 	enum State { FADE_IN, WAIT, FADE_OUT, DONE } m_State = FADE_IN;
 	sf::Time waitTime = sf::seconds(5);

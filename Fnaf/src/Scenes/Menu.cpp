@@ -7,6 +7,10 @@
 #include "Core/Window.h"
 #include "LayerDefines.h"
 
+bool ShouldShowNewsPaper = false;
+bool ShouldSwitchScene = false;
+int NewsPaperTimer = 0;
+bool IsShowingNewsPaper = false;
 
 void Menu::Init()
 {
@@ -28,6 +32,8 @@ void Menu::Init()
     flipbook.SetPosition(-250, 0);
     // ------------------------------------------------------
 
+    NewsPaperTexture = Resources::GetTexture("Graphics/MenuMenu/NewsPaper.png");
+
     m_Logo = Resources::GetTexture("Graphics/MenuMenu/Logo.png");
 
     m_LogoSprite = sf::Sprite(*m_Logo);
@@ -35,9 +41,9 @@ void Menu::Init()
     LayerManager::AddDrawable(BUTTON_LAYER, m_LogoSprite);
     flipbook.Play();
 
-    button.SetTexture("Graphics/MenuMenu/NewGame.png");
-    button.SetPosition(100, 300);
-    button.SetLayer(BUTTON_LAYER);
+    newbutton.SetTexture("Graphics/MenuMenu/NewGame.png");
+    newbutton.SetPosition(100, 300);
+    newbutton.SetLayer(BUTTON_LAYER);
 }
 
 void Menu::Update(double deltaTime)
@@ -71,6 +77,24 @@ void Menu::Update(double deltaTime)
     //}
 }
 
+void Menu::ShowNewsPaper()
+{
+    NewsPaperTimer += 1;
+    if (NewsPaperTimer > 1000)
+    {
+        ShouldShowNewsPaper = false;
+        ShouldSwitchScene = true;
+        return;
+    }
+
+    if(!IsShowingNewsPaper)
+    {
+        sf::Sprite sprite(*NewsPaperTexture);
+        LayerManager::AddDrawable(4, sprite);
+    }
+    
+}
+
 void Menu::SwitchToGameplay()
 {
     Destroy();
@@ -79,15 +103,23 @@ void Menu::SwitchToGameplay()
 
 void Menu::FixedUpdate()
 {
-    std::shared_ptr<sf::RenderWindow> window = Window::GetWindow();
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-	{
-        SwitchToGameplay();
-	}
-
-    if (button.IsClicked(*window)) {
+    if(ShouldShowNewsPaper)
+    {
+        ShowNewsPaper();
+    }
+    else if (ShouldSwitchScene)
+    {
         SwitchToGameplay();
     }
+
+    // TODO: window variable should not be needed...
+    std::shared_ptr<sf::RenderWindow> window = Window::GetWindow();
+
+	if (newbutton.IsClicked(*window))
+	{
+        ShouldShowNewsPaper = true;
+        SwitchToGameplay();
+	}
 }
 
 void Menu::Render()
