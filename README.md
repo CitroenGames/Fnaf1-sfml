@@ -12,6 +12,7 @@ Currently, the game features a **main menu** (which is not yet like the original
   - Camera system
   - Door controls
   - Functional buttons
+  - MOST IMPORTANTLY the honk :/
 
 ### Installation Instructions for Linux Users
 
