@@ -9,7 +9,7 @@
 
 void Gameplay::Init()
 {
-    auto entity = CreateEntity();
+    auto entity = CreateEntity("Office stuff");
     entity->AddComponent<PowerIndicator>()->Init();
     entity->AddComponent<Office>()->Init();
     auto officeComponent = entity->GetComponent<Office>();

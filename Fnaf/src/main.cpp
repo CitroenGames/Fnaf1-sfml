@@ -7,9 +7,10 @@
 #include "Assets/Resources.h"
 
 #define CAN_BUILD_ASSET_PAK 1
+#define KEY "example_key"
 
 int main() {
-    Pakker p("example_key");
+    Pakker p(KEY);
 
 #if CAN_BUILD_ASSET_PAK
     // Create PAK if it doesn't exist

@@ -2,6 +2,7 @@
 #include "Core/Window.h"
 #include "Graphics/LayerManager.h"
 #include "Assets/Resources.h"
+#include "Scene/SceneManager.h"
 
 void LeftTopButtonCallback(bool active)
 {
@@ -70,7 +71,9 @@ void Office::Init()
     m_LeftButtons.SetPosition(0, 250);
     m_RightButtons.SetPosition(1350, 250); 
     m_LeftDoorSprite.setPosition(100, 500);    
-    m_RightDoorSprite.setPosition(650, 500);   
+    m_RightDoorSprite.setPosition(650, 500);  
+
+    auto FanEnt = SceneManager::GetActiveScene()->CreateEntity("Fan");
 }
 
 void Office::Update(double deltaTime)
@@ -79,37 +82,15 @@ void Office::Update(double deltaTime)
 
 void Office::FixedUpdate()
 {
-    // Handle events
-    sf::Event event;
     std::shared_ptr<sf::RenderWindow> window = Window::GetWindow();
-
-    while (window->pollEvent(event)) {
-        if (event.type == sf::Event::KeyPressed) {
-            if (event.key.code == sf::Keyboard::Right) {
-                scrollOffset -= 10.0f; // Scroll right
-            }
-            if (event.key.code == sf::Keyboard::Left) {
-                scrollOffset += 10.0f; // Scroll left
-            }
-            // Handle button press
-            if (event.key.code == sf::Keyboard::Space) {
-                // Example button press logic
-            }
-        }
-    }
-
     m_LeftButtons.checkClick(*window);
 
-    // FNAF-style mouse look and screen scrolling
+    // Get mouse position
     sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
     sf::Vector2u windowSize = window->getSize();
 
-    // Calculate the mouse position relative to the center of the window
-    float mouseX = static_cast<float>(mousePos.x - windowSize.x / 2);
-    float mouseY = static_cast<float>(mousePos.y - windowSize.y / 2);
-
-    // Scroll the screen based on the mouse position
-    const float scrollThreshold = 50.0f; // Adjust the threshold as needed
+    // Screen scrolling based on mouse position
+    const float scrollThreshold = 50.0f;
     if (mousePos.x < scrollThreshold) {
         scrollOffset -= 10.0f; // Scroll left
     }
@@ -117,10 +98,12 @@ void Office::FixedUpdate()
         scrollOffset += 10.0f; // Scroll right
     }
 
-    // Update the camera view based on scrollOffset
-    sf::View view = window->getView(); // Get the current view
-    view.setCenter(scrollOffset + windowSize.x / 2.0f, windowSize.y / 2.0f); // Set the center of the view
-    window->setView(view); // Apply the updated view
+    // Clamp the scroll offset to half the viewport width
+    scrollOffset = std::clamp(scrollOffset, 0.0f, 360.0f);  // 360 = 720/2
+
+    // Calculate new camera position using viewport dimensions instead of window size
+    sf::Vector2f newCameraPos(scrollOffset + (VIEWPORT_WIDTH / 2), (VIEWPORT_HEIGHT / 2));
+    Window::setCameraPosition(newCameraPos);
 }
 
 void Office::Render()

@@ -15,6 +15,7 @@ void Application::Init()
 {
 	m_Window = Window::Init(1024, 576, "Five Nights at Freddy's");
     ImGui::SFML::Init(*m_Window, true);
+    Window::UpdateViewport();
 }
 
 void Application::Run()
@@ -36,6 +37,9 @@ void Application::Run()
             }
             else if (event.type == sf::Event::GainedFocus) {
                 hasFocus = true;
+            }
+            else if (event.type == sf::Event::Resized) {
+                Window::UpdateViewport();
             }
             ImGui::SFML::ProcessEvent(event);
         }
@@ -77,6 +81,7 @@ void Application::Run()
 void Application::Destroy()
 {
     //TODO: Add a proper way to close the application
+    LayerManager::Clear();
     SceneManager::Destroy();
     ImGui::SFML::Shutdown();
 	Window::Destroy();
