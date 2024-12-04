@@ -6,8 +6,8 @@
 #include <typeindex>
 #include <string>
 #include <functional>
-#include "components/component.h"
-#include "components/transform.h"
+#include "Components/component.h"
+#include "Components/transform.h"
 
 namespace Composable {
     class Node : public std::enable_shared_from_this<Node> {
