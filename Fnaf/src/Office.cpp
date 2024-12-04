@@ -13,28 +13,43 @@ void LeftBottomButtonCallback(bool active)
 	std::cout << "Left Bottom Button Pressed" << std::endl;
 }
 
+void RightTopButtonCallback(bool active)
+{
+    std::cout << "Right Top Button Pressed" << std::endl;
+}
+
+void RightBottomButtonCallback(bool active)
+{
+    std::cout << "Right Bottom Button Pressed" << std::endl;
+}
+
 Office::Office()
 {
     m_OfficeTexture = Resources::GetTexture("Graphics/Office/NormalOffice.png");
     m_DoorTexture = Resources::GetTexture("Graphics/Office/door.png");
 
-    std::vector<sf::Texture> ButtonsTextures;
+    std::vector<std::shared_ptr<sf::Texture>> LeftButtonsTextures;
 
-    ButtonsTextures.push_back(*Resources::GetTexture("Graphics/Office/ButtonsLeft/NoActive.png"));
-    ButtonsTextures.push_back(*Resources::GetTexture("Graphics/Office/ButtonsLeft/TopActive.png"));
-    ButtonsTextures.push_back(*Resources::GetTexture("Graphics/Office/ButtonsLeft/BothActive.png"));
-    ButtonsTextures.push_back(*Resources::GetTexture("Graphics/Office/ButtonsLeft/BottomActive.png"));
-    m_LeftButtons.SetTextures(ButtonsTextures);
+    LeftButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsLeft/NoActive.png"));
+    LeftButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsLeft/TopActive.png"));
+    LeftButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsLeft/BothActive.png"));
+    LeftButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsLeft/BottomActive.png"));
+    m_LeftButtons.SetTextures(LeftButtonsTextures);
 
-    //TODO: add right button textures
-    m_RightButtons.SetTextures(ButtonsTextures);
+    std::vector<std::shared_ptr<sf::Texture>> RightButtonsTextures;
+
+    RightButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsRight/NoActive.png"));
+    RightButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsRight/TopActive.png"));
+    RightButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsRight/BothActive.png"));
+    RightButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsRight/BottomActive.png"));
+    m_RightButtons.SetTextures(RightButtonsTextures);
 
     m_LeftButtons.SetLayer(2);
     m_LeftButtons.SetCallbacks(LeftTopButtonCallback, LeftBottomButtonCallback);
 
 
     m_RightButtons.SetLayer(2);
-    m_RightButtons.SetCallbacks(LeftTopButtonCallback, LeftBottomButtonCallback);
+    m_RightButtons.SetCallbacks(RightTopButtonCallback, RightBottomButtonCallback);
 }
 
 void Office::Init()
@@ -53,9 +68,9 @@ void Office::Init()
 
     // Initial positions
     m_LeftButtons.SetPosition(0, 250);
-    m_RightButtonSprite.setPosition(700, 250); // Example position
-    m_LeftDoorSprite.setPosition(100, 500);    // Example position
-    m_RightDoorSprite.setPosition(650, 500);   // Example position
+    m_RightButtons.SetPosition(1350, 250); 
+    m_LeftDoorSprite.setPosition(100, 500);    
+    m_RightDoorSprite.setPosition(650, 500);   
 }
 
 void Office::Update(double deltaTime)

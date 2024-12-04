@@ -12,8 +12,7 @@ public:
         m_OnBottomClick = onBottomClick;
     }
 
-    void SetTextures(const std::vector<sf::Texture>& textures) 
-    {
+    void SetTextures(const std::vector<std::shared_ptr<sf::Texture>> textures) {
         if (textures.empty()) {
             std::cerr << "Error: Provided texture vector is empty." << std::endl;
             return;
@@ -23,11 +22,10 @@ public:
         SetTexture(m_Textures[0]);
     }
 
-    void checkClick(sf::RenderWindow& window) 
-    {
-        bool isCurrentlyPressed = (IsMouseOver(window) && sf::Mouse::isButtonPressed(sf::Mouse::Left));
+    void checkClick(sf::RenderWindow& window) {
+        m_IsPressed = (IsMouseOver(window) && sf::Mouse::isButtonPressed(sf::Mouse::Left));
 
-        if (isCurrentlyPressed && !m_IsPressed) {
+        if (m_IsPressed && !m_IsPressed) {
             sf::Vector2i mousePos = sf::Mouse::getPosition(window);
             sf::Vector2f viewPos = window.mapPixelToCoords(mousePos);
             sf::FloatRect buttonBounds = m_ButtonSprite.getGlobalBounds();
@@ -48,14 +46,12 @@ public:
                 updateTexture(false);
             }
         }
-
-        m_IsPressed = isCurrentlyPressed;
     }
 
 private:
     std::function<void(bool active)> m_OnTopClick;
     std::function<void(bool active)> m_OnBottomClick;
-    std::vector<sf::Texture> m_Textures;
+    std::vector<std::shared_ptr<sf::Texture>> m_Textures;
     int m_ActiveState;
 
     void updateTexture(bool isTopClicked) {
@@ -68,7 +64,7 @@ private:
             m_ActiveState = ((m_ActiveState + 1) % (m_Textures.size() / 2)) + (m_Textures.size() / 2);
         }
 
-        m_ButtonSprite.setTexture(m_Textures[m_ActiveState]);
+        m_ButtonSprite.setTexture(*m_Textures[m_ActiveState]);
     }
 
     bool IsClicked(sf::RenderWindow& window) override { return m_IsPressed; }

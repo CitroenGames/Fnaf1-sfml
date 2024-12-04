@@ -1,7 +1,7 @@
 #include "SceneManager.h"
 
-Scene* SceneManager::m_ActiveScene = nullptr;
-Scene* SceneManager::m_QueuedScene = nullptr;
+std::shared_ptr<Scene> SceneManager::m_ActiveScene = nullptr;
+std::shared_ptr<Scene> SceneManager::m_QueuedScene = nullptr;
 
 void SceneManager::Update(double deltaTime)
 {
@@ -34,26 +34,25 @@ void SceneManager::Render()
 	}
 }
 
-void SceneManager::QueueSwitchScene(Scene* scene)
+void SceneManager::QueueSwitchScene(std::shared_ptr<Scene> scene)
 {
 	m_QueuedScene = scene;
 }
 
-void SceneManager::SwitchSceneNow(Scene* scene)
-{
+void SceneManager::SwitchSceneNow(std::shared_ptr<Scene> queuedScene) {
 	if (m_ActiveScene)
 	{
 		m_ActiveScene->Destroy();
-		delete m_ActiveScene;
+		m_ActiveScene.reset();
 	}
-	m_ActiveScene = scene;
+	m_ActiveScene = queuedScene;
 	if (m_ActiveScene)
 	{
 		m_ActiveScene->Init();
 	}
 }
 
-Scene* SceneManager::GetActiveScene()
+std::shared_ptr<Scene> SceneManager::GetActiveScene()
 {
 	return m_ActiveScene;
 }
@@ -63,7 +62,6 @@ void SceneManager::Destroy()
 	if (m_ActiveScene)
 	{
 		m_ActiveScene->Destroy();
-		delete m_ActiveScene;
-		m_ActiveScene = nullptr;
+		m_ActiveScene.reset();
 	}
 }

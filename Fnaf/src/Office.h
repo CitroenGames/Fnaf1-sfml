@@ -24,7 +24,6 @@ private:
 	float scrollOffset = 0.0f; // Initial scroll offset
 
 	sf::Sprite m_OfficeSprite;
-	sf::Sprite m_RightButtonSprite;
 	sf::Sprite m_LeftDoorSprite, m_RightDoorSprite;
 
 	std::shared_ptr<sf::Texture> m_OfficeTexture;

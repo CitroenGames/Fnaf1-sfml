@@ -18,6 +18,7 @@ void Menu::Init()
         bgaudio2->setVolume(100.f);
 	}
 
+    // NOTE: THIS IS NOT HOW IT LOOKS LIKE IN THE ACTUAL GAME
     flipbook = Flipbook(0, 0.2f, true);  // Passing true for looping
     flipbook.AddFrame(*Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu1.png"));
     flipbook.AddFrame(*Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu2.png"));
@@ -25,6 +26,7 @@ void Menu::Init()
     flipbook.AddFrame(*Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu4.png"));
 
     flipbook.SetPosition(-250, 0);
+    // ------------------------------------------------------
 
     m_Logo = Resources::GetTexture("Graphics/MenuMenu/Logo.png");
 
@@ -33,8 +35,6 @@ void Menu::Init()
     LayerManager::AddDrawable(BUTTON_LAYER, m_LogoSprite);
     flipbook.Play();
 
-
-    // TODO: this doesnt work
     button.SetTexture("Graphics/MenuMenu/NewGame.png");
     button.SetPosition(100, 300);
     button.SetLayer(BUTTON_LAYER);
@@ -74,7 +74,7 @@ void Menu::Update(double deltaTime)
 void Menu::SwitchToGameplay()
 {
     Destroy();
-	SceneManager::QueueSwitchScene(new Gameplay());
+	SceneManager::QueueSwitchScene(std::make_shared<Gameplay>());
 }
 
 void Menu::FixedUpdate()

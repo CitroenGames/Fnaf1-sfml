@@ -13,7 +13,7 @@ const double FRAME_TIME = 1.0 / TICKRATE;  // Time per tick (seconds)
 
 void Application::Init()
 {
-	m_Window = Window::Init(1024, 576, "Window");
+	m_Window = Window::Init(1024, 576, "Five Nights at Freddy's");
     ImGui::SFML::Init(*m_Window, true);
 }
 

@@ -8,12 +8,12 @@ public:
 	static void Update(double deltaTime);
 	static void FixedUpdate();
 	static void Render();
-	static void SwitchSceneNow(Scene* scene);
-	static void QueueSwitchScene(Scene* scene);
-	static Scene* GetActiveScene();
+	static void SwitchSceneNow(std::shared_ptr<Scene> scene);
+	static void QueueSwitchScene(std::shared_ptr<Scene> scene);
+	static std::shared_ptr<Scene> GetActiveScene();
 	static void Destroy();
 
 private:
-	static Scene* m_ActiveScene;
-	static Scene* m_QueuedScene;
+	static std::shared_ptr<Scene> m_ActiveScene;
+	static std::shared_ptr<Scene> m_QueuedScene;
 };

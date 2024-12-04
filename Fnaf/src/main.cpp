@@ -6,9 +6,12 @@
 #include "filesystem"
 #include "Assets/Resources.h"
 
+#define CAN_BUILD_ASSET_PAK 1
+
 int main() {
     Pakker p("example_key");
 
+#if CAN_BUILD_ASSET_PAK
     // Create PAK if it doesn't exist
     if (!std::filesystem::exists("Assets.pak")) {
         std::cout << "Packing Assets.pak" << std::endl;
@@ -28,6 +31,7 @@ int main() {
         std::cerr << "Error: Failed to list contents of assets.pak" << std::endl;
         return 1;
     }
+#endif
 
     // Set Pakker instance in Resources
     Resources::SetPakker(&p);
@@ -36,7 +40,7 @@ int main() {
     Resources::Load("Assets.pak");
     
     Application::Init();
-    SceneManager::QueueSwitchScene(new Menu());
+    SceneManager::QueueSwitchScene(std::make_shared<Menu>());
     Application::Run();
     Application::Destroy();
     return 0;
