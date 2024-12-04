@@ -24,16 +24,20 @@ add_library(${PROJECT_NAME} STATIC ${ENGINE_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
+set(LIBRARIES     
     sfml-system 
     sfml-window 
     sfml-graphics 
     sfml-network 
     sfml-audio
-    ${OPENGL_LIBRARIES}
-    GLEW::GLEW
     imgui
     ECS
     Pakker
     FunctionSpeaker
 )
+
+if(LINUX)
+    set(LIBRARIES ${LIBRARIES} ${OPENGL_LIBRARIES} GLEW::GLEW)
+endif()
+
+target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBRARIES})
