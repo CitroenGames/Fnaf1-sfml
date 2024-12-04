@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include "Graphics/LayerManager.h"
+#include <memory>
 
 class Flipbook {
 public:
@@ -10,10 +11,10 @@ public:
     Flipbook(int layer, float frameDuration = 0.1f, bool loop = true);
 
     // Add a new frame to the flipbook
-    void AddFrame(const sf::Texture& texture);
-    void AddFrame(const sf::Sprite& sprite);
+    void AddFrame(std::shared_ptr<sf::Texture> texture);
+    void AddFrame(std::shared_ptr<sf::Sprite> sprite);
 
-    void AddFrames(const std::vector<sf::Sprite>& sprites);
+    void AddFrames(const std::vector<std::shared_ptr<sf::Sprite>>& sprites);
 	void AddFrames(const std::vector<sf::Texture>& textures);
 
     void Update(float deltaTime);
@@ -31,18 +32,18 @@ public:
 
     void SetPosition(float x, float y) {
         for (auto& frame : m_Frames) {
-            frame.setPosition(x, y);
+            frame->setPosition(x, y);
         }
     }
 
-    void Destroy() {
+    void Cleanup() {
         for (const auto& frame : m_Frames) {
-            LayerManager::RemoveDrawable(frame);
+            LayerManager::RemoveDrawable(*frame);
         }
     }
 
 private:
-    std::vector<sf::Sprite> m_Frames;
+    std::vector<std::shared_ptr<sf::Sprite>> m_Frames;
     float m_FrameDuration;
     float m_ElapsedTime;
     std::size_t m_CurrentFrame;

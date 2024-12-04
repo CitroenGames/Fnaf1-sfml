@@ -20,10 +20,10 @@ void Menu::Init()
 
     // NOTE: THIS IS NOT HOW IT LOOKS LIKE IN THE ACTUAL GAME
     flipbook = Flipbook(0, 0.2f, true);  // Passing true for looping
-    flipbook.AddFrame(*Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu1.png"));
-    flipbook.AddFrame(*Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu2.png"));
-    flipbook.AddFrame(*Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu3.png"));
-    flipbook.AddFrame(*Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu4.png"));
+    flipbook.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu1.png"));
+    flipbook.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu2.png"));
+    flipbook.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu3.png"));
+    flipbook.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu4.png"));
 
     flipbook.SetPosition(-250, 0);
     // ------------------------------------------------------
@@ -102,6 +102,6 @@ void Menu::Destroy()
         bgaudio2->stop();
     }
 
-    flipbook.Destroy();
     flipbook.Stop();
+    flipbook.Cleanup();
 }
