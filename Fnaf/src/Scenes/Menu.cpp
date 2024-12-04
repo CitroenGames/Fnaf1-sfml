@@ -32,7 +32,9 @@ void Menu::Init()
     flipbook.SetPosition(-250, 0);
     // ------------------------------------------------------
 
+    // TODO: THIS DOESNT SCALE WITH RESOLUTION
     NewsPaperTexture = Resources::GetTexture("Graphics/MenuMenu/NewsPaper.png");
+    NewsPaperSprite = sf::Sprite(*NewsPaperTexture);
 
     m_Logo = Resources::GetTexture("Graphics/MenuMenu/Logo.png");
 
@@ -80,7 +82,7 @@ void Menu::Update(double deltaTime)
 void Menu::ShowNewsPaper()
 {
     NewsPaperTimer += 1;
-    if (NewsPaperTimer > 1000)
+    if (NewsPaperTimer > 50)
     {
         ShouldShowNewsPaper = false;
         ShouldSwitchScene = true;
@@ -89,8 +91,8 @@ void Menu::ShowNewsPaper()
 
     if(!IsShowingNewsPaper)
     {
-        sf::Sprite sprite(*NewsPaperTexture);
-        LayerManager::AddDrawable(4, sprite);
+        LayerManager::AddDrawable(4, NewsPaperSprite);
+        IsShowingNewsPaper = true;
     }
     
 }
@@ -118,7 +120,6 @@ void Menu::FixedUpdate()
 	if (newbutton.IsClicked(*window))
 	{
         ShouldShowNewsPaper = true;
-        SwitchToGameplay();
 	}
 }
 

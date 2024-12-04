@@ -26,6 +26,7 @@ private:
 	Flipbook flipbook;
 	ImageButton newbutton;
 	std::shared_ptr<sf::Texture> NewsPaperTexture;
+	sf::Sprite NewsPaperSprite;
 
 	enum State { FADE_IN, WAIT, FADE_OUT, DONE } m_State = FADE_IN;
 	sf::Time waitTime = sf::seconds(5);
