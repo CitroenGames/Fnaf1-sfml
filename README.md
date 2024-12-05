@@ -1,5 +1,8 @@
 # FNAF Clone Made in SFML
 
+![Main Menu](Images/Menu.png)
+
+
 This project is an early work-in-progress clone inspired by the "Five Nights at Freddy's" (FNaF) game, built using SFML (Simple and Fast Multimedia Library). 
 
 Currently, the game features a **main menu** (which is not yet like the original game) and an **office** scene that doesn't function properly. Key elements, such as the **animatronics**, **camera system**, **doors**, and **buttons**, are not yet implemented or fully functional.

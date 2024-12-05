@@ -6,6 +6,7 @@
 #include "Graphics/LayerManager.h"
 #include "Core/Window.h"
 #include "LayerDefines.h"
+#include "Utils/Helpers.h"
 
 bool ShouldShowNewsPaper = false;
 bool ShouldSwitchScene = false;
@@ -14,45 +15,61 @@ bool IsShowingNewsPaper = false;
 
 void Menu::Init()
 {
-    bgaudio2 = Resources::GetMusic("Audio/Menu/darknessmusic.wav");
-    if(bgaudio2)
+    m_BgStatic = Resources::GetMusic("Audio/static2.wav");
+    if (m_BgStatic)
+    {
+		m_BgStatic->play();
+		m_BgStatic->setVolume(100.f);
+    }
+    m_MenuMusic = Resources::GetMusic("Audio/Menu/darknessmusic.wav");
+    if(m_MenuMusic)
 	{
-        bgaudio2->setLoop(true);
-        bgaudio2->play();
-        bgaudio2->setVolume(100.f);
+        m_MenuMusic->setLoop(true);
+        m_MenuMusic->play();
+        m_MenuMusic->setVolume(100.f);
 	}
 
-    // NOTE: THIS IS NOT HOW IT LOOKS LIKE IN THE ACTUAL GAME
-    flipbook = Flipbook(0, 0.2f, true);  // Passing true for looping
-    flipbook.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu1.png"));
-    flipbook.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu2.png"));
-    flipbook.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu3.png"));
-    flipbook.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu4.png"));
+    m_FreddyGlitchEffect = GlitchEffect(0); 
+    m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu1.png"));
+    m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu2.png"));
+    m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu3.png"));
+    m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu4.png"));
 
-    flipbook.SetPosition(-250, 0);
-    // ------------------------------------------------------
+    m_FreddyGlitchEffect.SetGlitchParameters(0.01f, 0.3f, 0.05f);
+    m_FreddyGlitchEffect.RegisterToLayerManager();
 
-    // TODO: THIS DOESNT SCALE WITH RESOLUTION
+    m_StaticGlitchEffect = GlitchEffect(1);
+
+    // Apply transparency to all static noise frames
+    noise1 = MakeTextureTransparent(Resources::GetTexture("Graphics/Static/Noise1.png"), 0.2f);
+    noise2 = MakeTextureTransparent(Resources::GetTexture("Graphics/Static/Noise2.png"), 0.2f);
+    noise3 = MakeTextureTransparent(Resources::GetTexture("Graphics/Static/Noise3.png"), 0.2f);
+
+    m_StaticGlitchEffect.AddFrame(noise1);
+    m_StaticGlitchEffect.AddFrame(noise2);
+    m_StaticGlitchEffect.AddFrame(noise3);
+
+    m_StaticGlitchEffect.SetGlitchParameters(1.0f, 1.0f, 0.01f);
+    m_StaticGlitchEffect.RegisterToLayerManager();
+
     NewsPaperTexture = Resources::GetTexture("Graphics/MenuMenu/NewsPaper.png");
     NewsPaperSprite = sf::Sprite(*NewsPaperTexture);
+    // scale the sprite to fit the screen
+	NewsPaperSprite.setScale(1.0f, 1.0f);
 
-    m_Logo = Resources::GetTexture("Graphics/MenuMenu/Logo.png");
+    m_Logo = ProcessText(Resources::GetTexture("Graphics/MenuMenu/Logo.png"));
 
     m_LogoSprite = sf::Sprite(*m_Logo);
-    m_LogoSprite.setPosition(100, 0);
+    m_LogoSprite.setPosition(100, 100);
     LayerManager::AddDrawable(BUTTON_LAYER, m_LogoSprite);
-    flipbook.Play();
 
-    newbutton.SetTexture("Graphics/MenuMenu/NewGame.png");
-    newbutton.SetPosition(100, 300);
+    newbutton.SetTexture(ProcessText(Resources::GetTexture("Graphics/MenuMenu/NewGame.png")));
+    newbutton.SetPosition(100, 400);
     newbutton.SetLayer(BUTTON_LAYER);
 }
 
 void Menu::Update(double deltaTime)
 {
-    flipbook.Update(deltaTime);
-    flipbook.RegisterToLayerManager();
-
     //accumulatedTime += (float)deltaTime;
 
     //switch (m_State) {
@@ -82,7 +99,7 @@ void Menu::Update(double deltaTime)
 void Menu::ShowNewsPaper()
 {
     NewsPaperTimer += 1;
-    if (NewsPaperTimer > 50)
+    if (NewsPaperTimer > 100)
     {
         ShouldShowNewsPaper = false;
         ShouldSwitchScene = true;
@@ -108,11 +125,16 @@ void Menu::FixedUpdate()
     if(ShouldShowNewsPaper)
     {
         ShowNewsPaper();
+        return;
     }
     else if (ShouldSwitchScene)
     {
         SwitchToGameplay();
+        return;
     }
+
+    m_FreddyGlitchEffect.Update();
+    m_StaticGlitchEffect.Update();
 
     // TODO: window variable should not be needed...
     std::shared_ptr<sf::RenderWindow> window = Window::GetWindow();
@@ -130,11 +152,9 @@ void Menu::Render()
 void Menu::Destroy()
 {
     LayerManager::Clear();
-    if (bgaudio2)
+    if (m_MenuMusic)
     {
-        bgaudio2->stop();
+        m_MenuMusic->stop();
+        m_MenuMusic.reset();
     }
-
-    flipbook.Stop();
-    flipbook.Cleanup();
 }

@@ -43,8 +43,6 @@ void Gameplay::Init()
 void Gameplay::FixedUpdate()
 {
     Scene::FixedUpdate();
-    
-    m_Camera->shake(0.1f, 0.1f);
 }
 
 void Gameplay::Update(double deltaTime)

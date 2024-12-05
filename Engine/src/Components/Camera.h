@@ -10,18 +10,6 @@
 
 class Camera2D {
 public:
-    struct ShakeParameters {
-        float intensity = 0.0f;
-        float duration = 0.0f;
-        float remainingTime = 0.0f;
-        float frequency = 60.0f;
-        enum class Pattern { 
-            Sine,
-            Random,
-            Decay
-        } pattern = Pattern::Sine;
-    };
-
     struct Config {
         sf::Vector2f center;
         sf::Vector2f resolution;
@@ -40,11 +28,12 @@ public:
             , maxZoom(10.0f)
             , smoothingFactor(0.85f)
             , maintainResolution(false)
-        {}
+        {
+        }
 
         // Custom constructor
-        explicit Config(sf::Vector2f customCenter, 
-                       sf::Vector2f customResolution = sf::Vector2f(800.0f, 600.0f)) 
+        explicit Config(sf::Vector2f customCenter,
+            sf::Vector2f customResolution = sf::Vector2f(800.0f, 600.0f))
             : center(customCenter)
             , resolution(customResolution)
             , initialZoom(1.0f)
@@ -52,7 +41,8 @@ public:
             , maxZoom(10.0f)
             , smoothingFactor(0.85f)
             , maintainResolution(false)
-        {}
+        {
+        }
     };
 
 private:
@@ -67,21 +57,18 @@ private:
     float maxZoom;
     sf::FloatRect bounds;
     bool boundingEnabled;
-    
+
     // Movement and effects
-    ShakeParameters shakeParams;
-    sf::Vector2f shakeOffset;
     sf::Vector2f targetPosition;
     float smoothingFactor;
-    
+
     // Enhanced functionality
-    std::unique_ptr<std::mt19937> rng;
     float lastDeltaTime;
     std::vector<std::pair<float, sf::Vector2f>> positionHistory;
     static constexpr size_t MAX_HISTORY_SIZE = 10;
 
 public:
-    explicit Camera2D(const Config& config = Config{}) 
+    explicit Camera2D(const Config& config = Config{})
         : position(config.center)
         , baseResolution(config.resolution)
         , zoomLevel(config.initialZoom)
@@ -92,7 +79,6 @@ public:
         , boundingEnabled(false)
         , targetPosition(config.center)
         , smoothingFactor(config.smoothingFactor)
-        , rng(std::make_unique<std::mt19937>(std::random_device{}()))
         , lastDeltaTime(0.0f)
     {
         view.setCenter(config.center);
@@ -137,25 +123,6 @@ public:
         setRotation(rotation + angle);
     }
 
-    // Enhanced camera effects
-    void shake(float intensity, float duration, 
-              ShakeParameters::Pattern pattern = ShakeParameters::Pattern::Sine, 
-              float frequency = 60.0f) {
-        if (intensity < 0 || duration < 0 || frequency <= 0) {
-            throw std::invalid_argument("Invalid shake parameters");
-        }
-        shakeParams.intensity = intensity;
-        shakeParams.duration = duration;
-        shakeParams.remainingTime = duration;
-        shakeParams.frequency = frequency;
-        shakeParams.pattern = pattern;
-    }
-
-    void addScreenShake(float trauma) {
-        float intensity = trauma * trauma;
-        shake(intensity * 10.0f, 0.5f, ShakeParameters::Pattern::Decay);
-    }
-
     void focusOn(const sf::Vector2f& target, float duration = 1.0f) {
         auto distance = target - position;
         auto speed = distance / duration;
@@ -194,7 +161,6 @@ public:
     // Update and application
     void update(float deltaTime) {
         lastDeltaTime = deltaTime;
-        updateShake(deltaTime);
         updateSmoothMovement(deltaTime);
         updatePositionHistory();
         updateView();
@@ -208,15 +174,15 @@ public:
     }
 
     // Coordinate conversion
-    [[nodiscard]] sf::Vector2f screenToWorldCoords(const sf::Vector2f& screenPos, 
-                                                  const sf::RenderTarget& target) const {
+    [[nodiscard]] sf::Vector2f screenToWorldCoords(const sf::Vector2f& screenPos,
+        const sf::RenderTarget& target) const {
         return target.mapPixelToCoords(
-            sf::Vector2i(static_cast<int>(screenPos.x), 
-                        static_cast<int>(screenPos.y)), view);
+            sf::Vector2i(static_cast<int>(screenPos.x),
+                static_cast<int>(screenPos.y)), view);
     }
 
-    [[nodiscard]] sf::Vector2f worldToScreenCoords(const sf::Vector2f& worldPos, 
-                                                  const sf::RenderTarget& target) const {
+    [[nodiscard]] sf::Vector2f worldToScreenCoords(const sf::Vector2f& worldPos,
+        const sf::RenderTarget& target) const {
         return sf::Vector2f(target.mapCoordsToPixel(worldPos, view));
     }
 
@@ -230,7 +196,7 @@ public:
     [[nodiscard]] const std::vector<std::pair<float, sf::Vector2f>>& getMotionTrail() const noexcept {
         return positionHistory;
     }
-    
+
     [[nodiscard]] sf::FloatRect getVisibleArea() const noexcept {
         auto size = view.getSize();
         auto center = view.getCenter();
@@ -256,7 +222,7 @@ private:
     }
 
     void updateView() noexcept {
-        view.setCenter(position + shakeOffset);
+        view.setCenter(position);
         view.setSize(baseResolution / zoomLevel);
         view.setRotation(rotation);
     }
@@ -275,7 +241,8 @@ private:
                 float ratio = targetAspectRatio / windowAspectRatio;
                 viewport.left = (1.f - ratio) / 2.f;
                 viewport.width = ratio;
-            } else {
+            }
+            else {
                 float ratio = windowAspectRatio / targetAspectRatio;
                 viewport.top = (1.f - ratio) / 2.f;
                 viewport.height = ratio;
@@ -296,52 +263,12 @@ private:
         );
     }
 
-    void updateShake(float deltaTime) noexcept {
-        if (shakeParams.remainingTime <= 0) {
-            shakeOffset = sf::Vector2f(0, 0);
-            return;
-        }
-
-        shakeParams.remainingTime -= deltaTime;
-        float progress = shakeParams.remainingTime / shakeParams.duration;
-        float currentIntensity = shakeParams.intensity * progress;
-
-        switch (shakeParams.pattern) {
-            case ShakeParameters::Pattern::Sine:
-                updateSineShake(deltaTime, currentIntensity);
-                break; 
-            case ShakeParameters::Pattern::Random:
-                updateRandomShake(currentIntensity);
-                break;
-            case ShakeParameters::Pattern::Decay:
-                updateDecayShake(progress, currentIntensity);
-                break;
-        }
-    }
-
-    void updateSineShake(float deltaTime, float intensity) noexcept {
-        float time = shakeParams.duration - shakeParams.remainingTime;
-        shakeOffset = sf::Vector2f(
-            std::sin(time * shakeParams.frequency) * intensity,
-            std::cos(time * shakeParams.frequency * 1.5f) * intensity
-        );
-    }
-
-    void updateRandomShake(float intensity) noexcept {
-        std::uniform_real_distribution<float> dist(-intensity, intensity);
-        shakeOffset = sf::Vector2f(dist(*rng), dist(*rng));
-    }
-
-    void updateDecayShake(float progress, float intensity) noexcept {
-        float decay = std::pow(progress, 2.0f);
-        updateRandomShake(intensity * decay);
-    }
-
     void updateSmoothMovement(float deltaTime) noexcept {
         if (smoothingFactor > 0) {
             float smoothing = std::pow(smoothingFactor, deltaTime * 60.0f);
             position = position * smoothing + targetPosition * (1.0f - smoothing);
-        } else {
+        }
+        else {
             position = targetPosition;
         }
     }

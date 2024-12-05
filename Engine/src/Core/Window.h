@@ -3,8 +3,8 @@
 #include <iostream>
 #include <memory>
 
-constexpr float VIEWPORT_WIDTH = 1024.0f;
-constexpr float VIEWPORT_HEIGHT = 576.0f;
+constexpr float VIEWPORT_WIDTH = 1280.0f;
+constexpr float VIEWPORT_HEIGHT = 720.0f;
 
 class Window {
 public:
