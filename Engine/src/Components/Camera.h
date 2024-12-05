@@ -23,13 +23,36 @@ public:
     };
 
     struct Config {
-        sf::Vector2f center = sf::Vector2f(0.0f, 0.0f);
-        sf::Vector2f resolution = sf::Vector2f(800.0f, 600.0f);
-        float initialZoom = 1.0f;
-        float minZoom = 0.1f;
-        float maxZoom = 10.0f;
-        float smoothingFactor = 0.85f;
-        bool maintainResolution = false;
+        sf::Vector2f center;
+        sf::Vector2f resolution;
+        float initialZoom;
+        float minZoom;
+        float maxZoom;
+        float smoothingFactor;
+        bool maintainResolution;
+
+        // Default constructor with initialization
+        Config()
+            : center(0.0f, 0.0f)
+            , resolution(800.0f, 600.0f)
+            , initialZoom(1.0f)
+            , minZoom(0.1f)
+            , maxZoom(10.0f)
+            , smoothingFactor(0.85f)
+            , maintainResolution(false)
+        {}
+
+        // Custom constructor
+        explicit Config(sf::Vector2f customCenter, 
+                       sf::Vector2f customResolution = sf::Vector2f(800.0f, 600.0f)) 
+            : center(customCenter)
+            , resolution(customResolution)
+            , initialZoom(1.0f)
+            , minZoom(0.1f)
+            , maxZoom(10.0f)
+            , smoothingFactor(0.85f)
+            , maintainResolution(false)
+        {}
     };
 
 private:
@@ -58,7 +81,7 @@ private:
     static constexpr size_t MAX_HISTORY_SIZE = 10;
 
 public:
-    explicit Camera2D(const Config& config = Config{})
+    explicit Camera2D(const Config& config = Config{}) 
         : position(config.center)
         , baseResolution(config.resolution)
         , zoomLevel(config.initialZoom)
