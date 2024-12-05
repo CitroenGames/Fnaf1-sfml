@@ -54,8 +54,6 @@ void Menu::Init()
 
     NewsPaperTexture = Resources::GetTexture("Graphics/MenuMenu/NewsPaper.png");
     NewsPaperSprite = sf::Sprite(*NewsPaperTexture);
-    // scale the sprite to fit the screen
-	NewsPaperSprite.setScale(1.0f, 1.0f);
 
     m_Logo = ProcessText(Resources::GetTexture("Graphics/MenuMenu/Logo.png"));
 
