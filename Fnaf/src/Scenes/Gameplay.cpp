@@ -7,11 +7,16 @@
 #include "Power.h"
 #include "imgui.h"
 #include <math.h>
+#include "Scenes/Menu.h"
+#include "Scene/SceneManager.h"
 
 void Gameplay::Init()
 {
     auto entity = CreateEntity("Office stuff");
-    entity->AddComponent<PowerIndicator>()->Init();
+    std::shared_ptr<PowerIndicator> powerIndicator = entity->AddComponent<PowerIndicator>();
+    powerIndicator->OnPowerDepletedDelegate.Add(this, &Gameplay::OnPowerOut);
+    powerIndicator->Init();
+
     entity->AddComponent<Office>()->Init();
     auto officeComponent = entity->GetComponent<Office>();
     //AddComponent(officeComponent);
@@ -103,4 +108,11 @@ void Gameplay::Destroy()
 {
     m_Office.Destroy();
     Scene::Destroy();
+}
+
+void Gameplay::OnPowerOut()
+{
+    std::cout << "Power out" << std::endl;
+    Destroy();
+	SceneManager::QueueSwitchScene(std::make_shared<Menu>());
 }

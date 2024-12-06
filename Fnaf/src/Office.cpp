@@ -3,8 +3,7 @@
 #include "Graphics/LayerManager.h"
 #include "Assets/Resources.h"
 #include "Scene/SceneManager.h"
-
-bool IsUsingCamera = false;
+#include "Player.h"
 
 void LeftTopButtonCallback(bool active)
 {
@@ -16,14 +15,14 @@ void LeftBottomButtonCallback(bool active)
 	std::cout << "Left Bottom Button Pressed" << std::endl;
 }
 
-void RightTopButtonCallback(bool active)
+void RightDoorButtonCallback(bool active)
 {
-    std::cout << "Right Top Button Pressed" << std::endl;
+    std::cout << "Right Door Button Pressed" << std::endl;
 }
 
-void RightBottomButtonCallback(bool active)
+void RightLightButtonCallback(bool active)
 {
-    std::cout << "Right Bottom Button Pressed" << std::endl;
+    std::cout << "Right Light Button Pressed" << std::endl;
 }
 
 Office::Office()
@@ -55,7 +54,7 @@ Office::Office()
     m_LeftButtons.SetCallbacks(LeftTopButtonCallback, LeftBottomButtonCallback);
 
     m_RightButtons.SetLayer(2);
-    m_RightButtons.SetCallbacks(RightTopButtonCallback, RightBottomButtonCallback);
+    m_RightButtons.SetCallbacks(RightDoorButtonCallback, RightLightButtonCallback);
 
     m_FreddyNose = Resources::GetMusic("Audio/Office/PartyFavorraspyPart_AC01__3.wav");
     m_FreddyNose->stop();
@@ -87,12 +86,13 @@ void Office::Update(double deltaTime)
 
 void Office::FixedUpdate()
 {
-    std::shared_ptr<sf::RenderWindow> window = Window::GetWindow();
-
-    if (IsUsingCamera)
+    if (player.m_UsingCamera)
         return;
 
-    m_LeftButtons.checkClick(*window);
+    std::shared_ptr<sf::RenderWindow> window = Window::GetWindow();
+
+    m_LeftButtons.updateButton(*window);
+    m_RightButtons.updateButton(*window);
 
     if (m_FreddyNoseButton.IsClicked(*window))
     {

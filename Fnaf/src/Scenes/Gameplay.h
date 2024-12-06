@@ -17,6 +17,8 @@ public:
 	void Render() override;
 	void Destroy() override;
 
+	void OnPowerOut();
+
 private:
 	std::shared_ptr<sf::Music> bgaudio1;
 	std::shared_ptr<sf::Music> bgaudio2;
