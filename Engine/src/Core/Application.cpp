@@ -18,11 +18,13 @@ void Application::Init()
     Window::UpdateViewport();
 }
 
+bool isFocused = true;
+
 void Application::Run()
 {
     auto previousTime = std::chrono::high_resolution_clock::now();
     double accumulator = 0.0;
-    bool hasFocus = true;
+    
     sf::Event event;
     sf::Clock deltaClock;
 
@@ -33,10 +35,10 @@ void Application::Run()
                 break;
             }
             else if (event.type == sf::Event::LostFocus) {
-                hasFocus = false;
+                isFocused = false;
             }
             else if (event.type == sf::Event::GainedFocus) {
-                hasFocus = true;
+                isFocused = true;
             }
             else if (event.type == sf::Event::Resized) {
                 Window::UpdateViewport();
@@ -44,35 +46,32 @@ void Application::Run()
             ImGui::SFML::ProcessEvent(event);
         }
 
-        if (hasFocus) {
-            auto currentTime = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> elapsedTime = currentTime - previousTime;
-            previousTime = currentTime;
-            accumulator += elapsedTime.count();
-
-            ImGui::SFML::Update(*m_Window, deltaClock.restart());
-
-            // Fixed Update
-            while (accumulator >= FRAME_TIME) {
-                SceneManager::FixedUpdate();
-                accumulator -= FRAME_TIME;
-            }
-
-            // Update
-            double deltaTime = elapsedTime.count();
-            SceneManager::Update(deltaTime);
-
-            // Render
-            m_Window->clear();
-            LayerManager::Draw(*m_Window);
-            SceneManager::Render();
-            ImGui::SFML::Render(*m_Window);
-            m_Window->display();
-        }
-        else { // NOTE: THIS IS REALLY STUPID AND SHOULD BE FIXED
-            // Sleep to reduce CPU usage
+		if (!isFocused)
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsedTime = currentTime - previousTime;
+        previousTime = currentTime;
+        accumulator += elapsedTime.count();
+
+        ImGui::SFML::Update(*m_Window, deltaClock.restart());
+
+        // Fixed Update
+        while (accumulator >= FRAME_TIME) {
+            SceneManager::FixedUpdate();
+            accumulator -= FRAME_TIME;
         }
+
+        // Update
+        double deltaTime = elapsedTime.count();
+        SceneManager::Update(deltaTime);
+
+        // Render
+        m_Window->clear();
+        LayerManager::Draw(*m_Window);
+        SceneManager::Render();
+        ImGui::SFML::Render(*m_Window);
+        m_Window->display();
     }
 
     Application::Destroy();

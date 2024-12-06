@@ -32,7 +32,7 @@ void Gameplay::Init()
 	m_FanBuzzing->setVolume(40.f);
 
     Camera2D::Config config;
-    config.resolution = sf::Vector2f(1024.0f, 576.0f);
+    config.resolution = sf::Vector2f(1280.0f, 720.0f);
     config.initialZoom = 1.0f;
     config.smoothingFactor = 0.75f;
     config.maintainResolution = true;
@@ -54,51 +54,43 @@ void Gameplay::Update(double deltaTime)
     sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
     sf::Vector2u windowSize = window->getSize();
 
-    // Screen scrolling based on mouse position
-    const float scrollThreshold = 50.0f;
-    const float maxSpeed = 500.0f;
-    const float minSpeed = 100.0f;
-    const float deadZoneSize = 200.0f; // Size of the deadzone in pixels
+    // Image dimensions
+    const float imageWidth = 1600.0f;
+    const float imageHeight = 720.0f;
+    const float viewportWidth = 720.0f;  // Your configured camera resolution
 
-    // Calculate center and edges of the deadzone
-    float screenCenterX = windowSize.x / 2.0f;
-    float leftDeadZone = screenCenterX - deadZoneSize / 2;
-    float rightDeadZone = screenCenterX + deadZoneSize / 2;
+    // Scrolling parameters
+    const float scrollThreshold = 50.0f;
+    const float maxScrollSpeed = 500.0f;
 
     float scrollSpeed = 0.0f;
 
-    // Left side scrolling
-    if (mousePos.x < leftDeadZone) {
-        if (mousePos.x < scrollThreshold) {
-            // At edge, maximum speed
-            scrollSpeed = -maxSpeed;
-        }
-        else {
-            // Scale speed based on position between edge and deadzone
-            float speedFactor = (leftDeadZone - mousePos.x) / (leftDeadZone - scrollThreshold);
-            scrollSpeed = -(minSpeed + (maxSpeed - minSpeed) * speedFactor);
-        }
+    // Left edge scrolling
+    if (mousePos.x < scrollThreshold) {
+        scrollSpeed = -maxScrollSpeed;
     }
-    // Right side scrolling
-    else if (mousePos.x > rightDeadZone) {
-        if (mousePos.x > windowSize.x - scrollThreshold) {
-            // At edge, maximum speed
-            scrollSpeed = maxSpeed;
-        }
-        else {
-            // Scale speed based on position between deadzone and edge
-            float speedFactor = (mousePos.x - rightDeadZone) / ((windowSize.x - scrollThreshold) - rightDeadZone);
-            scrollSpeed = minSpeed + (maxSpeed - minSpeed) * speedFactor;
-        }
+    // Right edge scrolling
+    else if (mousePos.x > (windowSize.x - scrollThreshold)) {
+        scrollSpeed = maxScrollSpeed;
     }
 
+    // Update scroll offset
     scrollOffset += scrollSpeed * deltaTime;
 
-    // Clamp the scroll offset to half the viewport width
-    scrollOffset = std::clamp(scrollOffset, 0.0f, 360.0f);  // 360 = 720/2
+    // Clamp scroll offset to image bounds
+    // Ensures we can't scroll beyond the image's width minus the viewport
+    scrollOffset = std::clamp(
+        scrollOffset,
+        0.0f,
+        std::max(0.0f, imageWidth - viewportWidth)
+    );
 
-    // Calculate new camera position using viewport dimensions
-    sf::Vector2f newCameraPos(scrollOffset + (VIEWPORT_WIDTH / 1.9f), (VIEWPORT_HEIGHT / 2));
+    // Calculate new camera position
+    sf::Vector2f newCameraPos(
+        scrollOffset + (viewportWidth / 2.0f), // Center horizontally
+        (imageHeight / 2.0f)                  // Center vertically
+    );
+
     m_Camera->setPosition(newCameraPos);
     m_Camera->update(deltaTime);
     m_Camera->applyTo(*window);

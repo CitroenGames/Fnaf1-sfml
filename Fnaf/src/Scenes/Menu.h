@@ -40,7 +40,5 @@ private:
 
 private:
 	// temp holding static here
-	std::shared_ptr<sf::Texture> noise1;
-	std::shared_ptr<sf::Texture> noise2;
-	std::shared_ptr<sf::Texture> noise3;
+	std::vector<std::shared_ptr<sf::Texture>> m_NoiseTextures;
 };

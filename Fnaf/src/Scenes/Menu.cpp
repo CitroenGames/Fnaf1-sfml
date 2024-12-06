@@ -8,8 +8,6 @@
 #include "LayerDefines.h"
 #include "Utils/Helpers.h"
 
-bool ShouldShowNewsPaper = false;
-bool ShouldSwitchScene = false;
 int NewsPaperTimer = 0;
 bool IsShowingNewsPaper = false;
 
@@ -38,18 +36,19 @@ void Menu::Init()
     m_FreddyGlitchEffect.SetGlitchParameters(0.01f, 0.3f, 0.05f);
     m_FreddyGlitchEffect.RegisterToLayerManager();
 
-    m_StaticGlitchEffect = GlitchEffect(1);
-
     // Apply transparency to all static noise frames
-    noise1 = MakeTextureTransparent(Resources::GetTexture("Graphics/Static/Noise1.png"), 0.2f);
-    noise2 = MakeTextureTransparent(Resources::GetTexture("Graphics/Static/Noise2.png"), 0.2f);
-    noise3 = MakeTextureTransparent(Resources::GetTexture("Graphics/Static/Noise3.png"), 0.2f);
+    for (int i = 1; i <= 8; i++)
+    {
+        m_NoiseTextures.push_back(MakeTextureTransparent(Resources::GetTexture("Graphics/Static/Noise" + std::to_string(i) + ".png"), 0.15f));
+    }
+    
+    m_StaticGlitchEffect = GlitchEffect(1);
+    for(int i = 0; i < m_NoiseTextures.size(); i++)
+	{
+		m_StaticGlitchEffect.AddFrame(m_NoiseTextures[i]);
+	}
 
-    m_StaticGlitchEffect.AddFrame(noise1);
-    m_StaticGlitchEffect.AddFrame(noise2);
-    m_StaticGlitchEffect.AddFrame(noise3);
-
-    m_StaticGlitchEffect.SetGlitchParameters(1.0f, 1.0f, 0.01f);
+    m_StaticGlitchEffect.SetGlitchParameters(1.f, 1.5f, 0.01f);
     m_StaticGlitchEffect.RegisterToLayerManager();
 
     NewsPaperTexture = Resources::GetTexture("Graphics/MenuMenu/NewsPaper.png");
@@ -94,24 +93,6 @@ void Menu::Update(double deltaTime)
     //}
 }
 
-void Menu::ShowNewsPaper()
-{
-    NewsPaperTimer += 1;
-    if (NewsPaperTimer > 100)
-    {
-        ShouldShowNewsPaper = false;
-        ShouldSwitchScene = true;
-        return;
-    }
-
-    if(!IsShowingNewsPaper)
-    {
-        LayerManager::AddDrawable(4, NewsPaperSprite);
-        IsShowingNewsPaper = true;
-    }
-    
-}
-
 void Menu::SwitchToGameplay()
 {
     Destroy();
@@ -120,14 +101,13 @@ void Menu::SwitchToGameplay()
 
 void Menu::FixedUpdate()
 {
-    if(ShouldShowNewsPaper)
+    if (IsShowingNewsPaper)
     {
-        ShowNewsPaper();
-        return;
-    }
-    else if (ShouldSwitchScene)
-    {
-        SwitchToGameplay();
+        NewsPaperTimer += 1;
+        if (NewsPaperTimer > 100)
+        {
+            SwitchToGameplay();
+        }
         return;
     }
 
@@ -139,7 +119,8 @@ void Menu::FixedUpdate()
 
 	if (newbutton.IsClicked(*window))
 	{
-        ShouldShowNewsPaper = true;
+        LayerManager::AddDrawable(4, NewsPaperSprite);
+        IsShowingNewsPaper = true;
 	}
 }
 
