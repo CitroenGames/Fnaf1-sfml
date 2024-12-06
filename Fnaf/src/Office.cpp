@@ -64,12 +64,9 @@ void Office::Init()
     LayerManager::AddDrawable(1, m_LeftDoorSprite);
     LayerManager::AddDrawable(1, m_RightDoorSprite);
 
-    // Scale the office sprite
-    m_OfficeSprite.setScale(0.9f, 0.9f);
-
     // Initial positions
     m_LeftButtons.SetPosition(0, 250);
-    m_RightButtons.SetPosition(1350, 250); 
+    m_RightButtons.SetPosition(1525, 250); 
     m_LeftDoorSprite.setPosition(100, 500);    
     m_RightDoorSprite.setPosition(650, 500);  
 

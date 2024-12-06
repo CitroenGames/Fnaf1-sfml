@@ -8,8 +8,8 @@
 
 std::shared_ptr<sf::RenderWindow> Application::m_Window = nullptr;
 
-const int TICKRATE = 66;  // Desired tickrate (ticks per second)
-const double FRAME_TIME = 1.0 / TICKRATE;  // Time per tick (seconds)
+constexpr int TICKRATE = 66;  // Desired tickrate (ticks per second)
+constexpr double FRAME_TIME = 1.0 / TICKRATE;  // Time per tick (seconds)
 
 void Application::Init()
 {

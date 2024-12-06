@@ -3,6 +3,7 @@
 #include "Assets/Resources.h"
 #include "Graphics/LayerManager.h"
 #include "LayerDefines.h"
+#include <imgui.h>
 
 void PowerIndicator::Init()
 {
@@ -58,4 +59,9 @@ void PowerIndicator::Update(double deltaTime)
     //else if (usageLevel >= 3) {
     //    usageBars.setFillColor(sf::Color::Red);
     //}
+
+    ImGui::Begin("Power Indicator");
+	ImGui::Text("Power Level: %d%%", static_cast<int>(powerLevel));
+    ImGui::Text("Usage Level: %d", usageLevel);
+	ImGui::End();
 }

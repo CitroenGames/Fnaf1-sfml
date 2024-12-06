@@ -6,6 +6,7 @@
 #include "Assets/Resources.h"
 #include "Power.h"
 #include "imgui.h"
+#include <math.h>
 
 void Gameplay::Init()
 {
@@ -45,24 +46,20 @@ void Gameplay::FixedUpdate()
     Scene::FixedUpdate();
 }
 
+constexpr float m_OfficeWidth = 1600.0f;
+constexpr float m_ViewportWidth = 1280.0f;
+
 void Gameplay::Update(double deltaTime)
 {
     Scene::Update(deltaTime);
-    auto window = Window::GetWindow();
 
-    // Get mouse position
+    auto window = Window::GetWindow();
     sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
     sf::Vector2u windowSize = window->getSize();
-
-    // Image dimensions
-    const float imageWidth = 1600.0f;
-    const float imageHeight = 720.0f;
-    const float viewportWidth = 720.0f;  // Your configured camera resolution
 
     // Scrolling parameters
     const float scrollThreshold = 50.0f;
     const float maxScrollSpeed = 500.0f;
-
     float scrollSpeed = 0.0f;
 
     // Left edge scrolling
@@ -78,17 +75,16 @@ void Gameplay::Update(double deltaTime)
     scrollOffset += scrollSpeed * deltaTime;
 
     // Clamp scroll offset to image bounds
-    // Ensures we can't scroll beyond the image's width minus the viewport
     scrollOffset = std::clamp(
         scrollOffset,
         0.0f,
-        std::max(0.0f, imageWidth - viewportWidth)
+        std::max(0.0f, m_OfficeWidth - m_ViewportWidth)
     );
 
     // Calculate new camera position
     sf::Vector2f newCameraPos(
-        scrollOffset + (viewportWidth / 2.0f), // Center horizontally
-        (imageHeight / 2.0f)                  // Center vertically
+        scrollOffset + (m_ViewportWidth / 2.0f),  // Center horizontally
+        (720.0f / 2.0f)                          // Center vertically
     );
 
     m_Camera->setPosition(newCameraPos);

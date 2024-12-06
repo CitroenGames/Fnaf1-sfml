@@ -11,6 +11,13 @@
 int NewsPaperTimer = 0;
 bool IsShowingNewsPaper = false;
 
+// NOTE: this is in ticks not seconds so 66 ticks = 1 second
+#if _DEBUG
+#define SHOWNEWPAPERTIME 0.5 * 66 // 0.5 seconds
+#else
+#define SHOWNEWPAPERTIME 12 * 66 // 12 seconds
+#endif
+
 void Menu::Init()
 {
     m_BgStatic = Resources::GetMusic("Audio/static2.wav");
@@ -104,7 +111,7 @@ void Menu::FixedUpdate()
     if (IsShowingNewsPaper)
     {
         NewsPaperTimer += 1;
-        if (NewsPaperTimer > 100)
+        if (NewsPaperTimer >= SHOWNEWPAPERTIME) // tick rate is 66 so this takes about 1.5 seconds
         {
             SwitchToGameplay();
         }
