@@ -14,11 +14,10 @@ const double FRAME_TIME = 1.0 / TICKRATE;  // Time per tick (seconds)
 void Application::Init()
 {
 	m_Window = Window::Init(1280, 720, "Five Nights at Freddy's");
+    m_Window->setVerticalSyncEnabled(true);
     ImGui::SFML::Init(*m_Window, true);
     Window::UpdateViewport();
 }
-
-bool isFocused = true;
 
 void Application::Run()
 {
@@ -34,20 +33,11 @@ void Application::Run()
                 m_Window->close();
                 break;
             }
-            else if (event.type == sf::Event::LostFocus) {
-                isFocused = false;
-            }
-            else if (event.type == sf::Event::GainedFocus) {
-                isFocused = true;
-            }
             else if (event.type == sf::Event::Resized) {
                 Window::UpdateViewport();
             }
             ImGui::SFML::ProcessEvent(event);
         }
-
-		if (!isFocused)
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         auto currentTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsedTime = currentTime - previousTime;
