@@ -24,7 +24,7 @@ private:
 	//TODO: MOVE THIS TO OFFICE
 	std::shared_ptr<sf::Music> m_FanBuzzing;
 
-	float scrollOffset = 0.0f; // Initial scroll offset
+	float scrollOffset = 175.0f; // Initial scroll offset
 
 	Office m_Office;
 	std::unique_ptr<Camera2D> m_Camera;

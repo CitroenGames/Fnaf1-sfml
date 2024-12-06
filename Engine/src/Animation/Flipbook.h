@@ -5,10 +5,10 @@
 #include "Graphics/LayerManager.h"
 #include <memory>
 
-class Flipbook {
+class FlipBook {
 public:
-    Flipbook();
-    Flipbook(int layer, float frameDuration = 0.1f, bool loop = true);
+    FlipBook();
+    FlipBook(int layer, float frameDuration = 0.1f, bool loop = true);
 
     // Add a new frame to the flipbook
     void AddFrame(std::shared_ptr<sf::Texture> texture);

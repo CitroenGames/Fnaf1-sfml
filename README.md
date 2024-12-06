@@ -10,12 +10,13 @@ Currently, the game features a **main menu** (which is not yet like the original
 ### Features (WIP)
 - **Main Menu**: Basic framework in place, but not representative of the original game's main menu yet.
 - **Office**: The office scene is available, though it's currently not functional.
+- **Honk Freddy's Nose**: You can honk Freddy's nose!
 - **Missing Features**:
   - Animatronics AI
   - Camera system
   - Door controls
   - Functional buttons
-  - MOST IMPORTANTLY the honk :/
+  
 
 ### Installation Instructions for Linux Users
 

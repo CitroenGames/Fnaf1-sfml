@@ -35,10 +35,10 @@ void Menu::Init()
 	}
 
     m_FreddyGlitchEffect = GlitchEffect(0); 
-    m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu1.png"));
-    m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu2.png"));
-    m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu3.png"));
-    m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/MainMenu4.png"));
+    for (int i = 1; i < 4; i++)
+    {
+		m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/Frame" + std::to_string(i) + ".png"));
+    }
 
     m_FreddyGlitchEffect.SetGlitchParameters(0.01f, 0.3f, 0.05f);
     m_FreddyGlitchEffect.RegisterToLayerManager();
@@ -103,6 +103,7 @@ void Menu::Update(double deltaTime)
 void Menu::SwitchToGameplay()
 {
     Destroy();
+    // TODO: if we add custom nights we need to tell the scene what ai levels we want...
 	SceneManager::QueueSwitchScene(std::make_shared<Gameplay>());
 }
 

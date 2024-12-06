@@ -4,6 +4,8 @@
 #include "Assets/Resources.h"
 #include "Scene/SceneManager.h"
 
+bool IsUsingCamera = false;
+
 void LeftTopButtonCallback(bool active)
 {
 	std::cout << "Left Top Button Pressed" << std::endl;
@@ -45,12 +47,18 @@ Office::Office()
     RightButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsRight/BottomActive.png"));
     m_RightButtons.SetTextures(RightButtonsTextures);
 
+    m_FreddyNoseButton.SetTexture(Resources::GetTexture("Graphics/ClickTeamFusion/1.png"));
+    m_FreddyNoseButton.SetPosition(sf::Vector2f(667, 212.5));
+    //m_FreddyNoseButton.SetLayer(3); // for debug
+
     m_LeftButtons.SetLayer(2);
     m_LeftButtons.SetCallbacks(LeftTopButtonCallback, LeftBottomButtonCallback);
 
-
     m_RightButtons.SetLayer(2);
     m_RightButtons.SetCallbacks(RightTopButtonCallback, RightBottomButtonCallback);
+
+    m_FreddyNose = Resources::GetMusic("Audio/Office/PartyFavorraspyPart_AC01__3.wav");
+    m_FreddyNose->stop();
 }
 
 void Office::Init()
@@ -65,8 +73,8 @@ void Office::Init()
     LayerManager::AddDrawable(1, m_RightDoorSprite);
 
     // Initial positions
-    m_LeftButtons.SetPosition(0, 250);
-    m_RightButtons.SetPosition(1525, 250); 
+    m_LeftButtons.SetPosition(-12.5, 250);
+    m_RightButtons.SetPosition(1512.5, 250); 
     m_LeftDoorSprite.setPosition(100, 500);    
     m_RightDoorSprite.setPosition(650, 500);  
 
@@ -80,7 +88,17 @@ void Office::Update(double deltaTime)
 void Office::FixedUpdate()
 {
     std::shared_ptr<sf::RenderWindow> window = Window::GetWindow();
+
+    if (IsUsingCamera)
+        return;
+
     m_LeftButtons.checkClick(*window);
+
+    if (m_FreddyNoseButton.IsClicked(*window))
+    {
+        // play click sound
+        m_FreddyNose->play();
+    }
 }
 
 void Office::Render()
