@@ -116,13 +116,10 @@ void Gameplay::Render()
 {
     ImGui::Begin("PlayerInfo");
 
-    // If time is 0, display it as 12.
-    int displayedTime = (player.m_Time == 0) ? 12 : player.m_Time;
-
-    ImGui::Text("Time: %d AM", displayedTime);
-    ImGui::Text("Power: %d%%", static_cast<int>(player.m_PowerLevel));
-    ImGui::Text("Power Usage: %d", player.m_UsageLevel);
     ImGui::Text("Night: %d", player.m_Night);
+    ImGui::Text("Time: %d AM", (player.m_Time == 0) ? 12 : player.m_Time);
+    ImGui::Text("Power Usage: %d", player.m_UsageLevel);
+    ImGui::Text("Power: %d%%", static_cast<int>(player.m_PowerLevel));
     ImGui::End();
 }
 
