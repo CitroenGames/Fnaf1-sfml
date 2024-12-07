@@ -36,4 +36,5 @@ private:
 	FlipBook m_FanFlipBook;
 
 	std::shared_ptr<sf::Music> m_FreddyNose;
+	std::shared_ptr<sf::Music> m_DoorNoise;
 };

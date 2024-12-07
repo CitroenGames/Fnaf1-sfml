@@ -22,7 +22,7 @@ public:
     // Register the current frame to the LayerManager
     void RegisterToLayerManager();
 
-    void Play();
+    void Play(bool forward = true);
     void Pause();
     void Stop();
     void SetFrameDuration(float duration);
@@ -50,4 +50,5 @@ private:
     bool m_IsPlayingFlag;
     bool m_Loop;  // Whether the animation should loop
     int m_Layer;  // The layer to which this flipbook's frames will be added
+    bool m_IsForward;
 };

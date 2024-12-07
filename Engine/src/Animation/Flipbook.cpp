@@ -1,9 +1,16 @@
 #include "FlipBook.h"
 
-FlipBook::FlipBook() : m_Layer(m_Layer), m_FrameDuration(0), m_ElapsedTime(0.f), m_CurrentFrame(0), m_IsPlayingFlag(false), m_Loop(false) {}
+FlipBook::FlipBook()
+    : m_Layer(m_Layer), m_FrameDuration(0), m_ElapsedTime(0.f),
+    m_CurrentFrame(0), m_IsPlayingFlag(false), m_Loop(false),
+    m_IsForward(true) {
+}
 
 FlipBook::FlipBook(int m_Layer, float m_FrameDuration, bool m_Loop)
-    : m_Layer(m_Layer), m_FrameDuration(m_FrameDuration), m_ElapsedTime(0.f), m_CurrentFrame(0), m_IsPlayingFlag(false), m_Loop(m_Loop) {}
+    : m_Layer(m_Layer), m_FrameDuration(m_FrameDuration), m_ElapsedTime(0.f),
+    m_CurrentFrame(0), m_IsPlayingFlag(false), m_Loop(m_Loop),
+    m_IsForward(true) {
+}
 
 void FlipBook::AddFrame(std::shared_ptr<sf::Texture> texture) {
     m_Frames.push_back(std::make_shared<sf::Sprite>(*texture));
@@ -35,15 +42,35 @@ void FlipBook::Update(float deltaTime) {
     m_ElapsedTime += deltaTime;
     if (m_ElapsedTime >= m_FrameDuration) {
         m_ElapsedTime = 0.f;
-        if (m_CurrentFrame + 1 < m_Frames.size()) {
-            m_CurrentFrame++;
+
+        // Remove current frame from LayerManager
+        LayerManager::RemoveDrawable(*m_Frames[m_CurrentFrame]);
+
+        if (m_IsForward) {
+            if (m_CurrentFrame + 1 < m_Frames.size()) {
+                m_CurrentFrame++;
+            }
+            else if (m_Loop) {
+                m_CurrentFrame = 0;
+            }
+            else {
+                m_IsPlayingFlag = false;
+            }
         }
-        else if (m_Loop) {
-            m_CurrentFrame = 0;  // Reset to the first frame if looping is enabled
+        else {  // Playing backward
+            if (m_CurrentFrame > 0) {
+                m_CurrentFrame--;
+            }
+            else if (m_Loop) {
+                m_CurrentFrame = m_Frames.size() - 1;
+            }
+            else {
+                m_IsPlayingFlag = false;
+            }
         }
-        else {
-            m_IsPlayingFlag = false;  // Stop the animation if not looping
-        }
+
+        // Register new frame to LayerManager
+        LayerManager::AddDrawable(m_Layer, *m_Frames[m_CurrentFrame]);
     }
 }
 
@@ -54,8 +81,17 @@ void FlipBook::RegisterToLayerManager() {
     }
 }
 
-void FlipBook::Play() {
+void FlipBook::Play(bool forward) {
+    // If we're already playing and changing direction, cleanup current frame
+    if (m_IsPlayingFlag && forward != m_IsForward) {
+        LayerManager::RemoveDrawable(*m_Frames[m_CurrentFrame]);
+    }
+
     m_IsPlayingFlag = true;
+    m_IsForward = forward;
+
+    // Register the current frame
+    LayerManager::AddDrawable(m_Layer, *m_Frames[m_CurrentFrame]);
 }
 
 void FlipBook::Pause() {

@@ -5,11 +5,6 @@
 #include "Scene/SceneManager.h"
 #include "Player.h"
 
-void LeftTopButtonCallback(bool active)
-{
-	std::cout << "Left Top Button Pressed" << std::endl;
-}
-
 void LeftBottomButtonCallback(bool active)
 {
 	std::cout << "Left Bottom Button Pressed" << std::endl;
@@ -46,10 +41,10 @@ Office::Office()
     //m_FreddyNoseButton.SetLayer(3); // for debug
 
     m_LeftButtons.SetLayer(2);
-    m_LeftButtons.SetCallbacks(LeftTopButtonCallback, LeftBottomButtonCallback);
+    m_LeftButtons.SetCallbacks([&](bool active) { m_LeftDoor.Play(active); m_DoorNoise->play(); }, LeftBottomButtonCallback);
 
     m_RightButtons.SetLayer(2);
-    m_RightButtons.SetCallbacks([&](bool active) { m_RightDoor.Play(); }, RightLightButtonCallback);
+    m_RightButtons.SetCallbacks([&](bool active) { m_RightDoor.Play(active); m_DoorNoise->play(); }, RightLightButtonCallback);
 
     m_LeftDoor = FlipBook(2, 0.016f, false);
     m_RightDoor = FlipBook(2, 0.016f, false);
@@ -60,7 +55,7 @@ Office::Office()
     }
 
     m_FreddyNose = Resources::GetMusic("Audio/Office/PartyFavorraspyPart_AC01__3.wav");
-    m_FreddyNose->stop();
+    m_DoorNoise = Resources::GetMusic("Audio/Office/SFXBible_12478.wav");
 }
 
 void Office::Init()
@@ -70,10 +65,10 @@ void Office::Init()
 
     LayerManager::AddDrawable(0, m_OfficeSprite);
 
-    // Initial positions
+    // Set positions
     m_LeftButtons.SetPosition(-12.5, 250);
     m_RightButtons.SetPosition(1512.5, 250); 
-    m_LeftDoor.SetPosition(100, 0);
+    m_LeftDoor.SetPosition(60, 0);
     m_RightDoor.SetPosition(1255, 0);
 
     auto FanEnt = SceneManager::GetActiveScene()->CreateEntity("Fan");

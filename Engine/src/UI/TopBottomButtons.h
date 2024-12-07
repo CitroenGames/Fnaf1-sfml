@@ -54,14 +54,14 @@ public:
                     // Top half clicked
                     updateTopState();
                     if (m_OnTopClick) {
-                        m_OnTopClick(true);
+                        m_OnTopClick(m_CurrentState == ButtonState::TopActive || m_CurrentState == ButtonState::BothActive);
                     }
                 }
                 else {
                     // Bottom half clicked
                     updateBottomState();
                     if (m_OnBottomClick) {
-                        m_OnBottomClick(true);
+                        m_OnBottomClick(m_CurrentState == ButtonState::BottomActive || m_CurrentState == ButtonState::BothActive);
                     }
                 }
 

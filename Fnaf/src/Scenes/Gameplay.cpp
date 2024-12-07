@@ -95,13 +95,35 @@ void Gameplay::Update(double deltaTime)
     m_Camera->setPosition(newCameraPos);
     m_Camera->update(deltaTime);
     m_Camera->applyTo(*window);
+
+    // Update the player's time every 89 seconds
+    static double elapsedTime = 0.0;
+    elapsedTime += deltaTime;
+
+    if (elapsedTime >= 89.0) {
+        elapsedTime -= 89.0; // Reset the timer for the next interval
+        player.m_Time++;
+
+        if (player.m_Time == 6) {
+            // Game Complete
+            std::cout << "Game complete!" << std::endl;
+            // Additional logic for game completion can go here
+        }
+    }
 }
 
 void Gameplay::Render()
 {
-    ImGui::Begin("Gameplay");
-	ImGui::Text("Gameplay");
-	ImGui::End();
+    ImGui::Begin("PlayerInfo");
+
+    // If time is 0, display it as 12.
+    int displayedTime = (player.m_Time == 0) ? 12 : player.m_Time;
+
+    ImGui::Text("Time: %d AM", displayedTime);
+    ImGui::Text("Power: %d%%", static_cast<int>(player.m_PowerLevel));
+    ImGui::Text("Power Usage: %d", player.m_UsageLevel);
+    ImGui::Text("Night: %d", player.m_Night);
+    ImGui::End();
 }
 
 void Gameplay::Destroy()

@@ -41,12 +41,6 @@ void PowerIndicator::Update(double deltaTime) {
 
     // Update power text
     UpdatePowerUsageText();
-
-    // ImGui debug window
-    ImGui::Begin("Power Indicator");
-    ImGui::Text("Power Level: %d%%", static_cast<int>(player.m_PowerLevel));
-    ImGui::Text("Usage Level: %d", player.m_UsageLevel);
-    ImGui::End();
 }
 
 void PowerIndicator::SetUsageLevel(int level) {
