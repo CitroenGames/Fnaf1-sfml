@@ -23,7 +23,7 @@ public:
 
 private:
 	sf::Sprite m_OfficeSprite;
-	sf::Sprite m_LeftDoorSprite, m_RightDoorSprite;
+	FlipBook m_LeftDoor, m_RightDoor;
 
 	std::shared_ptr<sf::Texture> m_OfficeTexture;
 	std::shared_ptr<sf::Texture> m_LeftButtonTexture;

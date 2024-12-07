@@ -15,11 +15,6 @@ void LeftBottomButtonCallback(bool active)
 	std::cout << "Left Bottom Button Pressed" << std::endl;
 }
 
-void RightDoorButtonCallback(bool active)
-{
-    std::cout << "Right Door Button Pressed" << std::endl;
-}
-
 void RightLightButtonCallback(bool active)
 {
     std::cout << "Right Light Button Pressed" << std::endl;
@@ -54,7 +49,15 @@ Office::Office()
     m_LeftButtons.SetCallbacks(LeftTopButtonCallback, LeftBottomButtonCallback);
 
     m_RightButtons.SetLayer(2);
-    m_RightButtons.SetCallbacks(RightDoorButtonCallback, RightLightButtonCallback);
+    m_RightButtons.SetCallbacks([&](bool active) { m_RightDoor.Play(); }, RightLightButtonCallback);
+
+    m_LeftDoor = FlipBook(2, 0.016f, false);
+    m_RightDoor = FlipBook(2, 0.016f, false);
+    for (int i = 1; i < 16; i++)
+    {
+        m_LeftDoor.AddFrame(Resources::GetTexture("Graphics/Office/LeftDoor/Frame" + std::to_string(i) + ".png"));
+        m_RightDoor.AddFrame(Resources::GetTexture("Graphics/Office/RightDoor/Frame" + std::to_string(i) + ".png"));
+    }
 
     m_FreddyNose = Resources::GetMusic("Audio/Office/PartyFavorraspyPart_AC01__3.wav");
     m_FreddyNose->stop();
@@ -64,24 +67,24 @@ void Office::Init()
 {
     // Create sprites
     m_OfficeSprite = sf::Sprite(*m_OfficeTexture);
-    m_LeftDoorSprite = sf::Sprite(*m_DoorTexture);
-    m_RightDoorSprite = sf::Sprite(*m_DoorTexture);
 
     LayerManager::AddDrawable(0, m_OfficeSprite);
-    LayerManager::AddDrawable(1, m_LeftDoorSprite);
-    LayerManager::AddDrawable(1, m_RightDoorSprite);
 
     // Initial positions
     m_LeftButtons.SetPosition(-12.5, 250);
     m_RightButtons.SetPosition(1512.5, 250); 
-    m_LeftDoorSprite.setPosition(100, 500);    
-    m_RightDoorSprite.setPosition(650, 500);  
+    m_LeftDoor.SetPosition(100, 0);
+    m_RightDoor.SetPosition(1255, 0);
 
     auto FanEnt = SceneManager::GetActiveScene()->CreateEntity("Fan");
 }
 
 void Office::Update(double deltaTime)
 {
+    m_RightDoor.Update(deltaTime);
+    m_RightDoor.RegisterToLayerManager();
+	m_LeftDoor.Update(deltaTime);
+	m_LeftDoor.RegisterToLayerManager();
 }
 
 void Office::FixedUpdate()
