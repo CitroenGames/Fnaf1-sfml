@@ -2,7 +2,7 @@
 
 #include "Scene/Scene.h"
 #include "SFML/Audio.hpp"
-#include "Animation/Flipbook.h"
+#include "Animation/FlipBook.h"
 #include "Animation/GlitchEffect.h"
 #include "UI/ImageButton.h"
 #include <memory>

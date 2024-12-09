@@ -4,7 +4,7 @@
 #include "Composable.h"
 #include "nlohmann/json.hpp"
 #include "UI/TopBottomButtons.h"
-#include "Animation/Flipbook.h"
+#include "Animation/FlipBook.h"
 
 class Office : public Composable::Component
 {
