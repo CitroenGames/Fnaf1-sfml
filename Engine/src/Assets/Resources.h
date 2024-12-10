@@ -10,7 +10,8 @@
 class Resources
 {
 public:
-    static void Load(const std::string& pakFilename);
+    // TODO: currently you can only have 1 Pak file attached to the Resources class
+    static void BindPakFile(const std::string& pakFilename);
     static void Unload();
 
     static std::shared_ptr<sf::Texture> GetTexture(const std::string& filename);

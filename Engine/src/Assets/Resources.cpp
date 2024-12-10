@@ -8,7 +8,7 @@ std::map<std::string, std::shared_ptr<sf::SoundBuffer>> Resources::m_SoundBuffer
 std::map<std::string, std::shared_ptr<std::vector<uint8_t>>> Resources::m_MusicBuffers;
 std::map<std::string, std::shared_ptr<sf::Font>> Resources::m_Fonts;
 
-void Resources::Load(const std::string& pakFilename) {
+void Resources::BindPakFile(const std::string& pakFilename) {
     if (m_PakHandler == nullptr) {
         std::cerr << "Resources::Load: Pakker instance not set." << std::endl;
         return;
