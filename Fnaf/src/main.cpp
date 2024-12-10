@@ -40,7 +40,7 @@ int main() {
     // Load Resources
     Resources::Load("Assets.pak");
     
-    Application::Init();
+    Application::Init(1280, 720, "Five Nights at Freddy's");
     SceneManager::QueueSwitchScene(std::make_shared<Menu>());
     Application::Run();
     Application::Destroy();

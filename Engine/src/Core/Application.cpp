@@ -11,9 +11,9 @@ std::shared_ptr<sf::RenderWindow> Application::m_Window = nullptr;
 constexpr int TICKRATE = 66;  // Desired tickrate (ticks per second)
 constexpr double FRAME_TIME = 1.0 / TICKRATE;  // Time per tick (seconds)
 
-void Application::Init()
+void Application::Init(const int width, const int height, const std::string& title)
 {
-	m_Window = Window::Init(1280, 720, "Five Nights at Freddy's");
+	m_Window = Window::Init(width, height, title.data());
     m_Window->setVerticalSyncEnabled(true);
     ImGui::SFML::Init(*m_Window, true);
     Window::UpdateViewport();

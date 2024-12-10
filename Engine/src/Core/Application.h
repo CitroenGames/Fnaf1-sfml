@@ -6,7 +6,7 @@
 class Application
 {
 public:
-	static void Init();
+	static void Init(const int width = 1280, const int height = 720, const std::string& title = "Window");
 	static void Run();
 	static void Destroy();
 
