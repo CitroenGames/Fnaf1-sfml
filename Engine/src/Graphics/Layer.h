@@ -3,16 +3,19 @@
 
 class Layer {
 public:
-    void addDrawable(const sf::Drawable& drawable) {
-        m_Drawables.push_back(&drawable);
+    void addDrawable(const sf::Drawable* drawable) {
+        m_Drawables.push_back(drawable);
     }
 
-    void removeDrawable(const sf::Drawable& drawable) {
-        m_Drawables.erase(std::remove(m_Drawables.begin(), m_Drawables.end(), &drawable), m_Drawables.end());
+    void removeDrawable(const sf::Drawable* drawable) {
+        auto it = std::find(m_Drawables.begin(), m_Drawables.end(), drawable);
+        if (it != m_Drawables.end()) {
+            m_Drawables.erase(it);
+        }
     }
 
     void draw(sf::RenderWindow& window) const {
-        for (const auto& drawable : m_Drawables) {
+        for (const auto* drawable : m_Drawables) {
             window.draw(*drawable);
         }
     }

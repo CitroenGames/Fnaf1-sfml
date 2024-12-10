@@ -1,5 +1,4 @@
 #pragma once
-
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <Graphics/LayerManager.h>
@@ -41,23 +40,44 @@ public:
     {
     }
 
+    ~GlitchEffect() {
+        // Clean up current frame from LayerManager
+        if (!m_Frames.empty()) {
+            LayerManager::RemoveDrawable(m_Frames[m_CurrentFrame].get());
+        }
+    }
+
     void AddFrame(std::shared_ptr<sf::Texture> texture) {
         m_Frames.push_back(std::make_shared<sf::Sprite>(*texture));
+        if (m_Frames.size() == 1) {  // First frame added
+            RegisterToLayerManager();
+        }
     }
 
     void AddFrame(std::shared_ptr<sf::Sprite> sprite) {
         m_Frames.push_back(sprite);
+        if (m_Frames.size() == 1) {  // First frame added
+            RegisterToLayerManager();
+        }
     }
 
     void AddFrames(const std::vector<std::shared_ptr<sf::Sprite>>& sprites) {
+        bool wasEmpty = m_Frames.empty();
         for (const auto& sprite : sprites) {
             m_Frames.push_back(sprite);
+        }
+        if (wasEmpty && !m_Frames.empty()) {  // First frames added
+            RegisterToLayerManager();
         }
     }
 
     void AddFrames(const std::vector<std::shared_ptr<sf::Texture>>& textures) {
+        bool wasEmpty = m_Frames.empty();
         for (const auto& texture : textures) {
             m_Frames.push_back(std::make_shared<sf::Sprite>(*texture));
+        }
+        if (wasEmpty && !m_Frames.empty()) {  // First frames added
+            RegisterToLayerManager();
         }
     }
 
@@ -68,7 +88,12 @@ public:
     }
 
     void SetLayer(int layer) {
-        m_Layer = layer;
+        if (m_Layer != layer) {
+            if (!m_Frames.empty()) {
+                LayerManager::ChangeLayer(m_Frames[m_CurrentFrame].get(), layer);
+            }
+            m_Layer = layer;
+        }
     }
 
     void Update() {
@@ -99,13 +124,15 @@ public:
         }
     }
 
+private:
     void RegisterToLayerManager() {
         if (!m_Frames.empty()) {
-            LayerManager::RemoveDrawable(*m_Frames[m_CurrentFrame]);
-            LayerManager::AddDrawable(m_Layer, *m_Frames[m_CurrentFrame]);
+            LayerManager::RemoveDrawable(m_Frames[m_CurrentFrame].get());
+            LayerManager::AddDrawable(m_Layer, m_Frames[m_CurrentFrame].get());
         }
     }
 
+public:
     void StartGlitch() {
         m_IsGlitching = true;
         m_GlitchTimer = 0.0f;

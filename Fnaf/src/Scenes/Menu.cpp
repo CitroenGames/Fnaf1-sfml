@@ -41,7 +41,6 @@ void Menu::Init()
     }
 
     m_FreddyGlitchEffect.SetGlitchParameters(0.01f, 0.3f, 0.05f);
-    m_FreddyGlitchEffect.RegisterToLayerManager();
 
     // Apply transparency to all static noise frames
     for (int i = 1; i <= 8; i++)
@@ -56,7 +55,6 @@ void Menu::Init()
 	}
 
     m_StaticGlitchEffect.SetGlitchParameters(1.f, 1.5f, 0.01f);
-    m_StaticGlitchEffect.RegisterToLayerManager();
 
     NewsPaperTexture = Resources::GetTexture("Graphics/MenuMenu/NewsPaper.png");
     NewsPaperSprite = sf::Sprite(*NewsPaperTexture);
@@ -65,7 +63,7 @@ void Menu::Init()
 
     m_LogoSprite = sf::Sprite(*m_Logo);
     m_LogoSprite.setPosition(100, 100);
-    LayerManager::AddDrawable(BUTTON_LAYER, m_LogoSprite);
+    LayerManager::AddDrawable(BUTTON_LAYER, &m_LogoSprite);
 
     newbutton.SetTexture(ProcessText(Resources::GetTexture("Graphics/MenuMenu/NewGame.png")));
     newbutton.SetPosition(100, 400);
@@ -127,7 +125,7 @@ void Menu::FixedUpdate()
 
 	if (newbutton.IsClicked(*window))
 	{
-        LayerManager::AddDrawable(4, NewsPaperSprite);
+        LayerManager::AddDrawable(4, &NewsPaperSprite);
         IsShowingNewsPaper = true;
 	}
 }

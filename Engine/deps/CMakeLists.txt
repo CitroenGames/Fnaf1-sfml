@@ -22,6 +22,8 @@ if(NOT SFML_FOUND)
 endif()
 add_subdirectory(imgui)
 
+add_subdirectory(box2d-main)
+
 # Libraries created by me
 add_subdirectory(Pakker)
 add_subdirectory(ECS)

@@ -3,15 +3,30 @@
 
 void Scene::Update(double deltaTime)
 {
-	m_World.Update(deltaTime);
+    m_Scene.Update(deltaTime);
+
+    m_PhysicsAccumulator += static_cast<float>(deltaTime);
+
+    while (m_PhysicsAccumulator >= PHYSICS_TIME_STEP)
+    {
+        b2World_Step(m_worldId, PHYSICS_TIME_STEP, SUB_STEPS);
+        ProcessEvents();
+        m_PhysicsAccumulator -= PHYSICS_TIME_STEP;
+    }
 }
 
 void Scene::FixedUpdate()
 {
-	m_World.FixedUpdate();
+    m_Scene.FixedUpdate();
 }
 
 void Scene::Destroy()
 {
-	LayerManager::Clear();
+    if (B2_IS_NON_NULL(m_worldId))
+    {
+        b2DestroyWorld(m_worldId);
+        m_worldId = b2_nullWorldId;
+    }
+
+    LayerManager::Clear();
 }

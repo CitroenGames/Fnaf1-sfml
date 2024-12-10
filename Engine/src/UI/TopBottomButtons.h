@@ -14,10 +14,7 @@ public:
 
     TopBottomButtons() :
         m_CurrentState(ButtonState::NoActive),
-        m_WasMousePressed(false)
-    {
-        LayerManager::AddDrawable(0, m_ButtonSprite);
-    }
+        m_WasMousePressed(false) {}
 
     void SetCallbacks(
         std::function<void(bool active)> onTopClick,
@@ -27,7 +24,7 @@ public:
         m_OnBottomClick = onBottomClick;
     }
 
-    void SetTextures(const std::vector<std::shared_ptr<sf::Texture>> textures) {
+    void SetTextures(const std::vector<std::shared_ptr<sf::Texture>>& textures) {
         if (textures.size() != 4) {
             std::cerr << "Error: Expected exactly 4 textures (NoActive, TopActive, BothActive, BottomActive)." << std::endl;
             return;
@@ -46,7 +43,7 @@ public:
             if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !m_WasMousePressed) {
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                 sf::Vector2f viewPos = window.mapPixelToCoords(mousePos);
-                sf::FloatRect buttonBounds = m_ButtonSprite.getGlobalBounds();
+                sf::FloatRect buttonBounds = getGlobalBounds();  // Use inherited method
 
                 float relativeY = viewPos.y - buttonBounds.top;
 
@@ -125,8 +122,8 @@ private:
     void updateTexture() {
         if (m_Textures.empty()) return;
 
-        // Update sprite with texture corresponding to current state
-        m_ButtonSprite.setTexture(*m_Textures[static_cast<int>(m_CurrentState)]);
+        // Update texture using inherited SetTexture method
+        SetTexture(m_Textures[static_cast<int>(m_CurrentState)]);
     }
 
     bool IsClicked(sf::RenderWindow& window) override {

@@ -22,7 +22,7 @@ void PowerIndicator::Init() {
     m_PowerText.setPosition(screenWidth * 0.05f, screenHeight * 0.85f);
 
     // Add text to UI layer
-    LayerManager::AddDrawable(UI_LAYER, m_PowerText);
+    LayerManager::AddDrawable(UI_LAYER, &m_PowerText);
 }
 
 void PowerIndicator::Update(double deltaTime) {

@@ -63,7 +63,7 @@ void Office::Init()
     // Create sprites
     m_OfficeSprite = sf::Sprite(*m_OfficeTexture);
 
-    LayerManager::AddDrawable(0, m_OfficeSprite);
+    LayerManager::AddDrawable(0, &m_OfficeSprite);
 
     // Set positions
     m_LeftButtons.SetPosition(-12.5, 250);
