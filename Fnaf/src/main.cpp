@@ -43,6 +43,5 @@ int main() {
     Application::Init(1280, 720, "Five Nights at Freddy's");
     SceneManager::QueueSwitchScene(std::make_shared<Menu>());
     Application::Run();
-    Application::Destroy();
     return 0;
 }
