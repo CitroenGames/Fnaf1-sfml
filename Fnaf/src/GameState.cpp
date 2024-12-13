@@ -3,6 +3,7 @@
 #include "Assets/Resources.h"
 #include "Graphics/LayerManager.h"
 #include "Scene/SceneManager.h"
+#include "Scenes/Menu.h"
 
 void GameState::StartNight() {
     m_IsGameOver = false;

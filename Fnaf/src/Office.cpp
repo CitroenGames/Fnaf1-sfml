@@ -3,6 +3,7 @@
 #include "Graphics/LayerManager.h"
 #include "Assets/Resources.h"
 #include "Scene/SceneManager.h"
+#include "AudioManager.h"
 #include "Player.h"
 
 void LeftBottomButtonCallback(bool active)
