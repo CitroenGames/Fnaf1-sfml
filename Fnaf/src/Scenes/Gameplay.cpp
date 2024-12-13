@@ -30,10 +30,10 @@ void Gameplay::Init() {
     m_GameState->OnNightCompleteDelegate.Add(this, &Gameplay::OnNightComplete);
 
     // Initialize animatronics
-    m_Animatronics.push_back(Animatronic(Animatronic::Type::BONNIE));
-    m_Animatronics.push_back(Animatronic(Animatronic::Type::CHICA));
-    m_Animatronics.push_back(Animatronic(Animatronic::Type::FREDDY));
-    m_Animatronics.push_back(Animatronic(Animatronic::Type::FOXY));
+    m_Animatronics.push_back(Animatronic(Animatronic::Type::BONNIE, Animatronic::Location::SHOW_STAGE));
+    m_Animatronics.push_back(Animatronic(Animatronic::Type::CHICA, Animatronic::Location::SHOW_STAGE));
+    m_Animatronics.push_back(Animatronic(Animatronic::Type::FREDDY, Animatronic::Location::SHOW_STAGE));
+    m_Animatronics.push_back(Animatronic(Animatronic::Type::FOXY, Animatronic::Location::PIRATE_COVE));
 
     // Load music
     bgaudio1 = Resources::GetMusic("Audio/Ambience/ambience2.wav");
