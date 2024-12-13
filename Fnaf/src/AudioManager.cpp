@@ -25,7 +25,7 @@ void AudioManager::LoadSounds() {
 
 void AudioManager::PlayFootsteps(const Animatronic::Location& location) {
     // Play appropriate footstep sound based on location
-    std::string soundName = (location == Animatronic::Location::LEFT_HALL) ? "footstep_left" : "footstep_right";
+    std::string soundName = (location == Animatronic::Location::WEST_HALL) ? "footstep_left" : "footstep_right";
     auto sound = GetSound(soundName);
     if (sound) {
         sound->play();

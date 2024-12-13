@@ -69,9 +69,10 @@ void GameState::HandleJumpscare(const Animatronic& animatronic) {
         m_JumpscareTimer = JUMPSCARE_DURATION;
 
         // Play jumpscare sound
-        auto jumpscareSound = Resources::GetSound("Audio/Jumpscare/jumpscare.wav");
-        if (jumpscareSound) {
-            jumpscareSound->play();
+        auto jumpscareBuffer = Resources::GetSoundBuffer("Audio/Jumpscare/XSCREAM.wav");
+        if (jumpscareBuffer) {
+            sf::Sound sound(*jumpscareBuffer);
+            sound.play();
         }
 
         EndNight(false);
@@ -86,7 +87,9 @@ void GameState::UpdateGameOver(double deltaTime) {
 
     m_GameOverTimer += deltaTime;
     if (m_GameOverTimer >= GAME_OVER_DELAY) {
-        SceneManager::QueueSwitchScene("Menu");
+        // Switch back to menu scene
+        auto menuScene = std::make_shared<Menu>();
+        SceneManager::QueueSwitchScene(menuScene);
     }
 }
 

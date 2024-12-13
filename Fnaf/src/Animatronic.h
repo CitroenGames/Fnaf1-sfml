@@ -30,7 +30,7 @@ public:
     Animatronic(Type type, Location startLocation);
 
     // Component Lifecycle Methods
-    void Init() override;
+    void Init();
     void Update(double deltaTime) override;
     void FixedUpdate() override;
 

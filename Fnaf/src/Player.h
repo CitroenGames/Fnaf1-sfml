@@ -1,5 +1,5 @@
 #pragma once
-#define INITIAL_POWER_LEVEL 99
+#include <cstdint>
 
 struct Player
 {
@@ -8,9 +8,19 @@ struct Player
     bool m_UsingLight = false;
     bool m_UsageLevel = 1;
     int m_Night = 1;
-    float m_PowerLevel = INITIAL_POWER_LEVEL;
+    float m_PowerLevel = 99.0f;
     float m_TimeSinceLastDrain = 0.0f;
     uint8_t m_Time = 0;
+
+    void ResetForNight() {
+        m_UsingCamera = false;
+        m_UsingDoor = false;
+        m_UsingLight = false;
+        m_UsageLevel = 1;
+        m_PowerLevel = 99.0f;
+        m_TimeSinceLastDrain = 0.0f;
+        m_Time = 0;
+    }
 };
 
 inline Player player;

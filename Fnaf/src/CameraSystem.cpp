@@ -35,7 +35,7 @@ void CameraSystem::Init() {
     }
 
     // Add sprite to render layer
-    LayerManager::AddDrawable(CAMERA_LAYER, &m_ViewSprite);
+    LayerManager::AddDrawable(CAMERA_FEED_LAYER, &m_ViewSprite);
 }
 
 void CameraSystem::Update(double deltaTime) {

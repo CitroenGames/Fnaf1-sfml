@@ -41,7 +41,7 @@ bool Animatronic::CanMove() const {
     return dis(gen) < chance;
 }
 
-Location Animatronic::GetNextLocation() const {
+Animatronic::Location Animatronic::GetNextLocation() const {
     // Different movement patterns for each animatronic
     switch (m_Type) {
         case Type::BONNIE:
