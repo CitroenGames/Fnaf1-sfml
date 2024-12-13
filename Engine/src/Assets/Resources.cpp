@@ -63,6 +63,17 @@ std::shared_ptr<sf::SoundBuffer> Resources::GetSoundBuffer(const std::string& fi
     return m_SoundBuffers[filename];
 }
 
+std::shared_ptr<sf::Sound> Resources::GetSound(const std::string& filename) {
+    auto buffer = GetSoundBuffer(filename);
+    if (!buffer) {
+        return nullptr;
+    }
+
+    std::shared_ptr<sf::Sound> sound = std::make_shared<sf::Sound>();
+    sound->setBuffer(*buffer);
+    return sound;
+}
+
 std::shared_ptr<sf::Music> Resources::GetMusic(const std::string& filename) {
     if (m_MusicBuffers.find(filename) == m_MusicBuffers.end()) {
         auto musicData = m_PakHandler->LoadFile(m_PakFile, filename);

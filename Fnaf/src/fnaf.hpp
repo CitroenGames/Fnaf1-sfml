@@ -65,7 +65,7 @@ public:
     bool isInOffice;
     std::vector<AnimatronicPath> possiblePaths;
     bool isActive;
-    
+
     Animatronic(const std::string& name, int aiLevel);
     bool canMove(Room destination) const;
     void updateMovementProgress(float delta);
@@ -76,14 +76,12 @@ class FNAFGame {
 public:
     FNAFGame();
     ~FNAFGame() = default;
-    
+
     void InitializeGame(int night);
-    void 
-    ();
     void InitializeCustomNight(AILevels _AILevels);
     void Update(float deltaTime);
     bool IsGameOver() const { return m_GameOver; }
-    
+
 private:
     // Game state
     bool m_GameOver;
@@ -99,7 +97,7 @@ private:
     std::map<Room, std::vector<Room>> m_ValidMoves;
     std::array<bool, 2> m_Doors;  // [0] = left, [1] = right
     std::array<bool, 2> m_Lights; // [0] = left, [1] = right
-    
+
     // AI and gameplay functions
     void UpdateAnimatronics(float deltaTime);
     void UpdatePower(float deltaTime);
@@ -107,19 +105,19 @@ private:
     void HandlePowerOutage(float deltaTime);
     bool IsDefendedAgainst(const Animatronic& animatronic) const;
     void TriggerJumpscare(const std::string& character);
-    
+
     // Movement logic
     void AttemptMove(Animatronic& animatronic);
     bool ShouldAttemptMove(const Animatronic& animatronic);
     Room GetNextRoom(const Animatronic& animatronic) ;
     void MoveAnimatronic(Animatronic& animatronic, Room destination);
-    
+
     // Character-specific behavior
     void UpdateFreddy(Animatronic& freddy, float deltaTime);
     void UpdateBonnie(Animatronic& bonnie, float deltaTime);
     void UpdateChica(Animatronic& chica, float deltaTime);
     void UpdateFoxy(Animatronic& foxy, float deltaTime);
-    
+
     // Utility functions
     void InitializeMovementPaths();
     int GetAILevel(int night, const std::string& character) const;
