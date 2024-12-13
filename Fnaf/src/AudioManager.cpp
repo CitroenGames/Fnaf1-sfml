@@ -10,11 +10,9 @@ void AudioManager::LoadSounds() {
     m_SoundBuffers["footstep_left"] = Resources::GetSoundBuffer("Audio/Footsteps/Run_left.wav");
     m_SoundBuffers["footstep_right"] = Resources::GetSoundBuffer("Audio/Footsteps/Run_right.wav");
 
-    // Load jumpscare sounds for each animatronic
-    m_SoundBuffers["jumpscare_freddy"] = Resources::GetSoundBuffer("Audio/Jumpscare/freddy_jumpscare.wav");
-    m_SoundBuffers["jumpscare_bonnie"] = Resources::GetSoundBuffer("Audio/Jumpscare/bonnie_jumpscare.wav");
-    m_SoundBuffers["jumpscare_chica"] = Resources::GetSoundBuffer("Audio/Jumpscare/chica_jumpscare.wav");
-    m_SoundBuffers["jumpscare_foxy"] = Resources::GetSoundBuffer("Audio/Jumpscare/foxy_jumpscare.wav");
+    // Load jumpscare sound
+    m_SoundBuffers["jumpscare_normal"] = Resources::GetSoundBuffer("Audio/Jumpscare/XSCREAM.wav");
+    m_SoundBuffers["jumpscare_golden"] = Resources::GetSoundBuffer("Audio/Jumpscare/XSCREAM2.wav");
 
     // Load door sounds
     m_SoundBuffers["door_close"] = Resources::GetSoundBuffer("Audio/Office/Door.wav");
@@ -35,21 +33,9 @@ void AudioManager::PlayFootsteps(const Animatronic::Location& location) {
 }
 
 void AudioManager::PlayJumpscare(const Animatronic::Type& type) {
-    std::string soundName;
-    switch (type) {
-        case Animatronic::Type::FREDDY:
-            soundName = "jumpscare_freddy";
-            break;
-        case Animatronic::Type::BONNIE:
-            soundName = "jumpscare_bonnie";
-            break;
-        case Animatronic::Type::CHICA:
-            soundName = "jumpscare_chica";
-            break;
-        case Animatronic::Type::FOXY:
-            soundName = "jumpscare_foxy";
-            break;
-    }
+    std::string soundName = (type == Animatronic::Type::GOLDEN_FREDDY)
+        ? "jumpscare_golden"
+        : "jumpscare_normal";
 
     auto sound = GetSound(soundName);
     if (sound) {
@@ -71,7 +57,6 @@ void AudioManager::PlayAmbient(const CameraSystem::View& view) {
         default:
             return;
     }
-
 
     auto sound = GetSound(soundName);
     if (sound) {
