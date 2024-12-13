@@ -34,4 +34,5 @@ private:
     std::unique_ptr<Camera2D> m_Camera;
     std::shared_ptr<GameState> m_GameState;
     std::vector<Animatronic> m_Animatronics;
+    std::shared_ptr<CameraSystem> m_CameraSystem;
 };

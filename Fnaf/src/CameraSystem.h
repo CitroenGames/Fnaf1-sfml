@@ -3,6 +3,7 @@
 #include "Composable.h"
 #include "nlohmann/json.hpp"
 #include "Animatronic.h"
+#include "Animation/FlipBook.h"
 #include <map>
 #include <memory>
 
@@ -33,6 +34,7 @@ public:
     void ToggleCamera();
     bool IsAnimatronicVisible(const Animatronic& animatronic) const;
     View GetCurrentView() const { return m_CurrentView; }
+    bool IsHovering(const sf::Vector2i& mousePos) const;
 
     // Serialization (required by Component)
     nlohmann::json Serialize() const override { return nlohmann::json(); }
@@ -46,6 +48,12 @@ private:
     float m_TransitionTimer;
     bool m_IsTransitioning;
 
+    // Camera flip animation
+    std::unique_ptr<FlipBook> m_FlipAnimation;
+    sf::Sound m_CameraSound;
+    sf::Sprite m_CameraButton;
+    bool m_IsAnimating;
+
     // Static mapping
     static std::map<Animatronic::Location, View> LocationToView;
 
@@ -55,4 +63,5 @@ private:
     void RenderCurrentView();
     bool IsValidView(View view) const;
     View GetViewForLocation(Animatronic::Location location) const;
+    void InitializeFlipAnimation();
 };

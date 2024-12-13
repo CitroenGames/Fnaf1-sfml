@@ -24,6 +24,10 @@ void Gameplay::Init() {
     // Initialize office
     entity->AddComponent<Office>()->Init();
 
+    // Initialize camera system
+    m_CameraSystem = entity->AddComponent<CameraSystem>();
+    m_CameraSystem->Init();
+
     // Initialize game state
     m_GameState = entity->AddComponent<GameState>();
     m_GameState->OnGameOverDelegate.Add(this, &Gameplay::OnGameOver);
@@ -76,6 +80,13 @@ void Gameplay::Update(double deltaTime) {
     auto window = Window::GetWindow();
     sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
     sf::Vector2u windowSize = window->getSize();
+
+    // Handle camera button interaction
+    if (m_CameraSystem->IsHovering(mousePos)) {
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+            m_CameraSystem->ToggleCamera();
+        }
+    }
 
     // Scrolling parameters
     const float scrollThreshold = 50.0f;

@@ -23,7 +23,27 @@ CameraSystem::CameraSystem()
     : m_CurrentView(View::SHOW_STAGE)
     , m_TransitionTimer(0.0f)
     , m_IsTransitioning(false)
+    , m_IsAnimating(false)
 {
+    // Initialize camera button
+    auto buttonTexture = Resources::GetTexture("Graphics/Office/CameraButton.png");
+    m_CameraButton.setTexture(*buttonTexture);
+
+    // Initialize camera sound
+    auto soundBuffer = Resources::GetSoundBuffer("Audio/Camera/CAMERA_VIDEO_LOA_60105303.wav");
+    m_CameraSound.setBuffer(*soundBuffer);
+
+    InitializeFlipAnimation();
+}
+
+void CameraSystem::InitializeFlipAnimation() {
+    m_FlipAnimation = std::make_unique<FlipBook>(CAMERA_ANIMATION_LAYER, 0.03f, false);
+
+    // Load frame textures
+    for (int i = 1; i <= 11; ++i) {
+        std::string framePath = "Graphics/Office/Camera/Frame" + std::to_string(i) + ".png";
+        m_FlipAnimation->AddFrame(Resources::GetTexture(framePath));
+    }
 }
 
 void CameraSystem::Init() {
@@ -34,12 +54,21 @@ void CameraSystem::Init() {
         m_ViewSprite.setTexture(*m_ViewTextures[m_CurrentView]);
     }
 
-    // Add sprite to render layer
+    // Add sprites to render layers
     LayerManager::AddDrawable(CAMERA_FEED_LAYER, &m_ViewSprite);
+    LayerManager::AddDrawable(UI_LAYER, &m_CameraButton);
 }
 
 void CameraSystem::Update(double deltaTime) {
-    if (m_IsTransitioning) {
+    if (m_IsAnimating) {
+        m_FlipAnimation->Update(deltaTime);
+        if (!m_FlipAnimation->IsPlaying()) {
+            m_IsAnimating = false;
+            if (player.m_UsingCamera) {
+                RenderCurrentView();
+            }
+        }
+    } else if (m_IsTransitioning) {
         UpdateTransition(deltaTime);
     }
 
@@ -65,12 +94,14 @@ void CameraSystem::SwitchView(View newView) {
 }
 
 void CameraSystem::ToggleCamera() {
+    m_IsAnimating = true;
+    m_FlipAnimation->Play();
+    m_CameraSound.play();
+
     player.m_UsingCamera = !player.m_UsingCamera;
     if (player.m_UsingCamera) {
-        // Increase power usage when camera is active
         player.m_UsageLevel = std::min(player.m_UsageLevel + 1, 5);
     } else {
-        // Decrease power usage when camera is inactive
         player.m_UsageLevel = std::max(player.m_UsageLevel - 1, 1);
     }
 }
