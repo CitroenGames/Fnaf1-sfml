@@ -73,10 +73,10 @@ void CameraSystem::InitializeMap() {
         {Room::PIRATE_COVE, {750.f, 150.f}, "Graphics/CameraButtons/CAM1C.png"},
         {Room::WEST_HALL, {800.f, 300.f}, "Graphics/CameraButtons/CAM2A.png"},
         {Room::EAST_HALL, {900.f, 300.f}, "Graphics/CameraButtons/CAM2B.png"},
-        {Room::WEST_CORNER, {800.f, 400.f}, "Graphics/CameraButtons/CAM2A.png"},
-        {Room::EAST_CORNER, {900.f, 400.f}, "Graphics/CameraButtons/CAM2B.png"},
-        {Room::SUPPLY_CLOSET, {750.f, 300.f}, "Graphics/CameraButtons/CAM2A.png"},
-        {Room::KITCHEN, {950.f, 200.f}, "Graphics/CameraButtons/CAM1B.png"}
+        {Room::SUPPLY_CLOSET, {750.f, 300.f}, "Graphics/CameraButtons/CAM3.png"},
+        {Room::KITCHEN, {950.f, 200.f}, "Graphics/CameraButtons/CAM4A.png"},
+        {Room::WEST_CORNER, {800.f, 400.f}, "Graphics/CameraButtons/CAM4B.png"},
+        {Room::EAST_CORNER, {900.f, 400.f}, "Graphics/CameraButtons/CAM5.png"}
     };
 
     for (const auto& info : buttonInfos) {
@@ -208,16 +208,14 @@ void CameraSystem::Render(sf::RenderTarget& target) {
         // Draw map background
         target.draw(m_MapSprite);
 
-        // Update camera buttons visibility and handle clicks
+        // Draw and handle camera buttons
         for (auto& [room, button] : m_CameraButtons) {
-            // Highlight current room's button
-            if (room == m_CurrentRoom) {
-                button->setColor(sf::Color(255, 255, 0, static_cast<sf::Uint8>(viewAlpha))); // Yellow tint
-            } else {
-                button->setColor(sf::Color(255, 255, 255, static_cast<sf::Uint8>(viewAlpha)));
-            }
+            // Only draw and process buttons when camera is fully active
+            button->setColor(room == m_CurrentRoom ?
+                sf::Color(255, 255, 0, static_cast<sf::Uint8>(viewAlpha)) :  // Yellow for current room
+                sf::Color(255, 255, 255, static_cast<sf::Uint8>(viewAlpha)));
+            target.draw(*button);
 
-            // Handle button clicks for room switching
             if (button->IsClicked(*window)) {
                 SwitchToRoom(room);
             }
