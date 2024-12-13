@@ -16,6 +16,10 @@ void RightLightButtonCallback(bool active)
 }
 
 Office::Office()
+    : m_LeftDoorClosed(false)
+    , m_RightDoorClosed(false)
+    , m_LeftLightOn(false)
+    , m_RightLightOn(false)
 {
     m_OfficeTexture = Resources::GetTexture("Graphics/Office/NormalOffice.png");
     m_DoorTexture = Resources::GetTexture("Graphics/Office/door.png");
@@ -41,10 +45,26 @@ Office::Office()
     //m_FreddyNoseButton.SetLayer(3); // for debug
 
     m_LeftButtons.SetLayer(2);
-    m_LeftButtons.SetCallbacks([&](bool active) { m_LeftDoor.Play(active); m_DoorNoise->play(); }, LeftBottomButtonCallback);
+    m_LeftButtons.SetCallbacks(
+        [&](bool active) {
+            ToggleLeftDoor();
+            m_DoorNoise->play();
+        },
+        [&](bool active) {
+            ToggleLeftLight();
+        }
+    );
 
     m_RightButtons.SetLayer(2);
-    m_RightButtons.SetCallbacks([&](bool active) { m_RightDoor.Play(active); m_DoorNoise->play(); }, RightLightButtonCallback);
+    m_RightButtons.SetCallbacks(
+        [&](bool active) {
+            ToggleRightDoor();
+            m_DoorNoise->play();
+        },
+        [&](bool active) {
+            ToggleRightLight();
+        }
+    );
 
     m_LeftDoor = FlipBook(2, 0.016f, false);
     m_RightDoor = FlipBook(2, 0.016f, false);
@@ -67,7 +87,7 @@ void Office::Init()
 
     // Set positions
     m_LeftButtons.SetPosition(-12.5, 250);
-    m_RightButtons.SetPosition(1512.5, 250); 
+    m_RightButtons.SetPosition(1512.5, 250);
     m_LeftDoor.SetPosition(60, 0);
     m_RightDoor.SetPosition(1255, 0);
 
@@ -80,6 +100,10 @@ void Office::Update(double deltaTime)
     m_RightDoor.RegisterToLayerManager();
 	m_LeftDoor.Update(deltaTime);
 	m_LeftDoor.RegisterToLayerManager();
+
+    UpdateDoorStates();
+    UpdateLightStates();
+    UpdatePowerUsage();
 }
 
 void Office::FixedUpdate()
@@ -105,4 +129,56 @@ void Office::Render()
 
 void Office::Destroy()
 {
+}
+
+void Office::ToggleLeftDoor() {
+    m_LeftDoorClosed = !m_LeftDoorClosed;
+    m_LeftDoor.Play(m_LeftDoorClosed);
+    UpdatePowerUsage();
+}
+
+void Office::ToggleRightDoor() {
+    m_RightDoorClosed = !m_RightDoorClosed;
+    m_RightDoor.Play(m_RightDoorClosed);
+    UpdatePowerUsage();
+}
+
+void Office::ToggleLeftLight() {
+    m_LeftLightOn = !m_LeftLightOn;
+    m_RightLightOn = false;  // Turn off other light if on
+    UpdatePowerUsage();
+}
+
+void Office::ToggleRightLight() {
+    m_RightLightOn = !m_RightLightOn;
+    m_LeftLightOn = false;  // Turn off other light if on
+    UpdatePowerUsage();
+}
+
+void Office::UpdatePowerUsage() {
+    int usageLevel = 1;  // Base usage
+
+    // Add usage for each active system
+    if (m_LeftDoorClosed) usageLevel++;
+    if (m_RightDoorClosed) usageLevel++;
+    if (m_LeftLightOn) usageLevel++;
+    if (m_RightLightOn) usageLevel++;
+
+    // Update player's power usage level
+    player.m_UsageLevel = std::min(usageLevel, MAX_POWER_USAGE);
+}
+
+void Office::UpdateDoorStates() {
+    // Update door animations and states
+    if (m_LeftDoorClosed) {
+        player.m_UsingDoor = true;
+    }
+    if (m_RightDoorClosed) {
+        player.m_UsingDoor = true;
+    }
+}
+
+void Office::UpdateLightStates() {
+    // Update light states
+    player.m_UsingLight = m_LeftLightOn || m_RightLightOn;
 }
