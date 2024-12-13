@@ -5,6 +5,7 @@
 #include "SFML/Audio.hpp"
 #include "Office.h"
 #include "Components/Camera.h"
+#include "fnaf.hpp"
 
 constexpr float scrollspeed = 10.0f;
 
@@ -17,8 +18,6 @@ public:
 	void Render() override;
 	void Destroy() override;
 
-	void OnPowerOut();
-
 private:
 	std::shared_ptr<sf::Music> bgaudio1;
 	std::shared_ptr<sf::Music> bgaudio2;
@@ -30,4 +29,6 @@ private:
 
 	Office m_Office;
 	std::unique_ptr<Camera2D> m_Camera;
+
+	std::unique_ptr<FNAFGame> gameplay;
 };

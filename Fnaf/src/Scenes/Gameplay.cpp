@@ -4,22 +4,25 @@
 #include "Core/Window.h"
 #include "Graphics/LayerManager.h"
 #include "Assets/Resources.h"
-#include "Power.h"
 #include "imgui.h"
 #include <math.h>
 #include "Scenes/Menu.h"
+#include "GameState.h"
 #include "Scene/SceneManager.h"
 
 void Gameplay::Init()
 {
-    auto entity = CreateEntity("Office stuff");
-    std::shared_ptr<PowerIndicator> powerIndicator = entity->AddComponent<PowerIndicator>();
-    powerIndicator->OnPowerDepletedDelegate.Add(this, &Gameplay::OnPowerOut);
-    powerIndicator->Init();
+    gameplay = std::make_unique<FNAFGame>();
+    gameplay->InitializeGame(player.m_Night);
 
+    if (player.m_Night >= 7) // Custom night
+    {
+        //gameplay->InitializeCustomNight(CustomAILevels);
+    }
+
+    auto entity = CreateEntity("Office stuff");
     entity->AddComponent<Office>()->Init();
     auto officeComponent = entity->GetComponent<Office>();
-    //AddComponent(officeComponent);
     
     // Load music
     bgaudio1 = Resources::GetMusic("Audio/Ambience/ambience2.wav");
@@ -58,6 +61,12 @@ void Gameplay::Update(double deltaTime)
 {
     Scene::Update(deltaTime);
 
+    gameplay->Update(deltaTime);
+
+    if (gameplay->IsGameOver()) {
+        SceneManager::QueueSwitchScene(std::make_shared<Menu>());
+    }
+
     auto window = Window::GetWindow();
     sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
     sf::Vector2u windowSize = window->getSize();
@@ -95,21 +104,6 @@ void Gameplay::Update(double deltaTime)
     m_Camera->setPosition(newCameraPos);
     m_Camera->update(deltaTime);
     m_Camera->applyTo(*window);
-
-    // Update the player's time every 89 seconds
-    static double elapsedTime = 0.0;
-    elapsedTime += deltaTime;
-
-    if (elapsedTime >= 89.0) {
-        elapsedTime -= 89.0; // Reset the timer for the next interval
-        player.m_Time++;
-
-        if (player.m_Time == 6) {
-            // Game Complete
-            std::cout << "Game complete!" << std::endl;
-            // Additional logic for game completion can go here
-        }
-    }
 }
 
 void Gameplay::Render()
@@ -127,11 +121,4 @@ void Gameplay::Destroy()
 {
     m_Office.Destroy();
     Scene::Destroy();
-}
-
-void Gameplay::OnPowerOut()
-{
-    std::cout << "Power out" << std::endl;
-    Destroy();
-	SceneManager::QueueSwitchScene(std::make_shared<Menu>());
 }

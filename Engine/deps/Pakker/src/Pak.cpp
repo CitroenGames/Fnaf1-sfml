@@ -4,6 +4,8 @@
 #include <filesystem>
 #include <algorithm>
 #include <cstring>
+#include <future>
+#include <thread>
 
 namespace fs = std::filesystem;
 
@@ -546,27 +548,55 @@ bool Pakker::AddFileToPak(const std::string& pakFilename, const std::string& fil
     return true;
 }
 
+std::map<std::string, std::vector<uint8_t>> ReadFilesInRange(
+    const std::vector<fs::path>& filePaths,
+    const fs::path& basePath,
+    size_t start,
+    size_t end,
+    const std::function<std::string(const std::string&)>& normalizer)
+{
+    std::map<std::string, std::vector<uint8_t>> threadFiles;
+
+    for (size_t i = start; i < end && i < filePaths.size(); ++i)
+    {
+        const auto& path = filePaths[i];
+        if (fs::is_regular_file(path))
+        {
+            std::string relativePath = fs::relative(path, basePath).string();
+            relativePath = normalizer(relativePath);
+
+            std::ifstream file(path, std::ios::binary);
+            if (!file)
+            {
+                std::cerr << "ReadFilesInRange: Failed to open file: " << path << std::endl;
+                continue;
+            }
+
+            std::vector<uint8_t> content(
+                (std::istreambuf_iterator<char>(file)),
+                std::istreambuf_iterator<char>()
+            );
+
+            threadFiles[relativePath] = std::move(content);
+        }
+    }
+
+    return threadFiles;
+}
+
+
 // Creates a PAK file from all files within a specified folder
 bool Pakker::CreatePakFromFolder(const std::string& pakFilename, const std::string& folderPath)
 {
-    std::map<std::string, std::vector<uint8_t>> files;
-
+    // First, collect all file paths
+    std::vector<fs::path> filePaths;
     try
     {
         for (const auto& entry : fs::recursive_directory_iterator(folderPath))
         {
             if (fs::is_regular_file(entry.path()))
             {
-                std::string relativePath = fs::relative(entry.path(), folderPath).string();
-                relativePath = NormalizePathSeparators(relativePath);
-                std::ifstream file(entry.path(), std::ios::binary);
-                if (!file)
-                {
-                    std::cerr << "CreatePakFromFolder: Failed to open file: " << entry.path() << std::endl;
-                    continue;
-                }
-                std::vector<uint8_t> content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-                files[relativePath] = std::move(content);
+                filePaths.push_back(entry.path());
             }
         }
     }
@@ -576,5 +606,56 @@ bool Pakker::CreatePakFromFolder(const std::string& pakFilename, const std::stri
         return false;
     }
 
+    if (filePaths.empty())
+    {
+        std::cerr << "CreatePakFromFolder: No files found in folder: " << folderPath << std::endl;
+        return false;
+    }
+
+    // Calculate number of threads and chunk size
+    unsigned int numThreads = std::thread::hardware_concurrency();
+    if (numThreads == 0) numThreads = 4; // Fallback if hardware_concurrency fails
+
+    // Limit threads based on file count
+    numThreads = std::min(numThreads, static_cast<unsigned int>(filePaths.size()));
+
+    size_t filesPerThread = (filePaths.size() + numThreads - 1) / numThreads;
+
+    // Create futures for parallel processing
+    std::vector<std::future<std::map<std::string, std::vector<uint8_t>>>> futures;
+
+    for (unsigned int i = 0; i < numThreads; ++i)
+    {
+        size_t start = i * filesPerThread;
+        size_t end = std::min(start + filesPerThread, filePaths.size());
+
+        futures.push_back(std::async(
+            std::launch::async,
+            ReadFilesInRange,
+            std::cref(filePaths),
+            fs::path(folderPath),
+            start,
+            end,
+            std::bind(&Pakker::NormalizePathSeparators, this, std::placeholders::_1)
+        ));
+    }
+
+    // Combine results from all threads
+    std::map<std::string, std::vector<uint8_t>> files;
+    try
+    {
+        for (auto& future : futures)
+        {
+            auto threadResult = future.get();
+            files.insert(threadResult.begin(), threadResult.end());
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "CreatePakFromFolder: Error while combining thread results: " << e.what() << std::endl;
+        return false;
+    }
+
+    // Create the PAK file with the combined results
     return CreatePak(pakFilename, files);
 }

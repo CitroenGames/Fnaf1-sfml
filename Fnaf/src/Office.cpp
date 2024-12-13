@@ -3,7 +3,7 @@
 #include "Graphics/LayerManager.h"
 #include "Assets/Resources.h"
 #include "Scene/SceneManager.h"
-#include "Player.h"
+#include "GameState.h"
 
 void LeftBottomButtonCallback(bool active)
 {

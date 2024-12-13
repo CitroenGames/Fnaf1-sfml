@@ -1,5 +1,8 @@
 #pragma once
+
 #define INITIAL_POWER_LEVEL 99
+
+//AILevels CustomAILevels = { 0, 0, 0, 0 };
 
 struct Player
 {
