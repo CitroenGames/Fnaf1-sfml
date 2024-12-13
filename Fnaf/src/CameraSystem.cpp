@@ -85,8 +85,8 @@ void CameraSystem::InitializeMap() {
         auto button = std::make_unique<ImageButton>();
         button->SetTexture(*Resources::GetTexture("Graphics/CurrentlyActiveCam/CamButton.png"));
         button->SetPosition(info.position);
-        button->SetScale({0.5f, 0.5f});
-        button->SetClickCallback([this, room = info.room]() {
+        button->setScale({0.5f, 0.5f});
+        button->setOnClick([this, room = info.room]() {
             if (m_IsActive) {
                 SwitchToRoom(room);
             }
@@ -95,7 +95,7 @@ void CameraSystem::InitializeMap() {
     }
 
     // Add to appropriate layer
-    LayerManager::AddDrawable(m_MapSprite, CAMERA_UI_LAYER);
+    LayerManager::AddDrawable(CAMERA_UI_LAYER, &m_MapSprite);
 }
 
 void CameraSystem::Update(float deltaTime) {
@@ -217,11 +217,8 @@ void CameraSystem::Render(sf::RenderTarget& target) {
             if (button->IsClicked(*window)) {
                 SwitchToRoom(room);
             }
-
-            button->Render(*window);
         }
     }
-    m_CameraButton->Render(target);
 }
 
 void CameraSystem::UpdateStaticEffect() {

@@ -88,11 +88,16 @@ public:
         }
     }
 
+    void setOnClick(std::function<void()> callback) {
+        m_OnClick = callback;
+    }
+
 protected:
     std::shared_ptr<sf::Texture> m_ButtonTexture;
     int m_Layer = 0;
 
 private:
+    std::function<void()> m_OnClick;
     // These are no longer needed since we're inheriting from sf::Sprite
     using sf::Sprite::setPosition;
 };

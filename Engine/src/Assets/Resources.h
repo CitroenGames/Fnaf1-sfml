@@ -16,6 +16,7 @@ public:
 
     static std::shared_ptr<sf::Texture> GetTexture(const std::string& filename);
     static std::shared_ptr<sf::SoundBuffer> GetSoundBuffer(const std::string& filename);
+    static std::shared_ptr<sf::Sound> GetSound(const std::string& filename);
     static std::shared_ptr<sf::Music> GetMusic(const std::string& filename);
 
     // Load font from a PAK file and return a shared pointer to sf::Font
