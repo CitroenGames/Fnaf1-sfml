@@ -9,7 +9,8 @@ public:
         BONNIE,
         CHICA,
         FREDDY,
-        FOXY
+        FOXY,
+        GOLDEN_FREDDY
     };
 
     enum class Location {
