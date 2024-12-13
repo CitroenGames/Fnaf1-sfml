@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SFML/Graphics.hpp>
+#include <functional>
 #include "BaseButton.h"
 
 class ImageButton : public BaseButton {
