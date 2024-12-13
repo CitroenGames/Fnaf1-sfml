@@ -3,6 +3,7 @@
 #include "Graphics/LayerManager.h"
 #include "LayerDefines.h"
 #include "GameState.h"
+#include "Core/Window.h"  // Updated include path
 
 CameraSystem::CameraSystem()
     : m_CurrentRoom(Room::SHOW_STAGE)
@@ -47,11 +48,8 @@ void CameraSystem::Init() {
     m_StaticEffect.setColor(sf::Color(255, 255, 255, 128)); // 50% opacity
     m_WhiteEffect.setColor(sf::Color(255, 255, 255, 64));   // 25% opacity
 
-    // Initialize camera button
-    m_CameraButton = std::make_unique<ImageButton>();
-    m_CameraButton->SetTexture("Graphics/CurrentlyActiveCam/145.png");
-    m_CameraButton->SetLayer(CAMERA_UI_LAYER);
-    m_CameraButton->SetPosition({20.f, 550.f}); // Bottom left corner
+    // Initialize camera button animation
+    InitializeCameraButton();
 
     // Initialize camera map
     InitializeMap();
@@ -62,28 +60,28 @@ void CameraSystem::InitializeMap() {
     m_MapSprite.setTexture(*Resources::GetTexture("Graphics/CurrentlyActiveCam/CameraMap.png"));
     m_MapSprite.setPosition(800.f, 50.f); // Position in top-right corner
 
-    // Create camera buttons with their positions
+    // Create camera buttons with their positions and textures
     struct CameraButtonInfo {
         Room room;
         sf::Vector2f position;
-        const char* label;
+        const char* texturePath;
     };
 
     std::vector<CameraButtonInfo> buttonInfos = {
-        {Room::SHOW_STAGE, {850.f, 100.f}, "1A"},
-        {Room::DINING_AREA, {850.f, 200.f}, "1B"},
-        {Room::PIRATE_COVE, {750.f, 150.f}, "1C"},
-        {Room::WEST_HALL, {800.f, 300.f}, "2A"},
-        {Room::EAST_HALL, {900.f, 300.f}, "2B"},
-        {Room::WEST_CORNER, {800.f, 400.f}, "2C"},
-        {Room::EAST_CORNER, {900.f, 400.f}, "2D"},
-        {Room::SUPPLY_CLOSET, {750.f, 300.f}, "3"},
-        {Room::KITCHEN, {950.f, 200.f}, "4"}
+        {Room::SHOW_STAGE, {850.f, 100.f}, "Graphics/CameraButtons/CAM1A.png"},
+        {Room::DINING_AREA, {850.f, 200.f}, "Graphics/CameraButtons/CAM1B.png"},
+        {Room::PIRATE_COVE, {750.f, 150.f}, "Graphics/CameraButtons/CAM1C.png"},
+        {Room::WEST_HALL, {800.f, 300.f}, "Graphics/CameraButtons/CAM2A.png"},
+        {Room::EAST_HALL, {900.f, 300.f}, "Graphics/CameraButtons/CAM2B.png"},
+        {Room::WEST_CORNER, {800.f, 400.f}, "Graphics/CameraButtons/CAM2A.png"},
+        {Room::EAST_CORNER, {900.f, 400.f}, "Graphics/CameraButtons/CAM2B.png"},
+        {Room::SUPPLY_CLOSET, {750.f, 300.f}, "Graphics/CameraButtons/CAM2A.png"},
+        {Room::KITCHEN, {950.f, 200.f}, "Graphics/CameraButtons/CAM1B.png"}
     };
 
     for (const auto& info : buttonInfos) {
         auto button = std::make_unique<ImageButton>();
-        button->SetTexture(*Resources::GetTexture("Graphics/CurrentlyActiveCam/CamButton.png"));
+        button->SetTexture(*Resources::GetTexture(info.texturePath));
         button->SetPosition(info.position);
         button->setScale({0.5f, 0.5f});
         button->setOnClick([this, room = info.room]() {
@@ -133,6 +131,11 @@ void CameraSystem::Update(float deltaTime) {
         }
     }
 
+    // Update camera button animation
+    if (m_CameraButtonAnimation) {
+        m_CameraButtonAnimation->Update(deltaTime);
+    }
+
     // Update static noise animation
     m_StaticTimer += deltaTime;
     if (m_StaticTimer >= STATIC_FRAME_DURATION) {
@@ -165,7 +168,12 @@ void CameraSystem::SwitchToRoom(Room newRoom) {
 }
 
 void CameraSystem::Render(sf::RenderTarget& target) {
-    // Don't render camera view when inactive and not toggling
+    // Always render camera button animation
+    if (m_CameraButtonAnimation && m_CameraButtonAnimation->GetCurrentFrame()) {
+        target.draw(*m_CameraButtonAnimation->GetCurrentFrame());
+    }
+
+    // Don't render camera view or UI when inactive and not toggling
     if (!m_IsActive && !m_IsTogglingCamera) return;
 
     // Calculate view alpha based on toggle state
@@ -191,29 +199,25 @@ void CameraSystem::Render(sf::RenderTarget& target) {
     // Render static effects with additive blending
     sf::RenderStates additiveBlend;
     additiveBlend.blendMode = sf::BlendAdd;
-
-    // Increase static during toggle
-    float staticMultiplier = m_IsTogglingCamera ? 2.0f : 1.0f;
-    m_StaticEffect.setColor(sf::Color(255, 255, 255,
-        static_cast<sf::Uint8>(m_StaticIntensity * 128 * staticMultiplier)));
-    m_WhiteEffect.setColor(sf::Color(255, 255, 255,
-        static_cast<sf::Uint8>(m_StaticIntensity * 64 * staticMultiplier)));
-
     target.draw(m_StaticEffect, additiveBlend);
     target.draw(m_WhiteEffect, additiveBlend);
 
-    // Render camera UI
+    // Only render camera UI (map and buttons) when camera is fully active
     auto* window = dynamic_cast<sf::RenderWindow*>(&target);
-    if (window) {
+    if (window && m_IsActive && !m_IsTogglingCamera) {
+        // Draw map background
+        target.draw(m_MapSprite);
+
+        // Update camera buttons visibility and handle clicks
         for (auto& [room, button] : m_CameraButtons) {
             // Highlight current room's button
             if (room == m_CurrentRoom) {
-                button->setColor(sf::Color(255, 255, 0, 255)); // Yellow tint
+                button->setColor(sf::Color(255, 255, 0, static_cast<sf::Uint8>(viewAlpha))); // Yellow tint
             } else {
-                button->setColor(sf::Color::White);
+                button->setColor(sf::Color(255, 255, 255, static_cast<sf::Uint8>(viewAlpha)));
             }
 
-            // Handle button clicks
+            // Handle button clicks for room switching
             if (button->IsClicked(*window)) {
                 SwitchToRoom(room);
             }
@@ -243,27 +247,46 @@ void CameraSystem::SetStaticIntensity(float intensity) {
 
 void CameraSystem::ToggleCamera()
 {
-    static bool lastSpaceState = false;
-    bool currentSpaceState = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
+    static bool lastMouseState = false;
+    bool currentMouseState = sf::Mouse::isButtonPressed(sf::Mouse::Left);
 
-    // Only toggle on key press, not hold
-    if (currentSpaceState && !lastSpaceState) {
+    // Only toggle on mouse click (not hold) and when mouse is over button
+    if (currentMouseState && !lastMouseState && IsMouseOverCameraButton(*Window::GetWindow())) {
+        // Toggle camera state
         m_IsActive = !m_IsActive;
-
-        // Update power system
         player.m_UsingCamera = m_IsActive;
 
-        // Play camera toggle sound
+        // Play animation and sound
         if (m_IsActive) {
+            m_CameraButtonAnimation->Play(true);  // Forward animation
             Resources::GetSound("Audio/CameraUp.wav")->play();
         } else {
+            m_CameraButtonAnimation->Play(false); // Reverse animation
             Resources::GetSound("Audio/CameraDown.wav")->play();
         }
 
-        // Reset transition state when toggling camera
-        m_IsTransitioning = true;
-        m_TransitionProgress = 0.0f;
+        m_IsTogglingCamera = true;
+        m_ToggleProgress = 0.0f;
     }
 
-    lastSpaceState = currentSpaceState;
+    lastMouseState = currentMouseState;
+}
+
+void CameraSystem::InitializeCameraButton() {
+    m_CameraButtonAnimation = std::make_unique<FlipBook>(CAMERA_BUTTON_LAYER, 0.08f, false);
+    // Load camera button frames
+    for (int i = 1; i <= 11; i++) {
+        std::string framePath = "Graphics/Office/Camera/Frame" + std::to_string(i) + ".png";
+        m_CameraButtonAnimation->AddFrame(Resources::GetTexture(framePath));
+    }
+    m_CameraButtonAnimation->SetPosition(512.f, 680.f);
+}
+
+bool CameraSystem::IsMouseOverCameraButton(const sf::RenderWindow& window) const {
+    if (!m_CameraButtonAnimation || !m_CameraButtonAnimation->GetCurrentFrame()) return false;
+
+    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+    sf::Vector2f worldPos = window.mapPixelToCoords(mousePos);
+
+    return m_CameraButtonAnimation->GetCurrentFrame()->getGlobalBounds().contains(worldPos);
 }

@@ -6,6 +6,7 @@
 #include <map>
 #include "UI/ImageButton.h"
 #include "fnaf.hpp"
+#include "Animation/FlipBook.h"
 
 class CameraSystem {
 public:
@@ -47,8 +48,14 @@ private:
     static constexpr float TOGGLE_SPEED = 3.0f;
     static constexpr float STATIC_FRAME_DURATION = 0.05f;
     static constexpr float WHITE_FRAME_DURATION = 0.1f;
+    static constexpr int CAMERA_BUTTON_LAYER = 5;
 
     void UpdateStaticEffect();
     void InitializeMap();
+    void InitializeCameraButton();
+    void UpdateCameraButtonAnimation(float deltaTime);
+    bool IsMouseOverCameraButton(const sf::RenderWindow& window) const;
     std::unique_ptr<ImageButton> CreateCameraButton(const sf::Vector2f& position);
+
+    std::unique_ptr<FlipBook> m_CameraButtonAnimation;
 };
