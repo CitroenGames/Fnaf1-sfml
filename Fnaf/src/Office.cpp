@@ -48,7 +48,7 @@ Office::Office()
     m_LeftButtons.SetCallbacks(
         [&](bool active) {
             ToggleLeftDoor();
-            m_DoorNoise->play();
+            AudioManager::Instance().PlayDoorSound(m_LeftDoorClosed);
         },
         [&](bool active) {
             ToggleLeftLight();
@@ -59,7 +59,7 @@ Office::Office()
     m_RightButtons.SetCallbacks(
         [&](bool active) {
             ToggleRightDoor();
-            m_DoorNoise->play();
+            AudioManager::Instance().PlayDoorSound(m_RightDoorClosed);
         },
         [&](bool active) {
             ToggleRightLight();
@@ -75,7 +75,6 @@ Office::Office()
     }
 
     m_FreddyNose = Resources::GetMusic("Audio/Office/PartyFavorraspyPart_AC01__3.wav");
-    m_DoorNoise = Resources::GetMusic("Audio/Office/SFXBible_12478.wav");
 }
 
 void Office::Init()

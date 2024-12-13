@@ -10,8 +10,44 @@ void GameState::StartNight() {
     m_GameOverTimer = 0.0f;
     m_JumpscareTimer = 0.0f;
 
-    // Reset player state
+    // Reset player state for new night
     player.ResetForNight();
+    player.m_Time = 0;  // Start at 12 AM
+    player.m_PowerLevel = 100.0f;
+    player.m_UsageLevel = 1;
+}
+
+void GameState::Update(double deltaTime) {
+    if (m_IsGameOver) {
+        UpdateGameOver(deltaTime);
+        return;
+    }
+
+    if (!m_IsNightComplete) {
+        // Update time (89 seconds per hour)
+        static double elapsedTime = 0.0;
+        elapsedTime += deltaTime;
+
+        if (elapsedTime >= 89.0) {
+            elapsedTime -= 89.0;
+            player.m_Time++;
+
+            if (CheckWinCondition()) {
+                EndNight(true);
+            }
+        }
+
+        // Check other conditions
+        CheckPower();
+    }
+}
+
+bool GameState::CheckWinCondition() {
+    return player.m_Time >= 6;
+}
+
+bool GameState::CheckLoseCondition() {
+    return player.m_PowerLevel <= 0 || m_IsGameOver;
 }
 
 void GameState::EndNight(bool survived) {
@@ -27,38 +63,18 @@ void GameState::EndNight(bool survived) {
     }
 }
 
-bool GameState::CheckWinCondition() {
-    // Win condition: Reach 6 AM
-    return player.m_Time >= 6;
-}
-
-bool GameState::CheckLoseCondition() {
-    // Lose conditions: Power depleted or jumpscare
-    return player.m_PowerLevel <= 0 || m_IsGameOver;
-}
-
 void GameState::HandleJumpscare(const Animatronic& animatronic) {
     if (!m_IsGameOver) {
         m_IsGameOver = true;
         m_JumpscareTimer = JUMPSCARE_DURATION;
 
-        // Play jumpscare animation and sound
-        // TODO: Implement jumpscare effects
+        // Play jumpscare sound
+        auto jumpscareSound = Resources::GetSound("Audio/Jumpscare/jumpscare.wav");
+        if (jumpscareSound) {
+            jumpscareSound->play();
+        }
 
         EndNight(false);
-    }
-}
-
-void GameState::Update(double deltaTime) {
-    if (m_IsGameOver) {
-        UpdateGameOver(deltaTime);
-        return;
-    }
-
-    if (!m_IsNightComplete) {
-        CheckTime();
-        CheckPower();
-        CheckAnimatronics();
     }
 }
 
@@ -70,24 +86,12 @@ void GameState::UpdateGameOver(double deltaTime) {
 
     m_GameOverTimer += deltaTime;
     if (m_GameOverTimer >= GAME_OVER_DELAY) {
-        // Return to main menu
         SceneManager::QueueSwitchScene("Menu");
     }
 }
 
-void GameState::CheckTime() {
-    if (CheckWinCondition()) {
-        EndNight(true);
-    }
-}
-
 void GameState::CheckPower() {
-    if (player.m_PowerLevel <= 0) {
+    if (player.m_PowerLevel <= 0 && !m_IsGameOver) {
         EndNight(false);
     }
-}
-
-void GameState::CheckAnimatronics() {
-    // This will be called by the Animatronic class when needed
-    // through HandleJumpscare
 }

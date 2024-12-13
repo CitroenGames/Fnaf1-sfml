@@ -3,6 +3,7 @@
 #include "Graphics/LayerManager.h"
 #include "Player.h"
 #include "LayerDefines.h"
+#include "AudioManager.h"
 
 // Initialize static location to view mapping
 std::map<Animatronic::Location, CameraSystem::View> CameraSystem::LocationToView = {
@@ -44,6 +45,7 @@ void CameraSystem::Update(double deltaTime) {
 
     if (player.m_UsingCamera) {
         RenderCurrentView();
+        AudioManager::Instance().PlayAmbient(m_CurrentView);
     }
 }
 

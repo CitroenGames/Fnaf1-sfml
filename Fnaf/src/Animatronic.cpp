@@ -1,5 +1,6 @@
 #include "Animatronic.h"
 #include "Player.h"
+#include "AudioManager.h"
 #include <random>
 #include <algorithm>
 
@@ -91,6 +92,8 @@ void Animatronic::TryMove() {
         if (IsValidMove(nextLocation)) {
             m_CurrentLocation = nextLocation;
             m_IsMoving = true;
+            // Play footstep sound when moving
+            AudioManager::Instance().PlayFootsteps(m_CurrentLocation);
         }
     }
 }
