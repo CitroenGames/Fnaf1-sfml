@@ -23,7 +23,7 @@ void Gameplay::Init()
     auto entity = CreateEntity("Office stuff");
     entity->AddComponent<Office>()->Init();
     auto officeComponent = entity->GetComponent<Office>();
-    
+
     // Load music
     bgaudio1 = Resources::GetMusic("Audio/Ambience/ambience2.wav");
     bgaudio1->setLoop(true);
@@ -47,6 +47,10 @@ void Gameplay::Init()
     config.maintainResolution = true;
 
     m_Camera = std::make_unique<Camera2D>(config);
+
+    // Initialize camera system
+    m_CameraSystem = std::make_unique<CameraSystem>();
+    m_CameraSystem->Init();
 }
 
 void Gameplay::FixedUpdate()
@@ -67,43 +71,54 @@ void Gameplay::Update(double deltaTime)
         SceneManager::QueueSwitchScene(std::make_shared<Menu>());
     }
 
-    auto window = Window::GetWindow();
-    sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
-    sf::Vector2u windowSize = window->getSize();
+    // Update camera system
+    m_CameraSystem->Update(deltaTime);
 
-    // Scrolling parameters
-    const float scrollThreshold = 50.0f;
-    const float maxScrollSpeed = 500.0f;
-    float scrollSpeed = 0.0f;
-
-    // Left edge scrolling
-    if (mousePos.x < scrollThreshold) {
-        scrollSpeed = -maxScrollSpeed;
-    }
-    // Right edge scrolling
-    else if (mousePos.x > (windowSize.x - scrollThreshold)) {
-        scrollSpeed = maxScrollSpeed;
+    // Handle camera toggle input
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+        m_CameraSystem->ToggleCamera();
     }
 
-    // Update scroll offset
-    scrollOffset += scrollSpeed * deltaTime;
+    // Only update office camera when not using security cameras
+    if (!m_CameraSystem->IsActive()) {
+        auto window = Window::GetWindow();
+        sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
+        sf::Vector2u windowSize = window->getSize();
 
-    // Clamp scroll offset to image bounds
-    scrollOffset = std::clamp(
-        scrollOffset,
-        0.0f,
-        std::max(0.0f, m_OfficeWidth - m_ViewportWidth)
-    );
+        // Scrolling parameters
+        const float scrollThreshold = 50.0f;
+        const float maxScrollSpeed = 500.0f;
+        float scrollSpeed = 0.0f;
 
-    // Calculate new camera position
-    sf::Vector2f newCameraPos(
-        scrollOffset + (m_ViewportWidth / 2.0f),  // Center horizontally
-        (720.0f / 2.0f)                          // Center vertically
-    );
+        // Left edge scrolling
+        if (mousePos.x < scrollThreshold) {
+            scrollSpeed = -maxScrollSpeed;
+        }
+        // Right edge scrolling
+        else if (mousePos.x > (windowSize.x - scrollThreshold)) {
+            scrollSpeed = maxScrollSpeed;
+        }
 
-    m_Camera->setPosition(newCameraPos);
-    m_Camera->update(deltaTime);
-    m_Camera->applyTo(*window);
+        // Update scroll offset
+        scrollOffset += scrollSpeed * deltaTime;
+
+        // Clamp scroll offset to image bounds
+        scrollOffset = std::clamp(
+            scrollOffset,
+            0.0f,
+            std::max(0.0f, m_OfficeWidth - m_ViewportWidth)
+        );
+
+        // Calculate new camera position
+        sf::Vector2f newCameraPos(
+            scrollOffset + (m_ViewportWidth / 2.0f),  // Center horizontally
+            (720.0f / 2.0f)                          // Center vertically
+        );
+
+        m_Camera->setPosition(newCameraPos);
+        m_Camera->update(deltaTime);
+        m_Camera->applyTo(*window);
+    }
 }
 
 void Gameplay::Render()
@@ -115,6 +130,11 @@ void Gameplay::Render()
     ImGui::Text("Power Usage: %d", player.m_UsageLevel);
     ImGui::Text("Power: %d%%", static_cast<int>(player.m_PowerLevel));
     ImGui::End();
+
+    // Render camera system if active
+    if (m_CameraSystem->IsActive()) {
+        m_CameraSystem->Render(*Window::GetWindow());
+    }
 }
 
 void Gameplay::Destroy()
