@@ -28,18 +28,22 @@ void PowerIndicator::Init() {
 void PowerIndicator::Update(double deltaTime) {
     player.m_TimeSinceLastDrain += deltaTime;
 
-    // Existing power drain logic
-    float drainInterval = CalculateDrainInterval(player.m_UsageLevel);
+    // Calculate power drain based on usage and night
+    float baseInterval = GetDrainIntervalForNight(player.m_Night);
+    float powerMultiplier = CalculatePowerMultiplier();
+    float drainInterval = baseInterval / powerMultiplier;
+
+    // Drain power at calculated rate
     if (player.m_TimeSinceLastDrain >= drainInterval && player.m_PowerLevel > 0) {
-        player.m_PowerLevel--;
+        DrainPower(1.0f);
         player.m_TimeSinceLastDrain = 0;
     }
 
+    // Check for power depletion
     if (player.m_PowerLevel <= 0) {
         OnPowerDepletedDelegate.ExecuteAll();
     }
 
-    // Update power text
     UpdatePowerUsageText();
 }
 
@@ -76,25 +80,53 @@ void PowerIndicator::ResetPower() {
     player.m_TimeSinceLastDrain = 0.0f;
 }
 
-float PowerIndicator::CalculateDrainInterval(int usageLevel) const {
-    // Power drain intervals based on usage level
+float PowerIndicator::CalculatePowerMultiplier() const {
+    float multiplier = GetBaseUsageMultiplier(player.m_UsageLevel);
+
+    // Add multipliers for active systems
+    if (player.m_UsingDoor) multiplier += DOOR_POWER_MULTIPLIER;
+    if (player.m_UsingLight) multiplier += LIGHT_POWER_MULTIPLIER;
+    if (player.m_UsingCamera) multiplier += CAMERA_POWER_MULTIPLIER;
+
+    return multiplier;
+}
+
+float PowerIndicator::GetBaseUsageMultiplier(int usageLevel) const {
     switch (usageLevel) {
-    case 1: return 9.6f;  // Base drain: 1% every 9.6 seconds
-    case 2: return 4.8f;  // 1% every 4.8 seconds
-    case 3: return 3.2f;  // Average of 2.8s, 2.9s, 3.9s
-    case 4: return 2.4f;  // Average of 1.9s, 2.9s
+    case 1: return 1.0f;
+    case 2: return 1.5f;
+    case 3: return 2.0f;
+    case 4: return 2.5f;
+    case 5: return 3.0f;
+    default: return 1.0f;
+    }
+}
+
+void PowerIndicator::DrainPower(float amount) {
+    player.m_PowerLevel = std::max(0.0f, player.m_PowerLevel - amount);
+}
+
+float PowerIndicator::CalculateDrainInterval(int usageLevel) const {
+    // Base intervals adjusted for better gameplay balance
+    switch (usageLevel) {
+    case 1: return 9.6f;   // Base drain: 1% every 9.6 seconds
+    case 2: return 6.4f;   // Moderate drain
+    case 3: return 4.8f;   // High drain
+    case 4: return 3.2f;   // Very high drain
+    case 5: return 2.4f;   // Maximum drain
     default: return 9.6f;
     }
 }
 
 float PowerIndicator::GetDrainIntervalForNight(int night) const {
-    // Night-specific adjustments to make the game progressively harder
+    // Night-specific base intervals (higher = slower drain)
     switch (night) {
-    case 1: return 50.0f;
-    case 2: return 43.0f;
-    case 3: return 42.0f;
-    case 4: return 40.0f;
-    default: return 38.0f;
+    case 1: return 48.0f;  // Easiest night
+    case 2: return 42.0f;  // Getting harder
+    case 3: return 36.0f;  // Moderate difficulty
+    case 4: return 30.0f;  // Hard
+    case 5: return 24.0f;  // Very hard
+    default: return 20.0f; // Maximum difficulty
     }
 }
 

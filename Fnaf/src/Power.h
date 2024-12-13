@@ -7,6 +7,12 @@
 #include "Player.h"
 #include "FunctionSpeaker.h"
 
+// Constants for power management
+constexpr float INITIAL_POWER_LEVEL = 99.0f;
+constexpr float DOOR_POWER_MULTIPLIER = 0.5f;
+constexpr float LIGHT_POWER_MULTIPLIER = 0.25f;
+constexpr float CAMERA_POWER_MULTIPLIER = 0.3f;
+
 #define MAX_POWER_USAGE 5
 
 class PowerIndicator : public Composable::Component {
@@ -27,6 +33,10 @@ public:
     void OnFoxyEvent(int eventCount);
     void ResetPower();
 
+    // New Power Management Methods
+    float CalculatePowerMultiplier() const;
+    void DrainPower(float amount);
+
     MultiCastDelegate OnPowerDepletedDelegate;
 private:
     // Rendering Components
@@ -37,4 +47,5 @@ private:
     float CalculateDrainInterval(int usageLevel) const;
     float GetDrainIntervalForNight(int night) const;
     void UpdatePowerUsageText();
+    float GetBaseUsageMultiplier(int usageLevel) const;
 };
