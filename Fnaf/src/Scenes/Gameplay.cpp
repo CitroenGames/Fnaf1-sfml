@@ -9,18 +9,32 @@
 #include <math.h>
 #include "Scenes/Menu.h"
 #include "Scene/SceneManager.h"
+#include "GameState.h"
+#include "Animatronic.h"
+#include "CameraSystem.h"
 
-void Gameplay::Init()
-{
-    auto entity = CreateEntity("Office stuff");
+void Gameplay::Init() {
+    auto entity = CreateEntity("Game Components");
+
+    // Initialize power system
     std::shared_ptr<PowerIndicator> powerIndicator = entity->AddComponent<PowerIndicator>();
     powerIndicator->OnPowerDepletedDelegate.Add(this, &Gameplay::OnPowerOut);
     powerIndicator->Init();
 
+    // Initialize office
     entity->AddComponent<Office>()->Init();
-    auto officeComponent = entity->GetComponent<Office>();
-    //AddComponent(officeComponent);
-    
+
+    // Initialize game state
+    m_GameState = entity->AddComponent<GameState>();
+    m_GameState->OnGameOverDelegate.Add(this, &Gameplay::OnGameOver);
+    m_GameState->OnNightCompleteDelegate.Add(this, &Gameplay::OnNightComplete);
+
+    // Initialize animatronics
+    m_Animatronics.push_back(Animatronic(Animatronic::Type::BONNIE));
+    m_Animatronics.push_back(Animatronic(Animatronic::Type::CHICA));
+    m_Animatronics.push_back(Animatronic(Animatronic::Type::FREDDY));
+    m_Animatronics.push_back(Animatronic(Animatronic::Type::FOXY));
+
     // Load music
     bgaudio1 = Resources::GetMusic("Audio/Ambience/ambience2.wav");
     bgaudio1->setLoop(true);
@@ -33,9 +47,9 @@ void Gameplay::Init()
     bgaudio2->setVolume(50.f);
 
     m_FanBuzzing = Resources::GetMusic("Audio/Office/Buzz_Fan_Florescent2.wav");
-	m_FanBuzzing->setLoop(true);
-	m_FanBuzzing->play();
-	m_FanBuzzing->setVolume(40.f);
+    m_FanBuzzing->setLoop(true);
+    m_FanBuzzing->play();
+    m_FanBuzzing->setVolume(40.f);
 
     Camera2D::Config config;
     config.resolution = sf::Vector2f(1280.0f, 720.0f);
@@ -44,18 +58,19 @@ void Gameplay::Init()
     config.maintainResolution = true;
 
     m_Camera = std::make_unique<Camera2D>(config);
+
+    // Start the night
+    m_GameState->StartNight();
 }
 
-void Gameplay::FixedUpdate()
-{
+void Gameplay::FixedUpdate() {
     Scene::FixedUpdate();
 }
 
 constexpr float m_OfficeWidth = 1600.0f;
 constexpr float m_ViewportWidth = 1280.0f;
 
-void Gameplay::Update(double deltaTime)
-{
+void Gameplay::Update(double deltaTime) {
     Scene::Update(deltaTime);
 
     auto window = Window::GetWindow();
@@ -96,24 +111,19 @@ void Gameplay::Update(double deltaTime)
     m_Camera->update(deltaTime);
     m_Camera->applyTo(*window);
 
-    // Update the player's time every 89 seconds
-    static double elapsedTime = 0.0;
-    elapsedTime += deltaTime;
-
-    if (elapsedTime >= 89.0) {
-        elapsedTime -= 89.0; // Reset the timer for the next interval
-        player.m_Time++;
-
-        if (player.m_Time == 6) {
-            // Game Complete
-            std::cout << "Game complete!" << std::endl;
-            // Additional logic for game completion can go here
+    // Update animatronics
+    for (auto& animatronic : m_Animatronics) {
+        animatronic.Update(deltaTime);
+        if (animatronic.CheckJumpscare()) {
+            m_GameState->HandleJumpscare(animatronic);
         }
     }
+
+    // Update game state
+    m_GameState->Update(deltaTime);
 }
 
-void Gameplay::Render()
-{
+void Gameplay::Render() {
     ImGui::Begin("PlayerInfo");
 
     ImGui::Text("Night: %d", player.m_Night);
@@ -123,15 +133,26 @@ void Gameplay::Render()
     ImGui::End();
 }
 
-void Gameplay::Destroy()
-{
+void Gameplay::Destroy() {
     m_Office.Destroy();
     Scene::Destroy();
 }
 
-void Gameplay::OnPowerOut()
-{
-    std::cout << "Power out" << std::endl;
-    Destroy();
-	SceneManager::QueueSwitchScene(std::make_shared<Menu>());
+void Gameplay::OnPowerOut() {
+    m_GameState->EndNight(false);
+}
+
+void Gameplay::OnGameOver() {
+    // Stop all audio
+    bgaudio1->stop();
+    bgaudio2->stop();
+    m_FanBuzzing->stop();
+
+    // Switch to menu scene
+    SceneManager::QueueSwitchScene(std::make_shared<Menu>());
+}
+
+void Gameplay::OnNightComplete() {
+    // Play victory sound/animation if needed
+    SceneManager::QueueSwitchScene(std::make_shared<Menu>());
 }

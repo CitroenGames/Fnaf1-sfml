@@ -5,29 +5,33 @@
 #include "SFML/Audio.hpp"
 #include "Office.h"
 #include "Components/Camera.h"
+#include "GameState.h"
+#include "Animatronic.h"
+#include "CameraSystem.h"
 
 constexpr float scrollspeed = 10.0f;
 
-class Gameplay : public Scene
-{
+class Gameplay : public Scene {
 public:
-	void Init() override;
-	void FixedUpdate() override;
-	void Update(double deltaTime) override;
-	void Render() override;
-	void Destroy() override;
+    void Init() override;
+    void FixedUpdate() override;
+    void Update(double deltaTime) override;
+    void Render() override;
+    void Destroy() override;
 
-	void OnPowerOut();
+    void OnPowerOut();
+    void OnGameOver();
+    void OnNightComplete();
 
 private:
-	std::shared_ptr<sf::Music> bgaudio1;
-	std::shared_ptr<sf::Music> bgaudio2;
+    std::shared_ptr<sf::Music> bgaudio1;
+    std::shared_ptr<sf::Music> bgaudio2;
+    std::shared_ptr<sf::Music> m_FanBuzzing;
 
-	//TODO: MOVE THIS TO OFFICE
-	std::shared_ptr<sf::Music> m_FanBuzzing;
+    float scrollOffset = 175.0f;
 
-	float scrollOffset = 175.0f; // Initial scroll offset
-
-	Office m_Office;
-	std::unique_ptr<Camera2D> m_Camera;
+    Office m_Office;
+    std::unique_ptr<Camera2D> m_Camera;
+    std::shared_ptr<GameState> m_GameState;
+    std::vector<Animatronic> m_Animatronics;
 };
