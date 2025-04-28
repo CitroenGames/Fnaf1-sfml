@@ -78,8 +78,7 @@ public:
     ~FNAFGame() = default;
     
     void InitializeGame(int night);
-    void 
-    ();
+    void ShutdownGame() {}
     void InitializeCustomNight(AILevels _AILevels);
     void Update(float deltaTime);
     bool IsGameOver() const { return m_GameOver; }

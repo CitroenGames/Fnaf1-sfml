@@ -34,7 +34,7 @@ set(LIBRARIES
     ECS
     Pakker
     FunctionSpeaker
-    box2d
+    #box2d
 )
 
 if(LINUX)

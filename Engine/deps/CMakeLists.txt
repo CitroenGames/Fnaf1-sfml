@@ -12,8 +12,8 @@ endif()
 # If system SFML is not found, use the local directory
 if(NOT SFML_FOUND)
     # Check if the local SFML directory exists
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/SFML-2.6.2")
-        add_subdirectory(SFML-2.6.2)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/SFML")
+        add_subdirectory(SFML)
         set(SFML_LIBRARIES sfml-graphics sfml-window sfml-system)
         set(SFML_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/SFML-2.6.2/include)
     else()
@@ -22,7 +22,8 @@ if(NOT SFML_FOUND)
 endif()
 add_subdirectory(imgui)
 
-add_subdirectory(box2d-main)
+
+# add_subdirectory(box2d-main) # will add it back later :D (TM)
 
 # Libraries created by me
 add_subdirectory(Pakker)
