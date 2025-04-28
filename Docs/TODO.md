@@ -5,10 +5,6 @@
   - [ ] Ensure camera usage increases power consumption.  
   - [ ] Design camera system to prevent animatronic movement when observed. 
 
-- [ ] **Monitor Reactions**  
-  - [ ] Program all office monitors to display static or visual glitches during Foxy's jumpscare.  
-  - [ ] Synchronize monitor effects with Foxy's attack animations.
-
 - [ ] **Door Mechanics**  
   - [ ] Enable doors to block animatronic entry effectively.  
   - [ ] Ensure doors consume power when closed.  
