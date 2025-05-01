@@ -21,6 +21,9 @@ public:
 
 	std::string GetTypeName() const override { return "Office"; }
 
+	void HideOfficeElements();
+    void ShowOfficeElements();
+
 private:
 	sf::Sprite m_OfficeSprite;
 	FlipBook m_LeftDoor, m_RightDoor;
@@ -37,4 +40,5 @@ private:
 
 	std::shared_ptr<sf::Music> m_FreddyNose;
 	std::shared_ptr<sf::Music> m_DoorNoise;
+	bool m_IsVisible;
 };

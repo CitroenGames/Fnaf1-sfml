@@ -4,6 +4,7 @@
 #include "Assets/Resources.h"
 #include "Scene/SceneManager.h"
 #include "GameState.h"
+#include "LayerDefines.h"
 
 void LeftBottomButtonCallback(bool active)
 {
@@ -16,6 +17,7 @@ void RightLightButtonCallback(bool active)
 }
 
 Office::Office()
+    : m_IsVisible(true)
 {
     m_OfficeTexture = Resources::GetTexture("Graphics/Office/NormalOffice.png");
     m_DoorTexture = Resources::GetTexture("Graphics/Office/door.png");
@@ -72,6 +74,36 @@ void Office::Init()
     m_RightDoor.SetPosition(1255, 0);
 
     auto FanEnt = SceneManager::GetActiveScene()->CreateEntity("Fan");
+}
+
+void Office::HideOfficeElements()
+{
+    m_IsVisible = false;
+    
+    // Remove office sprite from layer manager
+    LayerManager::RemoveDrawable(&m_OfficeSprite);
+    
+    // Remove buttons from layer manager
+    m_LeftButtons.SetLayer(-1); // Use a non-visible layer
+    m_RightButtons.SetLayer(-1);
+    
+    // Hide Freddy nose button
+    LayerManager::RemoveDrawable(&m_FreddyNoseButton);
+}
+
+void Office::ShowOfficeElements()
+{
+    m_IsVisible = true;
+    
+    // Add office sprite back to layer manager
+    LayerManager::AddDrawable(OFFICE_LAYER, &m_OfficeSprite);
+    
+    // Add buttons back to layer manager
+    m_LeftButtons.SetLayer(BUTTON_LAYER);
+    m_RightButtons.SetLayer(BUTTON_LAYER);
+    
+    // Show Freddy nose button
+    LayerManager::AddDrawable(BUTTON_LAYER, &m_FreddyNoseButton);
 }
 
 void Office::Update(double deltaTime)

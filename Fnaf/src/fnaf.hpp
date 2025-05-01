@@ -83,6 +83,22 @@ public:
     void Update(float deltaTime);
     bool IsGameOver() const { return m_GameOver; }
     
+    Room GetAnimatronicLocation(const std::string& animatronicName) const {
+        auto it = m_Animatronics.find(animatronicName);
+        if (it != m_Animatronics.end()) {
+            return it->second->currentLocation;
+        }
+        return Room::SHOW_STAGE; // Default location
+    }
+    
+    float GetAnimatronicMovementProgress(const std::string& animatronicName) const {
+        auto it = m_Animatronics.find(animatronicName);
+        if (it != m_Animatronics.end()) {
+            return it->second->movementProgress;
+        }
+        return 0.0f;
+    }
+
 private:
     // Game state
     bool m_GameOver;

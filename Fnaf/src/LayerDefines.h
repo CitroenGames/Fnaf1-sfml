@@ -6,4 +6,3 @@
 #define CAMERA_ANIM_LAYER 10
 #define CAMERA_FEED_LAYER 11
 #define CAMERA_UI_LAYER 12
-
