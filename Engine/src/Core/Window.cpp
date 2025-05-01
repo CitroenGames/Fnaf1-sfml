@@ -4,6 +4,9 @@ std::shared_ptr<sf::RenderWindow> Window::m_Window = nullptr;
 sf::View Window::m_GameView;
 
 std::shared_ptr<sf::RenderWindow> Window::Init(int width, int height, std::string title) {
+	if (m_Window) 
+		return m_Window;
+
     m_Window = std::make_shared<sf::RenderWindow>(sf::VideoMode(width, height), title);
     m_GameView.setSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
     
