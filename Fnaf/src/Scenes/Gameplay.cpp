@@ -72,17 +72,31 @@ void Gameplay::Update(double deltaTime)
     sf::Vector2u windowSize = window->getSize();
 
     // Scrolling parameters
-    const float scrollThreshold = 50.0f;
+    const float scrollThreshold = 400.0f;
     const float maxScrollSpeed = 500.0f;
     float scrollSpeed = 0.0f;
 
-    // Left edge scrolling
+    // Left edge scrolling with dynamic speed
     if (mousePos.x < scrollThreshold) {
-        scrollSpeed = -maxScrollSpeed;
+        // Calculate how far the mouse is from the edge (0 to scrollThreshold)
+        float distanceFromEdge = static_cast<float>(mousePos.x);
+        // Convert to a percentage (1.0 at edge, 0.0 at threshold)
+        float speedFactor = 1.0f - (distanceFromEdge / scrollThreshold);
+        // Apply exponential curve for more natural acceleration
+        speedFactor = speedFactor * speedFactor;
+        // Apply to max speed
+        scrollSpeed = -maxScrollSpeed * speedFactor;
     }
-    // Right edge scrolling
+    // Right edge scrolling with dynamic speed
     else if (mousePos.x > (windowSize.x - scrollThreshold)) {
-        scrollSpeed = maxScrollSpeed;
+        // Calculate how far the mouse is from the edge (0 to scrollThreshold)
+        float distanceFromEdge = static_cast<float>(windowSize.x - mousePos.x);
+        // Convert to a percentage (1.0 at edge, 0.0 at threshold)
+        float speedFactor = 1.0f - (distanceFromEdge / scrollThreshold);
+        // Apply exponential curve for more natural acceleration
+        speedFactor = speedFactor * speedFactor;
+        // Apply to max speed
+        scrollSpeed = maxScrollSpeed * speedFactor;
     }
 
     // Update scroll offset
