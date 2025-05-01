@@ -37,7 +37,7 @@ void Menu::Init()
     m_FreddyGlitchEffect = GlitchEffect(0); 
     for (int i = 1; i < 4; i++)
     {
-		m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MenuMenu/FreddyBackground/Frame" + std::to_string(i) + ".png"));
+		m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MainMenu/FreddyBackground/Frame" + std::to_string(i) + ".png"));
     }
 
     m_FreddyGlitchEffect.SetGlitchParameters(0.01f, 0.3f, 0.05f);
@@ -56,16 +56,16 @@ void Menu::Init()
 
     m_StaticGlitchEffect.SetGlitchParameters(1.f, 1.5f, 0.01f);
 
-    NewsPaperTexture = Resources::GetTexture("Graphics/MenuMenu/NewsPaper.png");
+    NewsPaperTexture = Resources::GetTexture("Graphics/MainMenu/NewsPaper.png");
     NewsPaperSprite = sf::Sprite(*NewsPaperTexture);
 
-    m_Logo = ProcessText(Resources::GetTexture("Graphics/MenuMenu/Logo.png"));
+    m_Logo = ProcessText(Resources::GetTexture("Graphics/MainMenu/Logo.png"));
 
     m_LogoSprite = sf::Sprite(*m_Logo);
     m_LogoSprite.setPosition(100, 100);
     LayerManager::AddDrawable(BUTTON_LAYER, &m_LogoSprite);
 
-    newbutton.SetTexture(ProcessText(Resources::GetTexture("Graphics/MenuMenu/NewGame.png")));
+    newbutton.SetTexture(ProcessText(Resources::GetTexture("Graphics/MainMenu/NewGame.png")));
     newbutton.SetPosition(100, 400);
     newbutton.SetLayer(BUTTON_LAYER);
 }
