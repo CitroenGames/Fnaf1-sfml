@@ -26,16 +26,17 @@ void Gameplay::Init()
     
     // Load music
     bgaudio1 = Resources::GetMusic("Audio/Ambience/ambience2.wav");
+    bgaudio2 = Resources::GetMusic("Audio/Ambience/EerieAmbienceLargeSca_MV005.wav");
+    m_FanBuzzing = Resources::GetMusic("Audio/Office/Buzz_Fan_Florescent2.wav");
+
     bgaudio1->setLoop(true);
     bgaudio1->play();
     bgaudio1->setVolume(100.f);
 
-    bgaudio2 = Resources::GetMusic("Audio/Ambience/EerieAmbienceLargeSca_MV005.wav");
     bgaudio2->setLoop(true);
     bgaudio2->play();
     bgaudio2->setVolume(50.f);
 
-    m_FanBuzzing = Resources::GetMusic("Audio/Office/Buzz_Fan_Florescent2.wav");
 	m_FanBuzzing->setLoop(true);
 	m_FanBuzzing->play();
 	m_FanBuzzing->setVolume(40.f);
@@ -123,11 +124,12 @@ void Gameplay::Update(double deltaTime)
 void Gameplay::Render()
 {
     ImGui::Begin("PlayerInfo");
-
-    ImGui::Text("Night: %d", player.m_Night);
-    ImGui::Text("Time: %d AM", (player.m_Time == 0) ? 12 : player.m_Time);
-    ImGui::Text("Power Usage: %d", player.m_UsageLevel);
-    ImGui::Text("Power: %d%%", static_cast<int>(player.m_PowerLevel));
+    {
+        ImGui::Text("Night: %d", player.m_Night);
+        ImGui::Text("Time: %d AM", (player.m_Time == 0) ? 12 : player.m_Time);
+        ImGui::Text("Power Usage: %d", player.m_UsageLevel);
+        ImGui::Text("Power: %d%%", static_cast<int>(player.m_PowerLevel));
+    }
     ImGui::End();
 }
 
