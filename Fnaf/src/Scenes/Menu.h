@@ -11,6 +11,7 @@
 class Menu : public Scene
 {
 public:
+	Menu();
 	void Init() override;
 	void Update(double deltaTime) override;
 	void FixedUpdate() override;
@@ -32,6 +33,7 @@ private:
 	ImageButton newbutton;
 	GlitchEffect m_FreddyGlitchEffect;
 	GlitchEffect m_StaticGlitchEffect;
+	GlitchEffect m_WhiteGlitchEffect;
 
 	enum State { FADE_IN, WAIT, FADE_OUT, DONE } m_State = FADE_IN;
 	sf::Time waitTime = sf::seconds(5);
@@ -41,4 +43,5 @@ private:
 private:
 	// temp holding static here
 	std::vector<std::shared_ptr<sf::Texture>> m_NoiseTextures;
+	std::vector<std::shared_ptr<sf::Texture>> m_WhiteTextures;
 };

@@ -75,6 +75,29 @@ public:
 
     ButtonState GetCurrentState() const { return m_CurrentState; }
 
+    // Add this method to TopBottomButtons class
+    void updateBottomState(bool active) {
+        // If active is true, set to bottom active (or both if top was active)
+        // If active is false, set to no active (or top active if both were active)
+        if (active) {
+            if (m_CurrentState == ButtonState::NoActive) {
+                m_CurrentState = ButtonState::BottomActive;
+            }
+            else if (m_CurrentState == ButtonState::TopActive) {
+                m_CurrentState = ButtonState::BothActive;
+            }
+        }
+        else {
+            if (m_CurrentState == ButtonState::BottomActive) {
+                m_CurrentState = ButtonState::NoActive;
+            }
+            else if (m_CurrentState == ButtonState::BothActive) {
+                m_CurrentState = ButtonState::TopActive;
+            }
+        }
+        updateTexture();
+    }
+
 private:
     std::function<void(bool active)> m_OnTopClick;
     std::function<void(bool active)> m_OnBottomClick;

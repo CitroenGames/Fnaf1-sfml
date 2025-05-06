@@ -75,3 +75,38 @@ static std::shared_ptr<sf::Texture> ProcessText(const std::shared_ptr<sf::Textur
 
     return outputTexture;
 }
+
+inline std::shared_ptr<sf::Texture> RemoveBlackBackground(const std::shared_ptr<sf::Texture>& inputTexture, int threshold = 30) {
+    if (!inputTexture || !inputTexture->getSize().x || !inputTexture->getSize().y) {
+        return nullptr;
+    }
+
+    // Create new texture
+    auto outputTexture = std::make_shared<sf::Texture>();
+    outputTexture->setSmooth(inputTexture->isSmooth());
+    outputTexture->setRepeated(inputTexture->isRepeated());
+
+    // Get image data
+    sf::Image image = inputTexture->copyToImage();
+    const auto size = image.getSize();
+
+    // Process each pixel
+    for (unsigned int x = 0; x < size.x; x++) {
+        for (unsigned int y = 0; y < size.y; y++) {
+            const sf::Color pixel = image.getPixel(x, y);
+
+            // Check if pixel is black or very dark
+            if (pixel.r <= threshold && pixel.g <= threshold && pixel.b <= threshold) {
+                // Make dark pixels completely transparent
+                image.setPixel(x, y, sf::Color(pixel.r, pixel.g, pixel.b, 0));
+            }
+        }
+    }
+
+    // Create the new texture
+    if (!outputTexture->loadFromImage(image)) {
+        return nullptr;
+    }
+
+    return outputTexture;
+}

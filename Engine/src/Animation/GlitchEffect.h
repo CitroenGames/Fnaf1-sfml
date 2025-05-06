@@ -8,6 +8,7 @@ private:
     std::vector<std::shared_ptr<sf::Sprite>> m_Frames;
     int m_Layer;
     int m_CurrentFrame;
+    int m_PreviousFrame;  // Track previous frame for proper cleanup
 
     // Glitch effect parameters
     bool m_IsGlitching;
@@ -21,6 +22,7 @@ public:
     GlitchEffect()
         : m_Layer(0)
         , m_CurrentFrame(0)
+        , m_PreviousFrame(-1)  // Initialize to invalid frame
         , m_IsGlitching(false)
         , m_GlitchTimer(0.0f)
         , m_GlitchChance(0.001f)
@@ -32,6 +34,7 @@ public:
     GlitchEffect(int layer)
         : m_Layer(layer)
         , m_CurrentFrame(0)
+        , m_PreviousFrame(-1)  // Initialize to invalid frame
         , m_IsGlitching(false)
         , m_GlitchTimer(0.0f)
         , m_GlitchChance(0.001f)
@@ -41,9 +44,9 @@ public:
     }
 
     ~GlitchEffect() {
-        // Clean up current frame from LayerManager
-        if (!m_Frames.empty()) {
-            LayerManager::RemoveDrawable(m_Frames[m_CurrentFrame].get());
+        // Clean up ALL frames from LayerManager to prevent leaks
+        for (size_t i = 0; i < m_Frames.size(); i++) {
+            LayerManager::RemoveDrawable(m_Frames[i].get());
         }
     }
 
@@ -102,6 +105,9 @@ public:
         if (m_IsGlitching) {
             m_GlitchTimer += 1.0f / 66.0f;  // Fixed timestep for 66 tickrate
             if (m_GlitchTimer >= m_GlitchDuration) {
+                // Store current frame before changing it
+                m_PreviousFrame = m_CurrentFrame;
+                
                 if (m_GlitchSequence.empty()) {
                     // End of glitch sequence, return to normal
                     m_IsGlitching = false;
@@ -113,7 +119,7 @@ public:
                     m_GlitchSequence.pop_back();
                     m_GlitchTimer = 0.0f;
                 }
-                RegisterToLayerManager();
+                UpdateLayerManager();
             }
         }
         else {
@@ -127,8 +133,24 @@ public:
 private:
     void RegisterToLayerManager() {
         if (!m_Frames.empty()) {
-            LayerManager::RemoveDrawable(m_Frames[m_CurrentFrame].get());
+            // Only add first frame, don't try to remove anything yet
             LayerManager::AddDrawable(m_Layer, m_Frames[m_CurrentFrame].get());
+            m_PreviousFrame = m_CurrentFrame;
+        }
+    }
+    
+    // New method - properly updates frames
+    void UpdateLayerManager() {
+        if (!m_Frames.empty()) {
+            // Only remove previous frame if it's valid and different
+            if (m_PreviousFrame >= 0 && m_PreviousFrame < m_Frames.size() && 
+                m_PreviousFrame != m_CurrentFrame) {
+                LayerManager::RemoveDrawable(m_Frames[m_PreviousFrame].get());
+            }
+            
+            // Add the new current frame
+            LayerManager::AddDrawable(m_Layer, m_Frames[m_CurrentFrame].get());
+            m_PreviousFrame = m_CurrentFrame;
         }
     }
 
@@ -137,6 +159,9 @@ public:
         m_IsGlitching = true;
         m_GlitchTimer = 0.0f;
         m_GlitchSequence.clear();
+
+        // Store current frame before changing it
+        m_PreviousFrame = m_CurrentFrame;
 
         // Always add at least one random frame
         int numGlitchFrames = 1;
@@ -159,7 +184,7 @@ public:
         if (!m_GlitchSequence.empty()) {
             m_CurrentFrame = m_GlitchSequence.back();
             m_GlitchSequence.pop_back();
-            RegisterToLayerManager();
+            UpdateLayerManager();  // Use the new method instead of RegisterToLayerManager
         }
     }
 

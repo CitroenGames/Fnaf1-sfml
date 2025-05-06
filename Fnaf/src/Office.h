@@ -9,36 +9,51 @@
 class Office : public Composable::Component
 {
 public:
-	Office();
-	void Init();
-	void Update(double deltaTime) override;
-	void FixedUpdate() override;
-	void Render();
-	void Destroy();
+    Office();
+    void Init();
+    void Update(double deltaTime) override;
+    void FixedUpdate() override;
+    void Render();
+    void Destroy();
 
-	nlohmann::json Serialize()const override { return nlohmann::json(); };
-	void Deserialize(const nlohmann::json& data) override {};
+    nlohmann::json Serialize()const override { return nlohmann::json(); };
+    void Deserialize(const nlohmann::json& data) override {};
 
-	std::string GetTypeName() const override { return "Office"; }
+    std::string GetTypeName() const override { return "Office"; }
 
-	void HideOfficeElements();
+    void HideOfficeElements();
     void ShowOfficeElements();
 
 private:
-	sf::Sprite m_OfficeSprite;
-	FlipBook m_LeftDoor, m_RightDoor;
+    sf::Sprite m_OfficeSprite;
+    FlipBook m_LeftDoor, m_RightDoor;
 
-	std::shared_ptr<sf::Texture> m_OfficeTexture;
-	std::shared_ptr<sf::Texture> m_LeftButtonTexture;
-	std::shared_ptr<sf::Texture> m_DoorTexture;
+    std::shared_ptr<sf::Texture> m_OfficeTexture;
+    std::shared_ptr<sf::Texture> m_LeftButtonTexture;
+    std::shared_ptr<sf::Texture> m_DoorTexture;
 
-	ImageButton m_FreddyNoseButton;
+    // Add textures for office lights
+    std::shared_ptr<sf::Texture> m_LeftLightTexture;
+    std::shared_ptr<sf::Texture> m_RightLightTexture;
+    std::shared_ptr<sf::Texture> m_LeftLightBonnieTexture;
+    std::shared_ptr<sf::Texture> m_RightLightChicaTexture;
 
-	TopBottomButtons m_LeftButtons, m_RightButtons;
+    ImageButton m_FreddyNoseButton;
 
-	FlipBook m_FanFlipBook;
+    TopBottomButtons m_LeftButtons, m_RightButtons;
 
-	std::shared_ptr<sf::Music> m_FreddyNose;
-	std::shared_ptr<sf::Music> m_DoorNoise;
-	bool m_IsVisible;
+    FlipBook m_FanFlipBook;
+
+    std::shared_ptr<sf::Music> m_FreddyNose;
+    std::shared_ptr<sf::Music> m_DoorNoise;
+    std::shared_ptr<sf::Music> m_LightSound;
+    bool m_IsVisible;
+
+    // Light state flags
+    bool m_LeftLightOn;
+    bool m_RightLightOn;
+
+    // Light callback methods
+    void ToggleLeftLight(bool active);
+    void ToggleRightLight(bool active);
 };

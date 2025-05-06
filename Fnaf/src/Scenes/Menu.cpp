@@ -18,43 +18,57 @@ bool IsShowingNewsPaper = false;
 #define SHOWNEWPAPERTIME 12 * 66 // 12 seconds
 #endif
 
-void Menu::Init()
+Menu::Menu()
 {
     m_BgStatic = Resources::GetMusic("Audio/static2.wav");
-    if (m_BgStatic)
-    {
-		m_BgStatic->play();
-		m_BgStatic->setVolume(100.f);
-    }
     m_MenuMusic = Resources::GetMusic("Audio/Menu/darknessmusic.wav");
-    if(m_MenuMusic)
-	{
-        m_MenuMusic->setLoop(true);
-        m_MenuMusic->play();
-        m_MenuMusic->setVolume(100.f);
-	}
 
-    m_FreddyGlitchEffect = GlitchEffect(0); 
+    // Noise thing
+    {
+        for (int i = 1; i <= 8; i++)
+        {
+            m_NoiseTextures.push_back(MakeTextureTransparent(Resources::GetTexture("Graphics/Static/Noise" + std::to_string(i) + ".png"), 0.15f));
+        }
+
+        m_StaticGlitchEffect = GlitchEffect(1);
+        for (int i = 0; i < m_NoiseTextures.size(); i++)
+        {
+            m_StaticGlitchEffect.AddFrame(m_NoiseTextures[i]);
+        }
+    }
+
+    // White thing 
+    {
+        for (int i = 1; i <= 8; i++)
+        {
+            m_WhiteTextures.push_back(RemoveBlackBackground(Resources::GetTexture("Graphics/Static/WhiteThing" + std::to_string(i) + ".png")));
+        }
+
+        m_WhiteGlitchEffect = GlitchEffect(2);
+        for (int i = 0; i < m_WhiteTextures.size(); i++)
+        {
+            m_WhiteGlitchEffect.AddFrame(m_WhiteTextures[i]);
+        }
+    }
+
+    m_FreddyGlitchEffect = GlitchEffect(0);
     for (int i = 1; i < 4; i++)
     {
-		m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MainMenu/FreddyBackground/Frame" + std::to_string(i) + ".png"));
+        m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MainMenu/FreddyBackground/Frame" + std::to_string(i) + ".png"));
     }
+}
+
+void Menu::Init()
+{
+    m_BgStatic->play();
+    m_BgStatic->setVolume(100.f);
+    m_MenuMusic->setLoop(true);
+    m_MenuMusic->play();
+    m_MenuMusic->setVolume(100.f);
 
     m_FreddyGlitchEffect.SetGlitchParameters(0.01f, 0.3f, 0.05f);
-
-    // Apply transparency to all static noise frames
-    for (int i = 1; i <= 8; i++)
-    {
-        m_NoiseTextures.push_back(MakeTextureTransparent(Resources::GetTexture("Graphics/Static/Noise" + std::to_string(i) + ".png"), 0.15f));
-    }
-    
-    m_StaticGlitchEffect = GlitchEffect(1);
-    for(int i = 0; i < m_NoiseTextures.size(); i++)
-	{
-		m_StaticGlitchEffect.AddFrame(m_NoiseTextures[i]);
-	}
-
     m_StaticGlitchEffect.SetGlitchParameters(1.f, 1.5f, 0.01f);
+    m_WhiteGlitchEffect.SetGlitchParameters(1.f, 1.5f, 0.15f);
 
     NewsPaperTexture = Resources::GetTexture("Graphics/MainMenu/NewsPaper.png");
     NewsPaperSprite = sf::Sprite(*NewsPaperTexture);
@@ -63,11 +77,11 @@ void Menu::Init()
 
     m_LogoSprite = sf::Sprite(*m_Logo);
     m_LogoSprite.setPosition(100, 100);
-    LayerManager::AddDrawable(BUTTON_LAYER, &m_LogoSprite);
+    LayerManager::AddDrawable(MENU_BUTTON_LAYER, &m_LogoSprite);
 
     newbutton.SetTexture(ProcessText(Resources::GetTexture("Graphics/MainMenu/NewGame.png")));
     newbutton.SetPosition(100, 400);
-    newbutton.SetLayer(BUTTON_LAYER);
+    newbutton.SetLayer(MENU_BUTTON_LAYER);
 }
 
 void Menu::Update(double deltaTime)
@@ -101,7 +115,7 @@ void Menu::Update(double deltaTime)
 void Menu::SwitchToGameplay()
 {
     Destroy();
-    // TODO: if we add custom nights we need to tell the scene what ai levels we want...
+	// TODO: if we add custom nights we need to tell the scene what ai levels we want... (or just use globals because funny code go brr)
 	SceneManager::QueueSwitchScene(std::make_shared<Gameplay>());
 }
 
@@ -119,6 +133,7 @@ void Menu::FixedUpdate()
 
     m_FreddyGlitchEffect.Update();
     m_StaticGlitchEffect.Update();
+    m_WhiteGlitchEffect.Update();
 
     // TODO: window variable should not be needed...
     std::shared_ptr<sf::RenderWindow> window = Window::GetWindow();

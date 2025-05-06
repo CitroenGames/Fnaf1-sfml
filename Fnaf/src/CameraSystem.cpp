@@ -59,7 +59,7 @@ void CameraSystem::InitializeCameraViews()
     m_CameraStateViews["1A"]["Normal"] = std::make_shared<sf::Sprite>(*Resources::GetTexture("Graphics/CameraSystem/CamViews/Cam1A/Normal.png"));
     m_CameraStateViews["1A"]["AllLooking"] = std::make_shared<sf::Sprite>(*Resources::GetTexture("Graphics/CameraSystem/CamViews/Cam1A/AllLooking.png"));
     m_CameraStateViews["1A"]["ChicaGone"] = std::make_shared<sf::Sprite>(*Resources::GetTexture("Graphics/CameraSystem/CamViews/Cam1A/ChicaGone.png"));
-    m_CameraStateViews["1A"]["Empty"] = std::make_shared<sf::Sprite>(*Resources::GetTexture("Graphics/CameraSystem/CamViews/Cam1A/Empty.png"));
+	m_CameraStateViews["1A"]["Empty"] = std::make_shared<sf::Sprite>(*Resources::GetTexture("Graphics/CameraSystem/CamViews/Cam1A/Empty.png")); // should we make this the normal and not the other way around?
     m_CameraStateViews["1A"]["FreddyOnly"] = std::make_shared<sf::Sprite>(*Resources::GetTexture("Graphics/CameraSystem/CamViews/Cam1A/FreddyOnly.png"));
     m_CameraStateViews["1A"]["FreddyOnlyLooking"] = std::make_shared<sf::Sprite>(*Resources::GetTexture("Graphics/CameraSystem/CamViews/Cam1A/FreddyOnlyLooking.png"));
     m_CameraStateViews["1A"]["NoBonnie"] = std::make_shared<sf::Sprite>(*Resources::GetTexture("Graphics/CameraSystem/CamViews/Cam1A/NoBonnie.png"));
@@ -81,7 +81,7 @@ void CameraSystem::InitializeCameraViews()
         }
     }
     
-    // Add more states for other cameras as needed
+    // TODO: we need the put all of the camera states ;-; this is going to be hell maybe we should use scripting language for this...
 }
 
 void CameraSystem::InitializeCameraButtons()

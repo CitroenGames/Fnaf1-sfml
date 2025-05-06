@@ -65,13 +65,16 @@ void Gameplay::Init()
         // I have no idea where else I would put it but putting in scene is also a terrible idea in terms of keeping the code clean in the init func so stay tuned to see where I'll end up putting it :D
     }
 
-    Camera2D::Config config;
-    config.resolution = sf::Vector2f(1280.0f, 720.0f);
-    config.initialZoom = 1.0f;
-    config.smoothingFactor = 0.75f;
-    config.maintainResolution = true;
+	{ // Camera stuff
+        Camera2D::Config config;
+        config.resolution = sf::Vector2f(1280.0f, 720.0f);
+        config.initialZoom = 1.0f;
+        config.smoothingFactor = 0.75f;
+        config.maintainResolution = true;
 
-    m_Camera = std::make_unique<Camera2D>(config);
+        m_Camera = std::make_unique<Camera2D>(config);
+    }
+
 }
 
 void Gameplay::FixedUpdate()
@@ -144,7 +147,7 @@ void Gameplay::Update(double deltaTime)
         // Calculate new camera position
         sf::Vector2f newCameraPos(
             scrollOffset + (m_ViewportWidth / 2.0f),  // Center horizontally
-            (720.0f / 2.0f)                          // Center vertically
+            (720.0f / 2.0f)                           // Center vertically
         );
         m_Camera->setPosition(newCameraPos);
     }
