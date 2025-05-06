@@ -6,10 +6,10 @@
 #include <string>
 #include <random>
 #include "Animation/FlipBook.h"
-#include "UI/ImageButton.h"
+#include "UI/HUDButton.h"
 #include "Composable.h"
 #include "LayerDefines.h"
-#include <random>
+#include "UI/ImageButton.h"
 #include "GameState.h"
 
 class CameraSystem : public Composable::Component {
@@ -40,7 +40,6 @@ private:
     
     // UI elements
     std::shared_ptr<sf::Sprite> m_CameraMapSprite;
-    std::shared_ptr<ImageButton> m_CameraButton;
     std::map<std::string, std::shared_ptr<ImageButton>> m_CameraButtons;
     
     // Animation elements

@@ -6,8 +6,8 @@
 #include "filesystem"
 #include "Assets/Resources.h"
 
-#define CAN_BUILD_ASSET_PAK 1
-#define KEY "example_key"
+#define CAN_BUILD_ASSET_PAK true
+#define KEY "example_key" // I dont think we will ever use this because this is a open source project lol but whatever.
 
 int main() {
     Pakker p(KEY);

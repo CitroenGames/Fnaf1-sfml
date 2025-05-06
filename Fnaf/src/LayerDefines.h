@@ -5,4 +5,5 @@
 #define UI_LAYER 9
 #define CAMERA_ANIM_LAYER 10
 #define CAMERA_FEED_LAYER 11
-#define CAMERA_UI_LAYER 12
+#define CAMERA_MAP 12
+#define CAMERA_BUTTONS 13

@@ -32,6 +32,7 @@ private:
     std::unique_ptr<Camera2D> m_Camera;
     
     std::shared_ptr<CameraSystem> m_CameraSystem;
+    std::shared_ptr<HUDButton> m_CameraButton;
 
     std::unique_ptr<FNAFGame> gameplay;
 

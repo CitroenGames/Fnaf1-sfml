@@ -10,13 +10,7 @@ CameraSystem::CameraSystem()
 }
 
 void CameraSystem::Init()
-{
-    // Initialize camera button (to toggle camera view) as a HUD element
-    m_CameraButton = std::make_shared<ImageButton>();
-    m_CameraButton->SetTexture("Graphics/CameraSystem/CameraButton.png");
-    m_CameraButton->SetPosition(640.0f, 650.0f);
-    m_CameraButton->SetLayer(UI_LAYER); // Use UI_LAYER instead of BUTTON_LAYER
-    
+{   
     // Load camera map
     m_CameraMapSprite = std::make_shared<sf::Sprite>(*Resources::GetTexture("Graphics/CameraSystem/CameraMap.png"));
     m_CameraMapSprite->setPosition(640.0f, 360.0f);
@@ -35,7 +29,6 @@ void CameraSystem::Init()
     
     // Start with everything hidden except the camera button - which is always visible
     HideAllCameraElements();
-    LayerManager::AddDrawable(UI_LAYER, m_CameraButton.get());
 }
 
 void CameraSystem::InitializeCameraViews()
@@ -140,7 +133,7 @@ void CameraSystem::InitializeCameraButtons()
     
     // Set layer for all buttons but don't add them to the layer manager yet
     for (auto& [id, button] : m_CameraButtons) {
-        button->SetLayer(CAMERA_UI_LAYER);
+        button->SetLayer(CAMERA_BUTTONS);
         // Initially, all buttons are hidden
         LayerManager::RemoveDrawable(button.get());
     }
@@ -187,11 +180,6 @@ void CameraSystem::FixedUpdate()
 {
     auto window = Window::GetWindow();
     
-    // Check for main camera button press
-    if (m_CameraButton->IsClicked(*window)) {
-        ToggleCamera();
-    }
-    
     // Only check for camera selection buttons if camera is active
     if (m_IsActive) {
         for (const auto& [id, button] : m_CameraButtons) {
@@ -219,11 +207,11 @@ void CameraSystem::ToggleCamera()
         // Office::HideOfficeElements(); // This would be called through an event system or directly
         
         // Show camera map
-        LayerManager::AddDrawable(CAMERA_UI_LAYER, m_CameraMapSprite.get());
+        LayerManager::AddDrawable(CAMERA_MAP, m_CameraMapSprite.get());
         
         // Register camera selection buttons
         for (auto& [id, button] : m_CameraButtons) {
-            LayerManager::AddDrawable(CAMERA_UI_LAYER, button.get());
+            LayerManager::AddDrawable(CAMERA_BUTTONS, button.get());
         }
         
         // Play camera flip animation
@@ -320,9 +308,6 @@ void CameraSystem::Destroy()
     // Cleanup all animations
     m_CameraFlipAnimation.Cleanup();
     m_StaticAnimation.Cleanup();
-    
-    // Remove camera button at scene end
-    LayerManager::RemoveDrawable(m_CameraButton.get());
     
     // Reset state
     m_IsActive = false;
