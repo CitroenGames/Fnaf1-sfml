@@ -75,21 +75,60 @@ public:
     {
         // Save current view
         sf::View currentView = window.getView();
-        
+
         // Temporarily switch to default view for correct mouse coordinates
         window.setView(window.getDefaultView());
-        
-        // Get mouse position in default view
+
+        // Get mouse position in screen space
         sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-        sf::Vector2f viewPos = window.mapPixelToCoords(mousePos);
-        
+
+        // Apply the viewport transformation to the mouse coordinates
+        // This is necessary to handle letterboxing/pillarboxing
+        sf::FloatRect viewport = currentView.getViewport();
+        sf::Vector2u windowSize = window.getSize();
+
+        // Calculate the position in the actual rendered area
+        sf::Vector2f viewPos;
+
+        // Handle letterboxing/pillarboxing by applying the inverse viewport transformation
+        if (viewport.width < 1.0f) { // Pillarboxing (black bars on sides)
+            // Check if mouse is in the viewable area
+            if (mousePos.x < viewport.left * windowSize.x ||
+                mousePos.x >(viewport.left + viewport.width) * windowSize.x) {
+                // Mouse is in black bar, not over any HUD element
+                window.setView(currentView);
+                return false;
+            }
+
+            // Adjust x-coordinate to account for pillarboxing
+            float adjustedX = (mousePos.x - (viewport.left * windowSize.x)) / (viewport.width * windowSize.x) * windowSize.x;
+            viewPos = window.mapPixelToCoords(sf::Vector2i(static_cast<int>(adjustedX), mousePos.y));
+        }
+        else if (viewport.height < 1.0f) { // Letterboxing (black bars on top/bottom)
+            // Check if mouse is in the viewable area
+            if (mousePos.y < viewport.top * windowSize.y ||
+                mousePos.y >(viewport.top + viewport.height) * windowSize.y) {
+                // Mouse is in black bar, not over any HUD element
+                window.setView(currentView);
+                return false;
+            }
+
+            // Adjust y-coordinate to account for letterboxing
+            float adjustedY = (mousePos.y - (viewport.top * windowSize.y)) / (viewport.height * windowSize.y) * windowSize.y;
+            viewPos = window.mapPixelToCoords(sf::Vector2i(mousePos.x, static_cast<int>(adjustedY)));
+        }
+        else {
+            // No letterboxing/pillarboxing, normal mapping
+            viewPos = window.mapPixelToCoords(mousePos);
+        }
+
         // Check if mouse is over button
         sf::FloatRect buttonBounds = getGlobalBounds();
         bool result = buttonBounds.contains(viewPos);
-        
+
         // Restore original view
         window.setView(currentView);
-        
+
         return result;
     }
 
@@ -111,7 +150,7 @@ public:
     void UpdatePosition()
     {
         // Set sprite position directly using screen position
-        sf::Sprite::setPosition(m_ScreenPosition);
+        sf::Sprite::setPosition(AdjustForViewport(m_ScreenPosition));
     }
 
     void Draw(sf::RenderWindow& window)
@@ -122,10 +161,19 @@ public:
         // Set to default view for drawing HUD
         window.setView(window.getDefaultView());
 
+        // Update position based on current viewport (for letterboxing/pillarboxing)
+        sf::FloatRect viewport = currentView.getViewport();
+        sf::Vector2f originalPos = sf::Sprite::getPosition();
+
+        // Adjust position for viewport if needed
+        sf::Vector2f adjustedPos = AdjustForViewport(m_ScreenPosition);
+        sf::Sprite::setPosition(adjustedPos);
+
         // Draw button
         window.draw(*this);
 
-        // Restore original view
+        // Restore original position and view
+        sf::Sprite::setPosition(originalPos);
         window.setView(currentView);
     }
 
@@ -157,6 +205,34 @@ protected:
         sf::FloatRect bounds = getLocalBounds();
         setOrigin(bounds.width / 2.f, bounds.height / 2.f);
         UpdatePosition();
+    }
+
+    // Helper function to adjust positions for letterboxing/pillarboxing
+    sf::Vector2f AdjustForViewport(const sf::Vector2f& position) const
+    {
+        // Get the current window and active viewport
+		auto window = Window::GetWindow();
+        if (!window) return position;
+
+        sf::View currentView = window->getView();
+        sf::FloatRect viewport = currentView.getViewport();
+        sf::Vector2u windowSize = window->getSize();
+
+        sf::Vector2f adjustedPos = position;
+
+        // Adjust for pillarboxing (black bars on sides)
+        if (viewport.width < 1.0f) {
+            // Scale the x-coordinate to fit within the visible area
+            adjustedPos.x = (viewport.left * windowSize.x) + (position.x * viewport.width);
+        }
+
+        // Adjust for letterboxing (black bars on top/bottom)
+        if (viewport.height < 1.0f) {
+            // Scale the y-coordinate to fit within the visible area
+            adjustedPos.y = (viewport.top * windowSize.y) + (position.y * viewport.height);
+        }
+
+        return adjustedPos;
     }
 
 private:

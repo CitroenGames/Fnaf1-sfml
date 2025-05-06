@@ -168,7 +168,7 @@ public:
 
     void applyTo(sf::RenderTarget& target) {
         if (maintainResolution) {
-            updateViewport();
+            updateViewport(target.getSize());
         }
         target.setView(view);
     }
@@ -227,22 +227,23 @@ private:
         view.setRotation(rotation);
     }
 
-    void updateViewport() noexcept {
+    void updateViewport(const sf::Vector2u& actualWindowSize) noexcept {
         if (!maintainResolution) return;
 
-        sf::Vector2f windowSize = view.getSize();
-        float windowAspectRatio = windowSize.x / windowSize.y;
+        float windowAspectRatio = static_cast<float>(actualWindowSize.x) / static_cast<float>(actualWindowSize.y);
         float targetAspectRatio = baseResolution.x / baseResolution.y;
 
         sf::FloatRect viewport(0.f, 0.f, 1.f, 1.f);
 
         if (std::abs(windowAspectRatio - targetAspectRatio) > 0.001f) {
             if (windowAspectRatio > targetAspectRatio) {
+                // Ultrawide case - add black bars on the sides (pillarboxing)
                 float ratio = targetAspectRatio / windowAspectRatio;
                 viewport.left = (1.f - ratio) / 2.f;
                 viewport.width = ratio;
             }
             else {
+                // Tall case - add black bars on top/bottom (letterboxing)
                 float ratio = windowAspectRatio / targetAspectRatio;
                 viewport.top = (1.f - ratio) / 2.f;
                 viewport.height = ratio;
@@ -250,6 +251,16 @@ private:
         }
 
         view.setViewport(viewport);
+    }
+
+	void updateViewport() noexcept { // this is for backwards compatibility
+        if (!maintainResolution) return;
+
+        // This is a fallback that uses view size rather than actual window size
+        // For proper black borders, use the overloaded version with window size
+        sf::Vector2f viewSize = view.getSize();
+        updateViewport(sf::Vector2u(static_cast<unsigned int>(viewSize.x),
+            static_cast<unsigned int>(viewSize.y)));
     }
 
     void setTargetPosition(const sf::Vector2f& target) noexcept {
