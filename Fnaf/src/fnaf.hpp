@@ -11,6 +11,9 @@
 
 using Timestamp = std::chrono::system_clock::time_point;
 
+// Random check ceiling (for 1-20 roll)
+constexpr int MAX_RANDOM_ROLL = 20;
+
 // Constants
 constexpr int MAX_AI_LEVEL = 20;
 constexpr double NORMAL_TIME_WINDOW = 3.02;  // Seconds between AI decisions
@@ -54,6 +57,7 @@ struct AILevels
     int freddy, bonnie, chica, foxy;
 };
 
+class CameraSystem;
 
 class Animatronic {
 public:
@@ -65,7 +69,11 @@ public:
     bool isInOffice;
     std::vector<AnimatronicPath> possiblePaths;
     bool isActive;
-    
+
+    // FNAF 1 AI mechanics variables
+    mutable float timeSinceLastMoveCheck;  // Time since last movement check
+    float moveInterval;                    // Time between movement opportunities
+
     Animatronic(const std::string& name, int aiLevel);
     bool canMove(Room destination) const;
     void updateMovementProgress(float delta);
@@ -76,13 +84,17 @@ class FNAFGame {
 public:
     FNAFGame();
     ~FNAFGame() = default;
-    
+
     void InitializeGame(int night);
     void ShutdownGame() {}
     void InitializeCustomNight(AILevels _AILevels);
     void Update(float deltaTime);
     bool IsGameOver() const { return m_GameOver; }
-    
+
+    void SetCameraSystem(std::shared_ptr<CameraSystem> cameraSystem) {
+        m_CameraSystem = cameraSystem;
+    }
+
     Room GetAnimatronicLocation(const std::string& animatronicName) const {
         auto it = m_Animatronics.find(animatronicName);
         if (it != m_Animatronics.end()) {
@@ -90,11 +102,35 @@ public:
         }
         return Room::SHOW_STAGE; // Default location
     }
-    
+
     float GetAnimatronicMovementProgress(const std::string& animatronicName) const {
         auto it = m_Animatronics.find(animatronicName);
         if (it != m_Animatronics.end()) {
             return it->second->movementProgress;
+        }
+        return 0.0f;
+    }
+
+    int GetAnimatronicAILevel(const std::string& animatronicName) const {
+        auto it = m_Animatronics.find(animatronicName);
+        if (it != m_Animatronics.end()) {
+            return it->second->aiLevel;
+        }
+        return 0;
+    }
+
+    float GetAnimatronicTimeSinceLastMove(const std::string& animatronicName) const {
+        auto it = m_Animatronics.find(animatronicName);
+        if (it != m_Animatronics.end()) {
+            return it->second->timeSinceLastMoveCheck;
+        }
+        return 0.0f;
+    }
+
+    float GetAnimatronicMoveInterval(const std::string& animatronicName) const {
+        auto it = m_Animatronics.find(animatronicName);
+        if (it != m_Animatronics.end()) {
+            return it->second->moveInterval;
         }
         return 0.0f;
     }
@@ -109,32 +145,35 @@ private:
     std::mt19937 m_RNG;
     float m_TimeProgress = 0.0f;
     float m_CurrentHourDuration;
+    int m_LastHourAIUpdated = 0;  // Tracks the last hour when AI was updated
+    std::shared_ptr<CameraSystem> m_CameraSystem;  // Reference to the camera system
 
     // Movement tracking
     std::map<Room, std::vector<Room>> m_ValidMoves;
     std::array<bool, 2> m_Doors;  // [0] = left, [1] = right
     std::array<bool, 2> m_Lights; // [0] = left, [1] = right
-    
+
     // AI and gameplay functions
     void UpdateAnimatronics(float deltaTime);
     void UpdatePower(float deltaTime);
     void CheckForJumpscare();
     void HandlePowerOutage(float deltaTime);
     bool IsDefendedAgainst(const Animatronic& animatronic) const;
-    void TriggerJumpscare(const std::string& character);
-    
+    void TriggerJumpscare(const Animatronic& character);
+    void UpdatePowerUsageLevel();
+
     // Movement logic
     void AttemptMove(Animatronic& animatronic);
     bool ShouldAttemptMove(const Animatronic& animatronic);
-    Room GetNextRoom(const Animatronic& animatronic) ;
+    Room GetNextRoom(const Animatronic& animatronic);
     void MoveAnimatronic(Animatronic& animatronic, Room destination);
-    
+
     // Character-specific behavior
     void UpdateFreddy(Animatronic& freddy, float deltaTime);
     void UpdateBonnie(Animatronic& bonnie, float deltaTime);
     void UpdateChica(Animatronic& chica, float deltaTime);
     void UpdateFoxy(Animatronic& foxy, float deltaTime);
-    
+
     // Utility functions
     void InitializeMovementPaths();
     int GetAILevel(int night, const std::string& character) const;
@@ -142,4 +181,3 @@ private:
     bool IsCameraViewingLocation(Room location) const;
     void PlaySound(const std::string& soundName) const;
 };
-

@@ -7,6 +7,7 @@
 
 #include "Assets/Resources.h"
 #include "GameState.h"
+#include "CameraSystem.h"
 
 namespace {
     constexpr float FREDDY_LAUGH_CHANCE = 0.1f;
@@ -16,6 +17,17 @@ namespace {
     constexpr float SECONDS_PER_HOUR = 89.0f;
     constexpr float BASE_SECONDS_PER_HOUR = 89.0f;
     constexpr float HOUR_PROGRESS_RATE = 1.0f / SECONDS_PER_HOUR;
+
+    // FNAF 1 AI mechanics constants
+    constexpr float FREDDY_MOVE_INTERVAL = 3.0f;   // 3 seconds for Freddy
+    constexpr float OTHER_MOVE_INTERVAL = 4.97f;   // ~5 seconds for others
+
+    // Hour-based AI increments - based on FNAF 1 mechanics
+    const std::map<int, std::map<std::string, int>> HOUR_AI_INCREMENTS = {
+        {2, {{"Bonnie", 1}, {"Chica", 0}, {"Foxy", 0}, {"Freddy", 0}}},
+        {3, {{"Bonnie", 1}, {"Chica", 1}, {"Foxy", 1}, {"Freddy", 0}}},
+        {4, {{"Bonnie", 1}, {"Chica", 1}, {"Foxy", 1}, {"Freddy", 0}}}
+    };
 }
 
 Animatronic::Animatronic(const std::string& name, int aiLevel)
@@ -25,9 +37,11 @@ Animatronic::Animatronic(const std::string& name, int aiLevel)
     , movementProgress(0.0f)
     , isInOffice(false)
     , isActive(true)
+    , timeSinceLastMoveCheck(0.0f)
+    , moveInterval(name == "Freddy" ? FREDDY_MOVE_INTERVAL : OTHER_MOVE_INTERVAL)
 {
     lastMoved = std::chrono::system_clock::now();
-    
+
     // Initialize character-specific paths
     if (name == "Freddy") {
         possiblePaths = {
@@ -84,8 +98,8 @@ void Animatronic::updateMovementProgress(float delta) {
             movementProgress += delta * (aiLevel * PROGRESS_RATE);
         }
         else {
-            // Regression when watched
-            movementProgress = std::max(0.0f, movementProgress - delta * 0.5f);
+            // Regression when watched - commented out for now as Foxy is simplified
+            // movementProgress = std::max(0.0f, movementProgress - delta * 0.5f);
         }
     }
     else {
@@ -97,11 +111,13 @@ void Animatronic::updateMovementProgress(float delta) {
 void Animatronic::reset() {
     if (name == "Foxy") {
         currentLocation = Room::PIRATE_COVE;
-    } else {
+    }
+    else {
         currentLocation = Room::SHOW_STAGE;
     }
     movementProgress = 0.0f;
     isInOffice = false;
+    timeSinceLastMoveCheck = 0.0f;
 }
 
 FNAFGame::FNAFGame()
@@ -110,6 +126,8 @@ FNAFGame::FNAFGame()
     , m_PowerOutageTimer(0.0f)
     , m_FreddyMusicBoxTimer(0.0f)
     , m_RNG(std::random_device{}())
+    , m_LastHourAIUpdated(0)
+    , m_CameraSystem(nullptr)
 {
     InitializeMovementPaths();
 }
@@ -122,7 +140,8 @@ void FNAFGame::InitializeGame(int night) {
     m_CurrentHourDuration = BASE_SECONDS_PER_HOUR;
     m_GameOver = false;
     m_PowerOutage = false;
-    
+    m_LastHourAIUpdated = 0;
+
     // Initialize animatronics
     m_Animatronics["Freddy"] = std::make_unique<Animatronic>("Freddy", GetAILevel(night, "Freddy"));
     m_Animatronics["Bonnie"] = std::make_unique<Animatronic>("Bonnie", GetAILevel(night, "Bonnie"));
@@ -221,112 +240,150 @@ float FNAFGame::CalculatePowerDrain() const {
 void FNAFGame::UpdateAnimatronics(float deltaTime) {
     for (auto& [name, animatronic] : m_Animatronics) {
         if (!animatronic->isActive) continue;
-        
-        animatronic->updateMovementProgress(deltaTime);
-        
-        if (ShouldAttemptMove(*animatronic)) {
-            AttemptMove(*animatronic);
+
+        // Update movement check timer
+        animatronic->timeSinceLastMoveCheck += deltaTime;
+
+        // Check for hour-based AI increments
+        if (player.m_Time > m_LastHourAIUpdated) {
+            auto hourIncrements = HOUR_AI_INCREMENTS.find(player.m_Time);
+            if (hourIncrements != HOUR_AI_INCREMENTS.end()) {
+                auto nameIncrements = hourIncrements->second.find(name);
+                if (nameIncrements != hourIncrements->second.end()) {
+                    animatronic->aiLevel += nameIncrements->second;
+                    // Cap at maximum AI level
+                    animatronic->aiLevel = std::min(animatronic->aiLevel, MAX_AI_LEVEL);
+                }
+            }
+            m_LastHourAIUpdated = player.m_Time;
         }
-        
+
         // Character-specific updates
         if (name == "Freddy") {
             UpdateFreddy(*animatronic, deltaTime);
-        } else if (name == "Bonnie") {
+        }
+        else if (name == "Bonnie") {
             UpdateBonnie(*animatronic, deltaTime);
-        } else if (name == "Chica") {
+        }
+        else if (name == "Chica") {
             UpdateChica(*animatronic, deltaTime);
-        } else if (name == "Foxy") {
+        }
+        else if (name == "Foxy") {
             UpdateFoxy(*animatronic, deltaTime);
+        }
+
+        // Now check if animatronic should attempt to move
+        if (ShouldAttemptMove(*animatronic)) {
+            AttemptMove(*animatronic);
         }
     }
 }
 
 bool FNAFGame::ShouldAttemptMove(const Animatronic& animatronic) {
     if (!animatronic.isActive) return false;
-    
-    auto now = std::chrono::system_clock::now();
-    double timeSinceLastMove = 
-        std::chrono::duration<double>(now - animatronic.lastMoved).count();
-    
-    double timeWindow = player.m_Night >= 3 ? ACCELERATED_TIME_WINDOW : NORMAL_TIME_WINDOW;
-    
-    if (timeSinceLastMove < timeWindow) return false;
-    
+
+    // Check if it's time for a movement opportunity
+    if (animatronic.timeSinceLastMoveCheck < animatronic.moveInterval) {
+        return false;
+    }
+
+    // Reset timer
+    animatronic.timeSinceLastMoveCheck = 0.0f;
+
+    // For Foxy, we'll handle movement differently - this is simplified
     if (animatronic.name == "Foxy") {
+        // Simplified Foxy logic - just use AI level as direct chance
+        std::uniform_int_distribution<int> dist(1, MAX_RANDOM_ROLL);
+        return dist(m_RNG) <= animatronic.aiLevel;
+
+        /* Original complex logic commented out
         return animatronic.movementProgress >= 100.0f;
-    }
-    
-    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
-    float baseProbability = static_cast<float>(animatronic.aiLevel) / MAX_AI_LEVEL;
-
-    if (player.m_Time > 3) {
-        baseProbability *= 1.25f;
+        */
     }
 
-    return dist(m_RNG) < baseProbability;
+    // For other animatronics, generate random 1-20 roll
+    std::uniform_int_distribution<int> dist(1, MAX_RANDOM_ROLL);
+    int roll = dist(m_RNG);
+
+    // If roll <= AI level, the animatronic moves
+    return roll <= animatronic.aiLevel;
 }
 
 void FNAFGame::AttemptMove(Animatronic& animatronic) {
     Room nextRoom = GetNextRoom(animatronic);
-    
+
     if (animatronic.canMove(nextRoom)) {
         MoveAnimatronic(animatronic, nextRoom);
-        
+
         // Special effects
-        if (animatronic.name == "Freddy" && 
+        if (animatronic.name == "Freddy" &&
             nextRoom != Room::OFFICE) {
             if (std::uniform_real_distribution<float>(0.0f, 1.0f)(m_RNG) < FREDDY_LAUGH_CHANCE) {
                 PlaySound("freddy_laugh");
             }
         }
-        
+
         animatronic.lastMoved = std::chrono::system_clock::now();
     }
 }
 
 void FNAFGame::UpdateFreddy(Animatronic& freddy, float deltaTime) {
     // Freddy only moves when cameras are down
-    if (player.m_UsingCamera) {
-        freddy.movementProgress = std::max(0.0f, freddy.movementProgress - deltaTime * 5.0f);
-    } else {
-        freddy.movementProgress += deltaTime * (freddy.aiLevel * 0.1f);
+    if (player.m_UsingCamera && freddy.currentLocation != Room::OFFICE) {
+        // Freddy gets "stalled" by camera check
+        freddy.timeSinceLastMoveCheck = 0.0f;
     }
-    
+
+    // Handle "bounce back" if looking at Freddy with camera
+    if (player.m_UsingCamera && m_CameraSystem) {
+        // If Freddy is in East Hall Corner and player is viewing that camera
+        if (freddy.currentLocation == Room::EAST_CORNER &&
+            m_CameraSystem->GetActiveCamera() == "4B") {
+            // Stall Freddy's movement
+            freddy.timeSinceLastMoveCheck = 0.0f;
+        }
+    }
+
     // Handle power outage sequence
     if (m_PowerOutage && m_FreddyMusicBoxTimer > 0.0f) {
         m_FreddyMusicBoxTimer -= deltaTime;
         if (m_FreddyMusicBoxTimer <= 0.0f) {
-            TriggerJumpscare("Freddy");
+            //TriggerJumpscare(m_Animatronics.find("freddy"));
         }
     }
 }
 
 void FNAFGame::UpdateBonnie(Animatronic& bonnie, float deltaTime) {
-    // Bonnie is more aggressive on the left side
-    if (bonnie.currentLocation == Room::WEST_CORNER) {
-        bonnie.movementProgress += deltaTime * (bonnie.aiLevel * 0.15f);
-    } else {
-        bonnie.movementProgress += deltaTime * (bonnie.aiLevel * 0.1f);
-    }
+    // Bonnie movement is fairly standard - mainly handled by core AI
+    // No camera stalling effect
 }
 
 void FNAFGame::UpdateChica(Animatronic& chica, float deltaTime) {
     // Chica makes noise in the kitchen
     if (chica.currentLocation == Room::KITCHEN) {
-        if (std::uniform_real_distribution<float>(0.0f, 1.0f)(m_RNG) < 0.1f) {
-            PlaySound("kitchen/noise1");
+        if (std::uniform_real_distribution<float>(0.0f, 1.0f)(m_RNG) < 0.05f) {
+            PlaySound("kitchen/noise" + std::to_string(std::uniform_int_distribution<int>(1, 3)(m_RNG)));
         }
     }
-    
-    chica.movementProgress += deltaTime * (chica.aiLevel * 0.1f);
 }
 
 void FNAFGame::UpdateFoxy(Animatronic& foxy, float deltaTime) {
-    // Foxy's sprint sequence
+    // Simplified Foxy behavior - movement based on FNAF 1 mechanics
+    if (player.m_UsingCamera && m_CameraSystem) {
+        // Check if player is viewing Pirate Cove
+        bool viewingPirateCove = m_CameraSystem->GetActiveCamera() == "2A";
+
+        if (viewingPirateCove) {
+            // Reset Foxy timer if watched
+            foxy.timeSinceLastMoveCheck = 0.0f;
+        }
+    }
+
+    /* Complex Foxy sprint sequence commented out
     if (foxy.movementProgress >= 100.0f && foxy.currentLocation == Room::PIRATE_COVE) {
         PlaySound("foxy_run");
         foxy.currentLocation = Room::WEST_HALL;
-        
+
         // Check if left door is closed
         if (!m_Doors[0]) { // Left door
             TriggerJumpscare("Foxy");
@@ -337,6 +394,7 @@ void FNAFGame::UpdateFoxy(Animatronic& foxy, float deltaTime) {
             foxy.reset();
         }
     }
+    */
 }
 
 void FNAFGame::HandlePowerOutage(float deltaTime) {
@@ -360,7 +418,8 @@ void FNAFGame::HandlePowerOutage(float deltaTime) {
     if (m_FreddyMusicBoxTimer > 0.0f) {
         m_FreddyMusicBoxTimer -= deltaTime;
         if (m_FreddyMusicBoxTimer <= 0.0f) {
-            TriggerJumpscare("Freddy");
+			// Freddy jumpscare if music box runs out
+            //TriggerJumpscare(m_Animatronics.find("freddy"));
         }
     }
 }
@@ -403,28 +462,33 @@ Room FNAFGame::GetNextRoom(const Animatronic& animatronic) {
 
 void FNAFGame::MoveAnimatronic(Animatronic& animatronic, Room destination) {
     if (!animatronic.canMove(destination)) return;
-    
+
     animatronic.currentLocation = destination;
     animatronic.movementProgress = 0.0f;
-    
+
     // Check if reached office
     if (destination == Room::OFFICE) {
         if (!IsDefendedAgainst(animatronic)) {
-            TriggerJumpscare(animatronic.name);
-        } else {
+            TriggerJumpscare(animatronic);
+        }
+        else {
             // Retreat if blocked
             animatronic.reset();
         }
     }
+
+    // Special case for Freddy - laugh when he moves
+    if (animatronic.name == "Freddy" && std::uniform_real_distribution<float>(0.0f, 1.0f)(m_RNG) < 0.3f) {
+        PlaySound("freddy_laugh");
+    }
 }
 
 bool FNAFGame::IsDefendedAgainst(const Animatronic& animatronic) const {
-    if (animatronic.name == "Freddy") {
-        return player.m_UsingCamera;
-    } else if (animatronic.name == "Bonnie" || animatronic.name == "Foxy") {
-        return m_Doors[0]; // Left door
-    } else if (animatronic.name == "Chica") {
+    if (animatronic.name == "Freddy" || animatronic.name == "Chica") {
         return m_Doors[1]; // Right door
+    }
+    else if (animatronic.name == "Bonnie" || animatronic.name == "Foxy") {
+        return m_Doors[0]; // Left door
     }
     return false;
 }
@@ -432,13 +496,13 @@ bool FNAFGame::IsDefendedAgainst(const Animatronic& animatronic) const {
 void FNAFGame::CheckForJumpscare() {
     for (const auto& [name, animatronic] : m_Animatronics) {
         if (animatronic->currentLocation == Room::OFFICE && !IsDefendedAgainst(*animatronic)) {
-            TriggerJumpscare(name);
+            TriggerJumpscare(*animatronic);
             return;
         }
     }
 }
 
-void FNAFGame::TriggerJumpscare(const std::string& character) {
+void FNAFGame::TriggerJumpscare(const Animatronic& character) {
     PlaySound("JumpScare/XSCREAM");
     m_GameOver = true;
 }
@@ -447,10 +511,10 @@ void FNAFGame::InitializeCustomNight(AILevels _AILevels) {
     // Validate AI levels
     auto validateLevel = [](int level) {
         return std::clamp(level, 0, MAX_AI_LEVEL);
-    };
-    
+        };
+
     InitializeGame(7); // Custom night is night 7
-    
+
     m_Animatronics["Freddy"]->aiLevel = validateLevel(_AILevels.freddy);
     m_Animatronics["Bonnie"]->aiLevel = validateLevel(_AILevels.bonnie);
     m_Animatronics["Chica"]->aiLevel = validateLevel(_AILevels.chica);
@@ -459,46 +523,79 @@ void FNAFGame::InitializeCustomNight(AILevels _AILevels) {
 
 void FNAFGame::InitializeMovementPaths() {
     // Initialize valid movement paths for each room
-    m_ValidMoves[Room::SHOW_STAGE] = {Room::DINING_AREA};
-    m_ValidMoves[Room::DINING_AREA] = {Room::WEST_HALL, Room::EAST_HALL, Room::RESTROOMS, Room::KITCHEN};
-    m_ValidMoves[Room::WEST_HALL] = {Room::WEST_CORNER, Room::SUPPLY_CLOSET};
-    m_ValidMoves[Room::EAST_HALL] = {Room::EAST_CORNER, Room::KITCHEN};
-    m_ValidMoves[Room::WEST_CORNER] = {Room::OFFICE};
-    m_ValidMoves[Room::EAST_CORNER] = {Room::OFFICE};
-    m_ValidMoves[Room::PIRATE_COVE] = {Room::WEST_HALL};
-    m_ValidMoves[Room::KITCHEN] = {Room::EAST_HALL};
-    m_ValidMoves[Room::RESTROOMS] = {Room::KITCHEN, Room::DINING_AREA};
+    m_ValidMoves[Room::SHOW_STAGE] = { Room::DINING_AREA };
+    m_ValidMoves[Room::DINING_AREA] = { Room::WEST_HALL, Room::EAST_HALL, Room::RESTROOMS, Room::KITCHEN };
+    m_ValidMoves[Room::WEST_HALL] = { Room::WEST_CORNER, Room::SUPPLY_CLOSET };
+    m_ValidMoves[Room::EAST_HALL] = { Room::EAST_CORNER, Room::KITCHEN };
+    m_ValidMoves[Room::WEST_CORNER] = { Room::OFFICE };
+    m_ValidMoves[Room::EAST_CORNER] = { Room::OFFICE };
+    m_ValidMoves[Room::PIRATE_COVE] = { Room::WEST_HALL };
+    m_ValidMoves[Room::KITCHEN] = { Room::EAST_HALL };
+    m_ValidMoves[Room::RESTROOMS] = { Room::KITCHEN, Room::DINING_AREA };
 }
 
 int FNAFGame::GetAILevel(int night, const std::string& character) const {
-    // Default AI levels for each night
+    // Default AI levels for each night based on FNAF 1 mechanics
     struct NightLevels {
         int freddy, bonnie, chica, foxy;
     };
-    
-    const std::array<NightLevels, 7> nightConfigs = {{
-        {0, 3, 3, 1},  // Night 1
-        {0, 4, 4, 2},  // Night 2
-        {1, 6, 6, 4},  // Night 3
-        {2, 8, 8, 6},  // Night 4
-        {3, 10, 10, 8}, // Night 5
-        {4, 12, 12, 10}, // Night 6
+
+    // Updated AI levels to match FNAF 1 mechanics
+    const std::array<NightLevels, 7> nightConfigs = { {
+        {0, 0, 0, 0},  // Night 1
+        {0, 3, 1, 1},  // Night 2
+        {1, 0, 5, 2},  // Night 3
+        {1, 2, 4, 6},  // Night 4 (Freddy should have 50/50 chance to be 1 or 2, using 1 for simplicity)
+        {3, 5, 7, 5},  // Night 5
+        {4, 10, 12, 6}, // Night 6
         {5, 14, 14, 12}  // Night 7 (Default Custom Night)
-    }};
-    
+    } };
+
     if (night < 1 || night > 7) night = 1;
-    
+
     const auto& config = nightConfigs[night - 1];
-    
+
     if (character == "Freddy") return config.freddy;
     if (character == "Bonnie") return config.bonnie;
     if (character == "Chica") return config.chica;
     if (character == "Foxy") return config.foxy;
-    
+
     return 0;
 }
 
 void FNAFGame::PlaySound(const std::string& soundName) const {
     auto sound = Resources::GetMusic("Audio/" + soundName + ".wav");
-	sound->play();
+    if (sound) {
+        sound->play();
+    }
+}
+
+bool FNAFGame::IsCameraViewingLocation(Room location) const {
+    if (!m_CameraSystem || !player.m_UsingCamera) {
+        return false;
+    }
+
+    std::string cameraId = m_CameraSystem->GetActiveCamera();
+
+    // Mapping of cameras to rooms
+    const std::map<std::string, Room> cameraToRoom = {
+        {"1A", Room::SHOW_STAGE},
+        {"1B", Room::DINING_AREA},
+        {"1C", Room::PIRATE_COVE},
+        {"2A", Room::WEST_HALL},
+        {"2B", Room::WEST_CORNER},
+        {"3", Room::SUPPLY_CLOSET},
+        {"4A", Room::EAST_HALL},
+        {"4B", Room::EAST_CORNER},
+        {"5", Room::KITCHEN},
+        {"6", Room::RESTROOMS},
+        {"7", Room::OFFICE}
+    };
+
+    auto it = cameraToRoom.find(cameraId);
+    if (it != cameraToRoom.end()) {
+        return it->second == location;
+    }
+
+    return false;
 }

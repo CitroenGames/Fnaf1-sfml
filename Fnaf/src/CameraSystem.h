@@ -29,6 +29,7 @@ public:
     nlohmann::json Serialize() const override { return nlohmann::json(); }
     void Deserialize(const nlohmann::json& data) override {}
     std::string GetTypeName() const override { return "CameraSystem"; }
+    std::string GetActiveCamera() const { return m_CurrentCamera; }
 
 private:
     bool m_IsActive;
