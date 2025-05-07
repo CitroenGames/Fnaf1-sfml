@@ -6,6 +6,7 @@
 #include <cstring>
 #include <future>
 #include <thread>
+#include <functional>
 
 namespace fs = std::filesystem;
 
