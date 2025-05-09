@@ -71,4 +71,7 @@ private:
     // Static texture collections
     std::vector<std::shared_ptr<sf::Texture>> m_NoiseTextures;
     std::vector<std::shared_ptr<sf::Texture>> m_WhiteTextures;
+
+
+    std::shared_ptr<sf::Font> font = nullptr;
 };

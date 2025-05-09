@@ -31,7 +31,7 @@ Menu::Menu()
         ));
     }
 
-    // White textures
+    // Load & Setup white textures
     for (int i = 1; i <= 8; i++)
     {
         m_WhiteTextures.push_back(RemoveBlackBackground(
@@ -39,7 +39,7 @@ Menu::Menu()
         ));
     }
 
-    // Setup Freddy glitch effect
+    // Load & Setup Freddy glitch effect
     m_FreddyGlitchEffect = GlitchEffect(0);
     for (int i = 1; i < 4; i++)
     {
@@ -60,34 +60,11 @@ Menu::Menu()
         (Window::GetWindow()->getSize().y - m_WarningMessageSprite.getGlobalBounds().height) / 2
     );
 
-    // Setup loading screen sprite
+    // load loading screen sprite
     m_LoadingScreenTexture = Resources::GetTexture("Graphics/Loading.png");
-    m_LoadingScreenSprite.setTexture(*m_LoadingScreenTexture);
-    m_LoadingScreenSprite.setPosition(
-        Window::GetWindow()->getSize().x - m_LoadingScreenSprite.getGlobalBounds().width,
-        Window::GetWindow()->getSize().y - m_LoadingScreenSprite.getGlobalBounds().height
-    );
 
-    // Setup time and night text
-    sf::Font& font = *Resources::GetFont("Font/five-nights-at-freddys.ttf");
-
-    m_TimeText.setFont(font);
-    m_TimeText.setString("12:00 AM");
-    m_TimeText.setCharacterSize(40);
-    m_TimeText.setFillColor(sf::Color::White);
-    m_TimeText.setPosition(
-        (Window::GetWindow()->getSize().x - m_TimeText.getGlobalBounds().width) / 2,
-        Window::GetWindow()->getSize().y / 2 - 50
-    );
-
-    m_NightText.setFont(font);
-    m_NightText.setString("1st Night");
-    m_NightText.setCharacterSize(40);
-    m_NightText.setFillColor(sf::Color::White);
-    m_NightText.setPosition(
-        (Window::GetWindow()->getSize().x - m_NightText.getGlobalBounds().width) / 2,
-        Window::GetWindow()->getSize().y / 2 + 50
-    );
+    // load time and night text
+    font = Resources::GetFont("Font/five-nights-at-freddys.ttf");
 
     // Prepare logo sprite
     m_LogoSprite = sf::Sprite(*m_Logo);
@@ -101,6 +78,31 @@ void Menu::Init()
     // Start audio using AudioManager
     AudioManager::GetInstance().PlayMusic(STATIC_AUDIO_KEY, false, 100.0f);
     AudioManager::GetInstance().PlayMusic(MENU_MUSIC_KEY, true, 100.0f);
+
+    m_TimeText.setFont(*font);
+    m_TimeText.setString("12:00 AM");
+    m_TimeText.setCharacterSize(10);
+    m_TimeText.setFillColor(sf::Color::White);
+    m_TimeText.setPosition(
+        (Window::GetWindow()->getSize().x - m_TimeText.getGlobalBounds().width) / 2,
+        Window::GetWindow()->getSize().y / 2 - 50
+    );
+
+    m_NightText.setFont(*font);
+    m_NightText.setString("1st Night");
+    m_NightText.setCharacterSize(10);
+    m_NightText.setFillColor(sf::Color::White);
+    m_NightText.setPosition(
+        (Window::GetWindow()->getSize().x - m_NightText.getGlobalBounds().width) / 2,
+        Window::GetWindow()->getSize().y / 2 + 50
+    );
+
+	// Setup loading screen sprite
+    m_LoadingScreenSprite.setTexture(*m_LoadingScreenTexture);
+    m_LoadingScreenSprite.setPosition(
+        Window::GetWindow()->getSize().x - m_LoadingScreenSprite.getGlobalBounds().width,
+        Window::GetWindow()->getSize().y - m_LoadingScreenSprite.getGlobalBounds().height
+    );
 
     // Setup white glitch effect
     m_WhiteGlitchEffect = GlitchEffect(2);
