@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <iostream>
 
 inline std::shared_ptr<sf::Texture> MakeTextureTransparent(const std::shared_ptr<sf::Texture>& inputTexture, float alpha = 0.5f) {
     if (!inputTexture || !inputTexture->getSize().x || !inputTexture->getSize().y) {

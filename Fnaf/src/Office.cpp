@@ -10,9 +10,11 @@ Office::Office()
     : m_IsVisible(true)
     , m_LeftLightOn(false)
     , m_RightLightOn(false)
+    , m_GameRef(nullptr)
 {
     m_OfficeTexture = Resources::GetTexture("Graphics/Office/NormalOffice.png");
     m_DoorTexture = Resources::GetTexture("Graphics/Office/door.png");
+    m_PowerOutageTexture = Resources::GetTexture("Graphics/Office/Office_NoPower1.png");
 
     // Load light textures
     m_LeftLightTexture = Resources::GetTexture("Graphics/Office/Light/Office_LightLeft.png");
@@ -42,12 +44,30 @@ Office::Office()
     m_FreddyNoseButton.SetPosition(sf::Vector2f(667, 212.5));
 
     m_LeftButtons.SetLayer(2);
-    m_LeftButtons.SetCallbacks([&](bool active) { m_LeftDoor.Play(active); m_DoorNoise->play(); },
-        [&](bool active) { ToggleLeftLight(active); });
+    m_LeftButtons.SetCallbacks(
+        [&](bool active) {
+            m_LeftDoor.Play(active);
+            m_DoorNoise->play();
+            // Update game state if reference exists
+            if (m_GameRef) {
+                m_GameRef->SetDoorState(0, active);
+            }
+        },
+        [&](bool active) { ToggleLeftLight(active); }
+    );
 
     m_RightButtons.SetLayer(2);
-    m_RightButtons.SetCallbacks([&](bool active) { m_RightDoor.Play(active); m_DoorNoise->play(); },
-        [&](bool active) { ToggleRightLight(active); });
+    m_RightButtons.SetCallbacks(
+        [&](bool active) {
+            m_RightDoor.Play(active);
+            m_DoorNoise->play();
+            // Update game state if reference exists
+            if (m_GameRef) {
+                m_GameRef->SetDoorState(1, active);
+            }
+        },
+        [&](bool active) { ToggleRightLight(active); }
+    );
 
     m_LeftDoor = FlipBook(2, 0.016f, false);
     m_RightDoor = FlipBook(2, 0.016f, false);
@@ -80,6 +100,36 @@ void Office::Init()
     m_LightSound->setVolume(50.0f);
 
     auto FanEnt = SceneManager::GetActiveScene()->CreateEntity("Fan");
+
+    // Subscribe to power outage event
+    GameEvents::Subscribe(GameEvent::POWER_OUTAGE, [this]() {
+        HandlePowerOutage();
+        });
+}
+
+void Office::HandlePowerOutage()
+{
+    // Switch to power outage texture
+    m_OfficeSprite.setTexture(*m_PowerOutageTexture);
+
+    // Turn off any active lights or doors
+    if (m_LeftLightOn) {
+        m_LeftButtons.updateBottomState(false);
+        m_LeftLightOn = false;
+    }
+    if (m_RightLightOn) {
+        m_RightButtons.updateBottomState(false);
+        m_RightLightOn = false;
+    }
+
+    // Stop light sound if playing
+    if (m_LightSound->getStatus() == sf::Music::Playing) {
+        m_LightSound->stop();
+    }
+
+    // Disable door controls during power outage
+    m_LeftButtons.SetEnabled(false);
+    m_RightButtons.SetEnabled(false);
 }
 
 void Office::HideOfficeElements()
@@ -148,12 +198,20 @@ void Office::ToggleLeftLight(bool active)
 
     m_LeftLightOn = active;
 
+    // Update game state if reference exists
+    if (m_GameRef) {
+        m_GameRef->SetLightState(0, active);
+    }
+
     if (active)
     {
         // Check if Bonnie is at the door and use appropriate texture
         bool bonnieAtDoor = false; // This would come from the game state
         // In a real implementation, you would check the animatronic's position
-        // For example: bonnieAtDoor = (GameState::GetAnimatronicLocation("Bonnie") == Room::WEST_CORNER);
+        if (m_GameRef) {
+            Room bonnieLocation = m_GameRef->GetAnimatronicLocation("Bonnie");
+            bonnieAtDoor = (bonnieLocation == Room::WEST_CORNER);
+        }
 
         if (bonnieAtDoor)
         {
@@ -175,8 +233,10 @@ void Office::ToggleLeftLight(bool active)
     }
     else
     {
-        // Reset office texture
-        m_OfficeSprite.setTexture(*m_OfficeTexture);
+        // Reset office texture if not in power outage
+        if (m_GameRef && !m_GameRef->IsPowerOutage()) {
+            m_OfficeSprite.setTexture(*m_OfficeTexture);
+        }
 
         // If no lights are active, stop the sound and update power usage
         if (!m_RightLightOn) {
@@ -197,12 +257,20 @@ void Office::ToggleRightLight(bool active)
 
     m_RightLightOn = active;
 
+    // Update game state if reference exists
+    if (m_GameRef) {
+        m_GameRef->SetLightState(1, active);
+    }
+
     if (active)
     {
         // Check if Chica is at the door and use appropriate texture
         bool chicaAtDoor = false; // This would come from the game state
         // In a real implementation, you would check the animatronic's position
-        // For example: chicaAtDoor = (GameState::GetAnimatronicLocation("Chica") == Room::EAST_CORNER);
+        if (m_GameRef) {
+            Room chicaLocation = m_GameRef->GetAnimatronicLocation("Chica");
+            chicaAtDoor = (chicaLocation == Room::EAST_CORNER);
+        }
 
         if (chicaAtDoor)
         {
@@ -224,8 +292,10 @@ void Office::ToggleRightLight(bool active)
     }
     else
     {
-        // Reset office texture
-        m_OfficeSprite.setTexture(*m_OfficeTexture);
+        // Reset office texture if not in power outage
+        if (m_GameRef && !m_GameRef->IsPowerOutage()) {
+            m_OfficeSprite.setTexture(*m_OfficeTexture);
+        }
 
         // If no lights are active, stop the sound and update power usage
         if (!m_LeftLightOn) {
@@ -233,12 +303,4 @@ void Office::ToggleRightLight(bool active)
             player.m_UsingLight = false;
         }
     }
-}
-
-void Office::Render()
-{
-}
-
-void Office::Destroy()
-{
 }

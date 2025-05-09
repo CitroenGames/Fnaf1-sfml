@@ -37,6 +37,8 @@ public:
     }
 
     void updateButton(sf::RenderWindow& window) {
+		if (!m_Enabled) return; // Skip update if not enabled
+
         // Check if mouse is over button
         if (IsMouseOver(window)) {
             // Detect mouse press (only trigger once per click)
@@ -75,7 +77,6 @@ public:
 
     ButtonState GetCurrentState() const { return m_CurrentState; }
 
-    // Add this method to TopBottomButtons class
     void updateBottomState(bool active) {
         // If active is true, set to bottom active (or both if top was active)
         // If active is false, set to no active (or top active if both were active)
@@ -98,13 +99,22 @@ public:
         updateTexture();
     }
 
+    void SetEnabled(bool IsEnabled)
+    {
+		m_CurrentState = ButtonState::NoActive;
+		m_WasMousePressed = false;
+		m_Enabled = IsEnabled;
+		updateTexture();
+    }
+
 private:
     std::function<void(bool active)> m_OnTopClick;
     std::function<void(bool active)> m_OnBottomClick;
     std::vector<std::shared_ptr<sf::Texture>> m_Textures;
 
     ButtonState m_CurrentState;
-    bool m_WasMousePressed;    // Flag to prevent multiple triggers
+    bool m_WasMousePressed;
+	bool m_Enabled = true;
 
     void updateTopState() {
         switch (m_CurrentState) {

@@ -1,13 +1,14 @@
 #pragma once
 
-#include <string>
+#include <chrono>
 #include <map>
 #include <vector>
-#include <chrono>
-#include <random>
 #include <memory>
-#include <array>
+#include <string>
+#include <random>
 #include <functional>
+#include <algorithm>
+#include <numeric>
 
 using Timestamp = std::chrono::system_clock::time_point;
 
@@ -80,6 +81,36 @@ public:
     void reset();
 };
 
+// Game events that can be subscribed to
+enum class GameEvent {
+    POWER_OUTAGE,
+    JUMPSCARE,
+    HOUR_CHANGE,
+    // Add more events as needed
+};
+
+// Simple event system for game-wide notifications
+class GameEvents {
+public:
+    // Register a callback for an event
+    static void Subscribe(GameEvent event, std::function<void()> callback) {
+        s_Subscribers[event].push_back(callback);
+    }
+
+    // Trigger an event
+    static void TriggerEvent(GameEvent event) {
+        auto it = s_Subscribers.find(event);
+        if (it != s_Subscribers.end()) {
+            for (auto& callback : it->second) {
+                callback();
+            }
+        }
+    }
+
+private:
+    static std::map<GameEvent, std::vector<std::function<void()>>> s_Subscribers;
+};
+
 class FNAFGame {
 public:
     FNAFGame();
@@ -135,13 +166,33 @@ public:
         return 0.0f;
     }
 
+    // New methods for power system
+    void SetDoorState(int doorIndex, bool isActive) {
+        if (doorIndex >= 0 && doorIndex < m_Doors.size()) {
+            m_Doors[doorIndex] = isActive;
+            UpdatePowerUsageLevel();
+        }
+    }
+
+    void SetLightState(int lightIndex, bool isActive) {
+        if (lightIndex >= 0 && lightIndex < m_Lights.size()) {
+            m_Lights[lightIndex] = isActive;
+            UpdatePowerUsageLevel();
+        }
+    }
+
+    bool IsPowerOutage() const { return m_PowerOutage; }
+    float GetPowerOutageTimer() const { return m_PowerOutageTimer; }
+    float GetFreddyMusicBoxTimer() const { return m_FreddyMusicBoxTimer; }
+    bool IsDefendedAgainst(const Animatronic& animatronic) const;
+
+    std::map<std::string, std::unique_ptr<Animatronic>> m_Animatronics;
 private:
     // Game state
     bool m_GameOver;
     bool m_PowerOutage;
     float m_PowerOutageTimer;
     float m_FreddyMusicBoxTimer;
-    std::map<std::string, std::unique_ptr<Animatronic>> m_Animatronics;
     std::mt19937 m_RNG;
     float m_TimeProgress = 0.0f;
     float m_CurrentHourDuration;
@@ -158,7 +209,6 @@ private:
     void UpdatePower(float deltaTime);
     void CheckForJumpscare();
     void HandlePowerOutage(float deltaTime);
-    bool IsDefendedAgainst(const Animatronic& animatronic) const;
     void TriggerJumpscare(const Animatronic& character);
     void UpdatePowerUsageLevel();
 

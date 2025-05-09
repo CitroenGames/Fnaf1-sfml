@@ -16,7 +16,7 @@ constexpr float m_ViewportWidth = 1280.0f;
 
 void Gameplay::Init()
 {
-    gameplay = std::make_unique<FNAFGame>();
+    gameplay = std::make_shared<FNAFGame>();
     gameplay->InitializeGame(player.m_Night);
 
     if (player.m_Night >= 7) // Custom night
@@ -27,7 +27,10 @@ void Gameplay::Init()
     auto entity = CreateEntity("Office stuff");
     entity->AddComponent<Office>()->Init();
     auto officeComponent = entity->GetComponent<Office>();
-    
+
+    // Set the game reference in the Office component
+    officeComponent->SetGameReference(gameplay);
+
     // Add camera system
     auto cameraEntity = CreateEntity("Camera System");
     cameraEntity->AddComponent<CameraSystem>()->Init();
@@ -67,7 +70,7 @@ void Gameplay::Init()
         // I have no idea where else I would put it but putting in scene is also a terrible idea in terms of keeping the code clean in the init func so stay tuned to see where I'll end up putting it :D
     }
 
-	{ // Camera stuff
+    { // Camera stuff
         Camera2D::Config config;
         config.resolution = sf::Vector2f(1280.0f, 720.0f);
         config.initialZoom = 1.0f;
@@ -83,7 +86,7 @@ void Gameplay::FixedUpdate()
 {
     Scene::FixedUpdate();
 
-	auto window = Window::GetWindow(); // We REALLY should get rid of this shitty mess but who cares for now
+    auto window = Window::GetWindow(); // We REALLY should get rid of this shitty mess but who cares for now
 
     // Check for main camera button press
     if (m_CameraButton->IsClicked(*window)) {
@@ -94,10 +97,29 @@ void Gameplay::FixedUpdate()
 void Gameplay::Update(double deltaTime)
 {
     Scene::Update(deltaTime);
+    
     gameplay->Update(deltaTime);
     if (gameplay->IsGameOver()) {
         SceneManager::QueueSwitchScene(std::make_shared<Menu>());
     }
+
+    // Add keyboard shortcuts for debugging
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::F1)) {
+        // Skip to next night
+        player.m_Night++;
+        SceneManager::QueueSwitchScene(std::make_shared<Menu>());
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::F2)) {
+        // Force power outage
+        player.m_PowerLevel = 0;
+    }
+
+    gameplay->Update(deltaTime);
+    if (gameplay->IsGameOver()) {
+        SceneManager::QueueSwitchScene(std::make_shared<Menu>());
+    }
+
     auto window = Window::GetWindow();
     sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
     sf::Vector2u windowSize = window->getSize();
@@ -253,6 +275,45 @@ void Gameplay::Render()
         }
     }
     ImGui::End();
+
+    // New debug window for power system
+    ImGui::Begin("Power System Debug");
+    {
+        if (gameplay) {
+            ImGui::Text("Power Level: %.2f%%", player.m_PowerLevel);
+
+            // Display active systems
+            ImGui::Text("Active Systems:");
+            ImGui::Text("- Camera: %s", player.m_UsingCamera ? "ON" : "OFF");
+
+            // Display door states
+            ImGui::Text("- Left Door: %s", gameplay->IsDefendedAgainst(*gameplay->m_Animatronics["Bonnie"]) ? "CLOSED" : "OPEN");
+            ImGui::Text("- Right Door: %s", gameplay->IsDefendedAgainst(*gameplay->m_Animatronics["Chica"]) ? "CLOSED" : "OPEN");
+
+			// Display light state
+            ImGui::Text("- Using Lights: %s", player.m_UsingLight ? "ON" : "OFF");
+
+            // Display usage level and drain rate
+            ImGui::Text("Usage Level: %d/5", player.m_UsageLevel);
+
+            // Display power outage info if applicable
+            if (gameplay->IsPowerOutage()) {
+                ImGui::Separator();
+                ImGui::Text("POWER OUTAGE");
+
+                if (gameplay->GetFreddyMusicBoxTimer() > 0) {
+                    ImGui::Text("Freddy Music Box: %.2f seconds", gameplay->GetFreddyMusicBoxTimer());
+                }
+                else {
+                    ImGui::Text("Freddy is coming...");
+                }
+            }
+        }
+        else {
+            ImGui::Text("Gameplay not initialized!");
+        }
+    }
+    ImGui::End();
 #endif
 }
 
@@ -261,7 +322,7 @@ void Gameplay::Destroy()
     if (m_CameraSystem) {
         m_CameraSystem->Destroy();
     }
-    
+
     m_Office.Destroy();
     Scene::Destroy();
 }

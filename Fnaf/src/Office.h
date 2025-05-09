@@ -1,10 +1,10 @@
 #pragma once
 
-#include "SFML/Graphics.hpp"
 #include "Composable.h"
 #include "nlohmann/json.hpp"
 #include "UI/TopBottomButtons.h"
 #include "Animation/FlipBook.h"
+#include "fnaf.hpp"
 
 class Office : public Composable::Component
 {
@@ -13,8 +13,8 @@ public:
     void Init();
     void Update(double deltaTime) override;
     void FixedUpdate() override;
-    void Render();
-    void Destroy();
+    void Render() {};
+    void Destroy() {};
 
     nlohmann::json Serialize()const override { return nlohmann::json(); };
     void Deserialize(const nlohmann::json& data) override {};
@@ -23,6 +23,11 @@ public:
 
     void HideOfficeElements();
     void ShowOfficeElements();
+
+    // New method to set game reference
+    void SetGameReference(std::shared_ptr<FNAFGame> gameRef) {
+        m_GameRef = gameRef;
+    }
 
 private:
     sf::Sprite m_OfficeSprite;
@@ -37,6 +42,9 @@ private:
     std::shared_ptr<sf::Texture> m_RightLightTexture;
     std::shared_ptr<sf::Texture> m_LeftLightBonnieTexture;
     std::shared_ptr<sf::Texture> m_RightLightChicaTexture;
+
+    // Power outage textures
+    std::shared_ptr<sf::Texture> m_PowerOutageTexture;
 
     ImageButton m_FreddyNoseButton;
 
@@ -53,7 +61,13 @@ private:
     bool m_LeftLightOn;
     bool m_RightLightOn;
 
+    // Game reference for power system integration
+    std::shared_ptr<FNAFGame> m_GameRef;
+
     // Light callback methods
     void ToggleLeftLight(bool active);
     void ToggleRightLight(bool active);
+
+    // Power outage handling
+    void HandlePowerOutage();
 };

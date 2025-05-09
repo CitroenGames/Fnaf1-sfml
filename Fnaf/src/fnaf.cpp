@@ -1,9 +1,4 @@
 #include "fnaf.hpp"
-#include <algorithm>
-#include <iostream>
-#include <thread>
-#include <cmath>
-#include <numeric>
 
 #include "Assets/Resources.h"
 #include "GameState.h"
@@ -29,6 +24,9 @@ namespace {
         {4, {{"Bonnie", 1}, {"Chica", 1}, {"Foxy", 1}, {"Freddy", 0}}}
     };
 }
+
+// Initialize static member for GameEvents
+std::map<GameEvent, std::vector<std::function<void()>>> GameEvents::s_Subscribers;
 
 Animatronic::Animatronic(const std::string& name, int aiLevel)
     : name(name)
@@ -130,6 +128,10 @@ FNAFGame::FNAFGame()
     , m_CameraSystem(nullptr)
 {
     InitializeMovementPaths();
+
+    // Initialize doors and lights to off
+    std::fill(m_Doors.begin(), m_Doors.end(), false);
+    std::fill(m_Lights.begin(), m_Lights.end(), false);
 }
 
 void FNAFGame::InitializeGame(int night) {
@@ -141,6 +143,13 @@ void FNAFGame::InitializeGame(int night) {
     m_GameOver = false;
     m_PowerOutage = false;
     m_LastHourAIUpdated = 0;
+
+    // Reset doors and lights
+    std::fill(m_Doors.begin(), m_Doors.end(), false);
+    std::fill(m_Lights.begin(), m_Lights.end(), false);
+
+    // Set initial power usage level
+    player.m_UsageLevel = 1;
 
     // Initialize animatronics
     m_Animatronics["Freddy"] = std::make_unique<Animatronic>("Freddy", GetAILevel(night, "Freddy"));
@@ -204,6 +213,9 @@ void FNAFGame::UpdatePower(float deltaTime) {
             player.m_UsingLight = false;
             std::fill(m_Doors.begin(), m_Doors.end(), false);
             std::fill(m_Lights.begin(), m_Lights.end(), false);
+
+            // Notify other systems about power outage
+            GameEvents::TriggerEvent(GameEvent::POWER_OUTAGE);
         }
 
         return;
@@ -235,6 +247,33 @@ float FNAFGame::CalculatePowerDrain() const {
 
     // Apply usage level multiplier
     return drainPerSecond * player.m_UsageLevel;
+}
+
+void FNAFGame::UpdatePowerUsageLevel() {
+    // Calculate usage level based on active systems
+    int activeCount = 0;
+
+    // Check camera
+    if (player.m_UsingCamera) {
+        activeCount++;
+    }
+
+    // Check doors
+    for (bool door : m_Doors) {
+        if (door) {
+            activeCount++;
+        }
+    }
+
+    // Check lights
+    for (bool light : m_Lights) {
+        if (light) {
+            activeCount++;
+        }
+    }
+
+    // Update player usage level (1-5 based on how many systems are active)
+    player.m_UsageLevel = std::min(5, std::max(1, activeCount + 1));
 }
 
 void FNAFGame::UpdateAnimatronics(float deltaTime) {
@@ -348,7 +387,7 @@ void FNAFGame::UpdateFreddy(Animatronic& freddy, float deltaTime) {
     if (m_PowerOutage && m_FreddyMusicBoxTimer > 0.0f) {
         m_FreddyMusicBoxTimer -= deltaTime;
         if (m_FreddyMusicBoxTimer <= 0.0f) {
-            //TriggerJumpscare(m_Animatronics.find("freddy"));
+            TriggerJumpscare(freddy);
         }
     }
 }
@@ -412,14 +451,17 @@ void FNAFGame::HandlePowerOutage(float deltaTime) {
                 baseDuration * difficultyMultiplier * 1.2f
             );
             m_FreddyMusicBoxTimer = dist(m_RNG);
+
+            // Notify other systems about power outage progression
+            GameEvents::TriggerEvent(GameEvent::POWER_OUTAGE);
         }
     }
 
     if (m_FreddyMusicBoxTimer > 0.0f) {
         m_FreddyMusicBoxTimer -= deltaTime;
         if (m_FreddyMusicBoxTimer <= 0.0f) {
-			// Freddy jumpscare if music box runs out
-            //TriggerJumpscare(m_Animatronics.find("freddy"));
+            // Freddy jumpscare if music box runs out
+            TriggerJumpscare(*m_Animatronics["Freddy"]);
         }
     }
 }

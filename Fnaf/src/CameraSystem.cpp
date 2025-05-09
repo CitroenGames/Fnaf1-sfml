@@ -203,9 +203,6 @@ void CameraSystem::ToggleCamera()
         // Play camera open sound
         m_CameraOpenSound->play();
         
-        // Hide office elements - we'll need to add this to the Office class
-        // Office::HideOfficeElements(); // This would be called through an event system or directly
-        
         // Show camera map
         LayerManager::AddDrawable(CAMERA_MAP, m_CameraMapSprite.get());
         
@@ -227,9 +224,6 @@ void CameraSystem::ToggleCamera()
         
         // Hide all camera elements
         HideAllCameraElements();
-        
-        // Show office elements
-        // Office::ShowOfficeElements(); // This would be called through an event system or directly
         
         // Play reverse camera flip animation
         m_CameraFlipAnimation.Play(false);

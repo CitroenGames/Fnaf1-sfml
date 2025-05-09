@@ -1,4 +1,4 @@
-build
+/build
 out
 .cache
 .idea
@@ -9,4 +9,5 @@ out
 *.pak
 imgui.ini
 *.pdb
-Fnaf-SFML
+/Fnaf-SFML
+/profile_results.json

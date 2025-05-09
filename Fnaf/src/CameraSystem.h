@@ -1,10 +1,5 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-#include <memory>
-#include <map>
-#include <string>
-#include <random>
 #include "Animation/FlipBook.h"
 #include "UI/HUDButton.h"
 #include "Composable.h"

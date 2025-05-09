@@ -1,12 +1,10 @@
 #pragma once
 
 #include "Scene/Scene.h"
-#include "SFML/Graphics.hpp"
-#include "SFML/Audio.hpp"
-#include "Office.h"
 #include "Components/Camera.h"
+#include "CameraSystem.h"
+#include "Office.h"
 #include "fnaf.hpp"
-#include "CameraSystem.h" 
 
 constexpr float scrollspeed = 10.0f;
 
@@ -34,7 +32,7 @@ private:
     std::shared_ptr<CameraSystem> m_CameraSystem;
     std::shared_ptr<HUDButton> m_CameraButton;
 
-    std::unique_ptr<FNAFGame> gameplay;
+    std::shared_ptr<FNAFGame> gameplay;
 
 	std::shared_ptr<Office> m_OfficeComponent;
     bool m_WasCameraActive = false;

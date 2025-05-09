@@ -1,10 +1,9 @@
 #include "Window.h"
 #include "Application.h"
-#include <chrono>
 #include "Scene/SceneManager.h"
 #include "Graphics/LayerManager.h"
-#include <thread>
 #include "imgui/imgui-SFML.h"
+#include "Utils/Profiler.h"
 
 std::shared_ptr<sf::RenderWindow> Application::m_Window = nullptr;
 
@@ -28,6 +27,7 @@ void Application::Run()
     sf::Clock deltaClock;
 
     while (m_Window->isOpen()) {
+		PROFILE_BEGIN("Application Loop");
         while (m_Window->pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 m_Window->close();
@@ -62,6 +62,7 @@ void Application::Run()
         SceneManager::Render();
         ImGui::SFML::Render(*m_Window);
         m_Window->display();
+		PROFILE_END();
     }
 
     Application::Destroy();
@@ -69,9 +70,11 @@ void Application::Run()
 
 void Application::Destroy()
 {
+	PROFILE_BEGIN("Application Shutdown");
     //TODO: Add a proper way to close the application
     LayerManager::Clear();
     SceneManager::Destroy();
     ImGui::SFML::Shutdown();
 	Window::Destroy();
+    PROFILE_END();
 }

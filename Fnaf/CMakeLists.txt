@@ -15,6 +15,7 @@ endif()
 add_executable(${PROJECT_NAME} ${GAMESOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)
+target_precompile_headers(${PROJECT_NAME} PUBLIC src/pch.h)
 target_link_libraries(${PROJECT_NAME} PRIVATE Engine)
 
 

@@ -1,10 +1,8 @@
 #include "Menu.h"
-#include "SFML/Window.hpp"
 #include "Scene/SceneManager.h"
 #include "Scenes/Gameplay.h"
 #include "Assets/Resources.h"
 #include "Graphics/LayerManager.h"
-#include "Core/Window.h"
 #include "LayerDefines.h"
 #include "Utils/Helpers.h"
 
@@ -29,25 +27,13 @@ Menu::Menu()
         {
             m_NoiseTextures.push_back(MakeTextureTransparent(Resources::GetTexture("Graphics/Static/Noise" + std::to_string(i) + ".png"), 0.15f));
         }
-
-        m_StaticGlitchEffect = GlitchEffect(1);
-        for (int i = 0; i < m_NoiseTextures.size(); i++)
-        {
-            m_StaticGlitchEffect.AddFrame(m_NoiseTextures[i]);
-        }
     }
 
     // White thing 
     {
         for (int i = 1; i <= 8; i++)
         {
-            m_WhiteTextures.push_back(RemoveBlackBackground(Resources::GetTexture("Graphics/Static/WhiteThing" + std::to_string(i) + ".png")));
-        }
-
-        m_WhiteGlitchEffect = GlitchEffect(2);
-        for (int i = 0; i < m_WhiteTextures.size(); i++)
-        {
-            m_WhiteGlitchEffect.AddFrame(m_WhiteTextures[i]);
+            m_WhiteTextures.push_back(RemoveBlackBackground(Resources::GetTexture("Graphics/White/WhiteThing" + std::to_string(i) + ".png")));
         }
     }
 
@@ -81,7 +67,6 @@ Menu::Menu()
         );
     }
 
-    /* this crashes the game currently and i have no idea why
     {
         // Setup time and night text
         sf::Font& font = *Resources::GetFont("Font/five-nights-at-freddys.ttf");
@@ -103,11 +88,36 @@ Menu::Menu()
             Window::GetWindow()->getSize().y / 2 + 50
         );
     }
-    */
 
     // Prepare logo sprite
     m_LogoSprite = sf::Sprite(*m_Logo);
     m_LogoSprite.setPosition(100, 100);
+}
+
+void Menu::Init()
+{
+    ShowMainMenuElements();
+    m_BgStatic->play();
+    m_BgStatic->setVolume(100.f);
+    m_MenuMusic->setLoop(true);
+    m_MenuMusic->play();
+    m_MenuMusic->setVolume(100.f);
+
+    m_WhiteGlitchEffect = GlitchEffect(2);
+    for (int i = 0; i < m_WhiteTextures.size(); i++)
+    {
+        m_WhiteGlitchEffect.AddFrame(m_WhiteTextures[i]);
+    }
+
+    m_StaticGlitchEffect = GlitchEffect(1);
+    for (int i = 0; i < m_NoiseTextures.size(); i++)
+    {
+        m_StaticGlitchEffect.AddFrame(m_NoiseTextures[i]);
+    }
+
+    m_FreddyGlitchEffect.SetGlitchParameters(0.01f, 0.3f, 0.05f);
+    m_StaticGlitchEffect.SetGlitchParameters(1.f, 1.5f, 0.01f);
+    m_WhiteGlitchEffect.SetGlitchParameters(1.f, 1.5f, 0.15f);
 
     // Prepare newspaper sprite
     NewsPaperSprite = sf::Sprite(*NewsPaperTexture);
@@ -165,46 +175,10 @@ void Menu::ShowMainMenuElements()
 
     // Show glitch effects
     ShowGlitchEffects();
-
-    // Set state to main menu
-    m_State = MAIN_MENU;
-}
-
-void Menu::Init()
-{
-    m_BgStatic->play();
-    m_BgStatic->setVolume(100.f);
-    m_MenuMusic->setLoop(true);
-    m_MenuMusic->play();
-    m_MenuMusic->setVolume(100.f);
-
-    m_FreddyGlitchEffect.SetGlitchParameters(0.01f, 0.3f, 0.05f);
-    m_StaticGlitchEffect.SetGlitchParameters(1.f, 1.5f, 0.01f);
-    m_WhiteGlitchEffect.SetGlitchParameters(1.f, 1.5f, 0.15f);
-
-    // Hide all menu elements initially
-    HideAllMenuElements();
-
-    // Start with warning message
-    m_State = WARNING;
-    m_WarningMessageTimer = 0.0f;
-    LayerManager::AddDrawable(MENU_BUTTON_LAYER, &m_WarningMessageSprite);
 }
 
 void Menu::Update(double deltaTime)
 {
-    if (m_State == WARNING) {
-        m_WarningMessageTimer += deltaTime;
-        if (m_WarningMessageTimer >= WARNING_MESSAGE_DURATION) {
-            // Remove warning message
-            LayerManager::RemoveDrawable(&m_WarningMessageSprite);
-
-            // Show main menu elements
-            ShowMainMenuElements();
-        }
-        return;
-    }
-
     //accumulatedTime += (float)deltaTime;
 
     //switch (m_State) {

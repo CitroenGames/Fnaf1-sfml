@@ -1,11 +1,9 @@
 #pragma once
 
 #include "Scene/Scene.h"
-#include "SFML/Audio.hpp"
 #include "Animation/FlipBook.h"
 #include "Animation/GlitchEffect.h"
 #include "UI/ImageButton.h"
-#include <memory>
 #include "Graphics/FadeEffect.h"
 
 class Menu : public Scene
@@ -49,7 +47,7 @@ private:
 	GlitchEffect m_StaticGlitchEffect;
 	GlitchEffect m_WhiteGlitchEffect;
 
-	enum State { WARNING, MAIN_MENU, FADE_IN, WAIT, FADE_OUT, DONE } m_State = WARNING;
+	enum State { MAIN_MENU, FADE_IN, WAIT, FADE_OUT, DONE } m_State = MAIN_MENU;
 	enum GameplayTransitionState {
 		NEWSPAPER,
 		TIME_DISPLAY,
