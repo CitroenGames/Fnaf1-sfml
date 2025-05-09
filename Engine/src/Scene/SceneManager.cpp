@@ -1,4 +1,5 @@
 #include "SceneManager.h"
+#include "Audio/AudioManager.h"
 
 std::shared_ptr<Scene> SceneManager::m_ActiveScene = nullptr;
 std::shared_ptr<Scene> SceneManager::m_QueuedScene = nullptr;
@@ -50,7 +51,10 @@ void SceneManager::SwitchSceneNow(std::shared_ptr<Scene> queuedScene) {
     // Prevent switching to the same scene
     if (m_ActiveScene == queuedScene) return;
     
-    // Clean up active scene first
+    // Stop all audio first
+    AudioManager::GetInstance().StopAllAudio();
+    
+    // Clean up active scene
     if (m_ActiveScene)
     {
         m_ActiveScene->Destroy();

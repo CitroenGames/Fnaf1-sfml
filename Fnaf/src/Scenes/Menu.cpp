@@ -18,76 +18,76 @@ bool IsShowingNewsPaper = false;
 
 Menu::Menu()
 {
-    m_BgStatic = Resources::GetMusic("Audio/static2.wav");
-    m_MenuMusic = Resources::GetMusic("Audio/Menu/darknessmusic.wav");
+    // Preload audio - no longer keeping music objects directly in the Menu class
+    Resources::GetMusic(STATIC_AUDIO_KEY);
+    Resources::GetMusic(MENU_MUSIC_KEY);
 
-    // Noise thing
+    // Noise textures
+    for (int i = 1; i <= 8; i++)
     {
-        for (int i = 1; i <= 8; i++)
-        {
-            m_NoiseTextures.push_back(MakeTextureTransparent(Resources::GetTexture("Graphics/Static/Noise" + std::to_string(i) + ".png"), 0.15f));
-        }
+        m_NoiseTextures.push_back(MakeTextureTransparent(
+            Resources::GetTexture("Graphics/Static/Noise" + std::to_string(i) + ".png"),
+            0.15f
+        ));
     }
 
-    // White thing 
+    // White textures
+    for (int i = 1; i <= 8; i++)
     {
-        for (int i = 1; i <= 8; i++)
-        {
-            m_WhiteTextures.push_back(RemoveBlackBackground(Resources::GetTexture("Graphics/White/WhiteThing" + std::to_string(i) + ".png")));
-        }
+        m_WhiteTextures.push_back(RemoveBlackBackground(
+            Resources::GetTexture("Graphics/White/WhiteThing" + std::to_string(i) + ".png")
+        ));
     }
 
+    // Setup Freddy glitch effect
     m_FreddyGlitchEffect = GlitchEffect(0);
     for (int i = 1; i < 4; i++)
     {
-        m_FreddyGlitchEffect.AddFrame(Resources::GetTexture("Graphics/MainMenu/FreddyBackground/Frame" + std::to_string(i) + ".png"));
+        m_FreddyGlitchEffect.AddFrame(Resources::GetTexture(
+            "Graphics/MainMenu/FreddyBackground/Frame" + std::to_string(i) + ".png"
+        ));
     }
 
-    // these shouldnt be needed...
+    // Load textures
     m_Logo = ProcessText(Resources::GetTexture("Graphics/MainMenu/Logo.png"));
     NewsPaperTexture = Resources::GetTexture("Graphics/MainMenu/NewsPaper.png");
-
-    // Load warning message texture
     m_WarningMessageTexture = ProcessText(Resources::GetTexture("Graphics/MainMenu/WarningMessage.png"));
+
+    // Setup warning message sprite
     m_WarningMessageSprite.setTexture(*m_WarningMessageTexture);
-    // Center the warning message
     m_WarningMessageSprite.setPosition(
         (Window::GetWindow()->getSize().x - m_WarningMessageSprite.getGlobalBounds().width) / 2,
         (Window::GetWindow()->getSize().y - m_WarningMessageSprite.getGlobalBounds().height) / 2
     );
 
-    {
-        // Add loading screen texture  
-        m_LoadingScreenTexture = Resources::GetTexture("Graphics/Loading.png");
-        m_LoadingScreenSprite.setTexture(*m_LoadingScreenTexture);
-        // Position the loading screen at the bottom-right corner  
-        m_LoadingScreenSprite.setPosition(
-            Window::GetWindow()->getSize().x - m_LoadingScreenSprite.getGlobalBounds().width,
-            Window::GetWindow()->getSize().y - m_LoadingScreenSprite.getGlobalBounds().height
-        );
-    }
+    // Setup loading screen sprite
+    m_LoadingScreenTexture = Resources::GetTexture("Graphics/Loading.png");
+    m_LoadingScreenSprite.setTexture(*m_LoadingScreenTexture);
+    m_LoadingScreenSprite.setPosition(
+        Window::GetWindow()->getSize().x - m_LoadingScreenSprite.getGlobalBounds().width,
+        Window::GetWindow()->getSize().y - m_LoadingScreenSprite.getGlobalBounds().height
+    );
 
-    {
-        // Setup time and night text
-        sf::Font& font = *Resources::GetFont("Font/five-nights-at-freddys.ttf");
-        m_TimeText.setFont(font);
-        m_TimeText.setString("12:00 AM");
-        m_TimeText.setCharacterSize(40);
-        m_TimeText.setFillColor(sf::Color::White);
-        m_TimeText.setPosition(
-            (Window::GetWindow()->getSize().x - m_TimeText.getGlobalBounds().width) / 2,
-            Window::GetWindow()->getSize().y / 2 - 50
-        );
+    // Setup time and night text
+    sf::Font& font = *Resources::GetFont("Font/five-nights-at-freddys.ttf");
 
-        m_NightText.setFont(font);
-        m_NightText.setString("1st Night");
-        m_NightText.setCharacterSize(40);
-        m_NightText.setFillColor(sf::Color::White);
-        m_NightText.setPosition(
-            (Window::GetWindow()->getSize().x - m_NightText.getGlobalBounds().width) / 2,
-            Window::GetWindow()->getSize().y / 2 + 50
-        );
-    }
+    m_TimeText.setFont(font);
+    m_TimeText.setString("12:00 AM");
+    m_TimeText.setCharacterSize(40);
+    m_TimeText.setFillColor(sf::Color::White);
+    m_TimeText.setPosition(
+        (Window::GetWindow()->getSize().x - m_TimeText.getGlobalBounds().width) / 2,
+        Window::GetWindow()->getSize().y / 2 - 50
+    );
+
+    m_NightText.setFont(font);
+    m_NightText.setString("1st Night");
+    m_NightText.setCharacterSize(40);
+    m_NightText.setFillColor(sf::Color::White);
+    m_NightText.setPosition(
+        (Window::GetWindow()->getSize().x - m_NightText.getGlobalBounds().width) / 2,
+        Window::GetWindow()->getSize().y / 2 + 50
+    );
 
     // Prepare logo sprite
     m_LogoSprite = sf::Sprite(*m_Logo);
@@ -97,37 +97,38 @@ Menu::Menu()
 void Menu::Init()
 {
     ShowMainMenuElements();
-    m_BgStatic->play();
-    m_BgStatic->setVolume(100.f);
-    m_MenuMusic->setLoop(true);
-    m_MenuMusic->play();
-    m_MenuMusic->setVolume(100.f);
 
+    // Start audio using AudioManager
+    AudioManager::GetInstance().PlayMusic(STATIC_AUDIO_KEY, false, 100.0f);
+    AudioManager::GetInstance().PlayMusic(MENU_MUSIC_KEY, true, 100.0f);
+
+    // Setup white glitch effect
     m_WhiteGlitchEffect = GlitchEffect(2);
     for (int i = 0; i < m_WhiteTextures.size(); i++)
     {
         m_WhiteGlitchEffect.AddFrame(m_WhiteTextures[i]);
     }
 
+    // Setup static glitch effect
     m_StaticGlitchEffect = GlitchEffect(1);
     for (int i = 0; i < m_NoiseTextures.size(); i++)
     {
         m_StaticGlitchEffect.AddFrame(m_NoiseTextures[i]);
     }
 
+    // Configure glitch parameters
     m_FreddyGlitchEffect.SetGlitchParameters(0.01f, 0.3f, 0.05f);
     m_StaticGlitchEffect.SetGlitchParameters(1.f, 1.5f, 0.01f);
     m_WhiteGlitchEffect.SetGlitchParameters(1.f, 1.5f, 0.15f);
 
     // Prepare newspaper sprite
     NewsPaperSprite = sf::Sprite(*NewsPaperTexture);
-    // Center the newspaper
     NewsPaperSprite.setPosition(
         (Window::GetWindow()->getSize().x - NewsPaperSprite.getGlobalBounds().width) / 2,
         (Window::GetWindow()->getSize().y - NewsPaperSprite.getGlobalBounds().height) / 2
     );
 
-    // Prepare new game button
+    // Setup new game button
     newbutton.SetTexture(ProcessText(Resources::GetTexture("Graphics/MainMenu/NewGame.png")));
     newbutton.SetPosition(100, 400);
 }
@@ -210,7 +211,6 @@ void Menu::SwitchToGameplay()
     // Clean up all transition elements before switching scenes
     HideAllMenuElements();
 
-    Destroy();
     // Switch to gameplay scene
     SceneManager::QueueSwitchScene(std::make_shared<Gameplay>());
 }
@@ -281,19 +281,5 @@ void Menu::FixedUpdate()
             NewsPaperTimer = 0;
             m_GameplayTransitionState = NEWSPAPER;
         }
-    }
-}
-
-void Menu::Render()
-{
-}
-
-void Menu::Destroy()
-{
-    LayerManager::Clear();
-    if (m_MenuMusic)
-    {
-        m_MenuMusic->stop();
-        m_MenuMusic.reset();
     }
 }

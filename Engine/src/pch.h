@@ -12,6 +12,7 @@
 #include <chrono>
 #include <algorithm>
 #include <thread>
+#include <unordered_map>
 
 // SFML
 #include <SFML/Audio.hpp>
