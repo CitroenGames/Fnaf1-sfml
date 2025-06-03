@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <thread>
 #include <unordered_map>
+#include <mutex>
+#include <functional>
 
 // SFML
 #include <SFML/Audio.hpp>

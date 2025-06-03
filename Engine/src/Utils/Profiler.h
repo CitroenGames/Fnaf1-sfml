@@ -1,5 +1,7 @@
 #pragma once
 
+#include <pch.h>
+
 #define PROFILING 1 // we will eventually put it under a config or debug config?
 
 struct ProfileResult
