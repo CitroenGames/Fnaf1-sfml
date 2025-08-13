@@ -1,5 +1,4 @@
-#ifndef PAK_H
-#define PAK_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -125,5 +124,3 @@ private:
 
     std::string encryptionKey_; // Encryption key used for encrypting/decrypting data
 };
-
-#endif // PAK_H

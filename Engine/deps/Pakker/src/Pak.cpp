@@ -1,4 +1,4 @@
-#include "pak.h"
+#include "Pak.h"
 #include <fstream>
 #include <iostream>
 #include <filesystem>
