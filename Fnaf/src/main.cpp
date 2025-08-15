@@ -22,17 +22,17 @@ int main() {
         std::cout << "Packing Assets.pak" << std::endl;
         // Check if assets folder exists
         if (!std::filesystem::exists("Assets")) {
-            std::cerr << "Error: Assets folder not found" << std::endl;
+            std::cerr << "Error: Assets folder not found in current directory: " << std::filesystem::current_path().string() << std::endl;
             return 1;
         }
         if (!p.CreatePakFromFolder("Assets.pak", "Assets")) {
-            std::cerr << "Error: Failed to create Assets.pak" << std::endl;
+            std::cerr << "Error: Failed to create Assets.pak in current directory: " << std::filesystem::current_path().string() << std::endl;
             return 1;
         }
     }
     // List contents of the PAK
     if (!p.ListPak("Assets.pak")) {
-        std::cerr << "Error: Failed to list contents of assets.pak" << std::endl;
+        std::cerr << "Error: Failed to list contents of assets.pak in current directory: " << std::filesystem::current_path().string() << std::endl;
         return 1;
     }
 #endif

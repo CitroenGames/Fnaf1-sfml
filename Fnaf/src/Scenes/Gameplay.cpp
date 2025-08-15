@@ -67,7 +67,8 @@ void Gameplay::Init()
 
     // Load sound effects? 
     {
-        // I have no idea where else I would put it but putting in scene is also a terrible idea in terms of keeping the code clean in the init func so stay tuned to see where I'll end up putting it :D
+        // for example jumpscare sound and so on.
+        // IDK where else i would put this.
     }
 
     { // Camera stuff
@@ -86,7 +87,7 @@ void Gameplay::FixedUpdate()
 {
     Scene::FixedUpdate();
 
-    auto window = Window::GetWindow(); // We REALLY should get rid of this shitty mess but who cares for now
+    auto window = Window::GetWindow(); // TODO: We REALLY should get rid of this shitty mess but who cares for now
 
     // Check for main camera button press
     if (m_CameraButton->IsClicked(*window)) {
