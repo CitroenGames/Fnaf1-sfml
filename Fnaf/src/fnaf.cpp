@@ -128,10 +128,6 @@ FNAFGame::FNAFGame()
     , m_CameraSystem(nullptr)
 {
     InitializeMovementPaths();
-
-    // Initialize doors and lights to off
-    std::fill(m_Doors.begin(), m_Doors.end(), false);
-    std::fill(m_Lights.begin(), m_Lights.end(), false);
 }
 
 void FNAFGame::InitializeGame(int night) {
@@ -144,12 +140,17 @@ void FNAFGame::InitializeGame(int night) {
     m_PowerOutage = false;
     m_LastHourAIUpdated = 0;
 
-    // Reset doors and lights
-    std::fill(m_Doors.begin(), m_Doors.end(), false);
-    std::fill(m_Lights.begin(), m_Lights.end(), false);
+    // Reset player state
+    player.m_UsingCamera = false;
+    player.m_UsingDoor = false;
+    player.m_UsingLight = false;
+    player.m_LeftDoorClosed = false;
+    player.m_RightDoorClosed = false;
+    player.m_LeftLightOn = false;
+    player.m_RightLightOn = false;
 
     // Set initial power usage level
-    player.m_UsageLevel = 1;
+    player.UpdateUsageLevel();
 
     // Initialize animatronics
     m_Animatronics["Freddy"] = std::make_unique<Animatronic>("Freddy", GetAILevel(night, "Freddy"));
@@ -193,7 +194,7 @@ void FNAFGame::Update(float deltaTime) {
 void FNAFGame::UpdatePower(float deltaTime) {
     // Only update power if we're not already in a power outage
     if (!m_PowerOutage) {
-        // Calculate power drain rate per second
+        // Calculate power drain rate per second using new system
         float drainRate = CalculatePowerDrain();
 
         // Apply drain scaled by delta time
@@ -207,12 +208,15 @@ void FNAFGame::UpdatePower(float deltaTime) {
             std::uniform_real_distribution<float> dist(POWER_OUTAGE_DURATION_MIN, POWER_OUTAGE_DURATION_MAX);
             m_PowerOutageTimer = dist(m_RNG);
 
-            // Disable all systems
+            // Disable all systems and update player state
             player.m_UsingCamera = false;
             player.m_UsingDoor = false;
             player.m_UsingLight = false;
-            std::fill(m_Doors.begin(), m_Doors.end(), false);
-            std::fill(m_Lights.begin(), m_Lights.end(), false);
+            player.m_LeftDoorClosed = false;
+            player.m_RightDoorClosed = false;
+            player.m_LeftLightOn = false;
+            player.m_RightLightOn = false;
+            player.UpdateUsageLevel();
 
             // Notify other systems about power outage
             GameEvents::TriggerEvent(GameEvent::POWER_OUTAGE);
@@ -228,52 +232,25 @@ void FNAFGame::UpdatePower(float deltaTime) {
 float FNAFGame::CalculatePowerDrain() const {
     float drainPerSecond = BASE_POWER_DRAIN_PER_SECOND;
 
-    // Add system multipliers (now properly scaled per second)
+    // Add system multipliers using the new centralized state
     if (player.m_UsingCamera) {
         drainPerSecond += BASE_POWER_DRAIN_PER_SECOND * CAMERA_POWER_MULTIPLIER;
     }
 
-    for (bool door : m_Doors) {
-        if (door) {
-            drainPerSecond += BASE_POWER_DRAIN_PER_SECOND * DOOR_POWER_MULTIPLIER;
-        }
+    if (player.m_LeftDoorClosed) {
+        drainPerSecond += BASE_POWER_DRAIN_PER_SECOND * DOOR_POWER_MULTIPLIER;
     }
 
-    for (bool light : m_Lights) {
-        if (light) {
-            drainPerSecond += BASE_POWER_DRAIN_PER_SECOND * LIGHT_POWER_MULTIPLIER;
-        }
+    if (player.m_RightDoorClosed) {
+        drainPerSecond += BASE_POWER_DRAIN_PER_SECOND * DOOR_POWER_MULTIPLIER;
+    }
+
+    if (player.m_LeftLightOn || player.m_RightLightOn) {
+        drainPerSecond += BASE_POWER_DRAIN_PER_SECOND * LIGHT_POWER_MULTIPLIER;
     }
 
     // Apply usage level multiplier
     return drainPerSecond * player.m_UsageLevel;
-}
-
-void FNAFGame::UpdatePowerUsageLevel() {
-    // Calculate usage level based on active systems
-    int activeCount = 0;
-
-    // Check camera
-    if (player.m_UsingCamera) {
-        activeCount++;
-    }
-
-    // Check doors
-    for (bool door : m_Doors) {
-        if (door) {
-            activeCount++;
-        }
-    }
-
-    // Check lights
-    for (bool light : m_Lights) {
-        if (light) {
-            activeCount++;
-        }
-    }
-
-    // Update player usage level (1-5 based on how many systems are active)
-    player.m_UsageLevel = std::min(5, std::max(1, activeCount + 1));
 }
 
 void FNAFGame::UpdateAnimatronics(float deltaTime) {
@@ -410,7 +387,7 @@ void FNAFGame::UpdateFoxy(Animatronic& foxy, float deltaTime) {
     // Simplified Foxy behavior - movement based on FNAF 1 mechanics
     if (player.m_UsingCamera && m_CameraSystem) {
         // Check if player is viewing Pirate Cove
-        bool viewingPirateCove = m_CameraSystem->GetActiveCamera() == "2A";
+        bool viewingPirateCove = m_CameraSystem->GetActiveCamera() == "1C";
 
         if (viewingPirateCove) {
             // Reset Foxy timer if watched
@@ -424,7 +401,7 @@ void FNAFGame::UpdateFoxy(Animatronic& foxy, float deltaTime) {
         foxy.currentLocation = Room::WEST_HALL;
 
         // Check if left door is closed
-        if (!m_Doors[0]) { // Left door
+        if (!player.m_LeftDoorClosed) { // Left door
             TriggerJumpscare("Foxy");
         } else {
             // Drain extra power and reset Foxy
@@ -527,10 +504,10 @@ void FNAFGame::MoveAnimatronic(Animatronic& animatronic, Room destination) {
 
 bool FNAFGame::IsDefendedAgainst(const Animatronic& animatronic) const {
     if (animatronic.name == "Freddy" || animatronic.name == "Chica") {
-        return m_Doors[1]; // Right door
+        return player.m_RightDoorClosed; // Right door
     }
     else if (animatronic.name == "Bonnie" || animatronic.name == "Foxy") {
-        return m_Doors[0]; // Left door
+        return player.m_LeftDoorClosed; // Left door
     }
     return false;
 }

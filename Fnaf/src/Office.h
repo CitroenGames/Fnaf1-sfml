@@ -24,7 +24,7 @@ public:
     void HideOfficeElements();
     void ShowOfficeElements();
 
-    // New method to set game reference
+    // Set game reference
     void SetGameReference(std::shared_ptr<FNAFGame> gameRef) {
         m_GameRef = gameRef;
     }
@@ -56,10 +56,6 @@ private:
     std::shared_ptr<sf::Music> m_DoorNoise;
     std::shared_ptr<sf::Music> m_LightSound;
     bool m_IsVisible;
-
-    // Light state flags
-    bool m_LeftLightOn;
-    bool m_RightLightOn;
 
     // Game reference for power system integration
     std::shared_ptr<FNAFGame> m_GameRef;

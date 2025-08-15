@@ -5,7 +5,6 @@
 #include "Graphics/LayerManager.h"
 #include "Assets/Resources.h"
 #include "imgui.h"
-#include <math.h>
 #include "Scenes/Menu.h"
 #include "GameState.h"
 #include "Scene/SceneManager.h"
@@ -98,7 +97,7 @@ void Gameplay::FixedUpdate()
 void Gameplay::Update(double deltaTime)
 {
     Scene::Update(deltaTime);
-    
+
     gameplay->Update(deltaTime);
     if (gameplay->IsGameOver()) {
         SceneManager::QueueSwitchScene(std::make_shared<Menu>());
@@ -114,11 +113,6 @@ void Gameplay::Update(double deltaTime)
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::F2)) {
         // Force power outage
         player.m_PowerLevel = 0;
-    }
-
-    gameplay->Update(deltaTime);
-    if (gameplay->IsGameOver()) {
-        SceneManager::QueueSwitchScene(std::make_shared<Menu>());
     }
 
     auto window = Window::GetWindow();
@@ -283,19 +277,17 @@ void Gameplay::Render()
         if (gameplay) {
             ImGui::Text("Power Level: %.2f%%", player.m_PowerLevel);
 
-            // Display active systems
+            // Display active systems using new centralized state
             ImGui::Text("Active Systems:");
             ImGui::Text("- Camera: %s", player.m_UsingCamera ? "ON" : "OFF");
-
-            // Display door states
-            ImGui::Text("- Left Door: %s", gameplay->IsDefendedAgainst(*gameplay->m_Animatronics["Bonnie"]) ? "CLOSED" : "OPEN");
-            ImGui::Text("- Right Door: %s", gameplay->IsDefendedAgainst(*gameplay->m_Animatronics["Chica"]) ? "CLOSED" : "OPEN");
-
-			// Display light state
-            ImGui::Text("- Using Lights: %s", player.m_UsingLight ? "ON" : "OFF");
+            ImGui::Text("- Left Door: %s", player.m_LeftDoorClosed ? "CLOSED" : "OPEN");
+            ImGui::Text("- Right Door: %s", player.m_RightDoorClosed ? "CLOSED" : "OPEN");
+            ImGui::Text("- Left Light: %s", player.m_LeftLightOn ? "ON" : "OFF");
+            ImGui::Text("- Right Light: %s", player.m_RightLightOn ? "ON" : "OFF");
 
             // Display usage level and drain rate
             ImGui::Text("Usage Level: %d/5", player.m_UsageLevel);
+            ImGui::Text("Calculated Usage: %d/5", player.CalculateUsageLevel());
 
             // Display power outage info if applicable
             if (gameplay->IsPowerOutage()) {

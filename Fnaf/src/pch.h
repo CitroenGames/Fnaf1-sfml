@@ -18,6 +18,7 @@
 #include <functional>
 #include <cmath>
 #include <numeric>
+#include <math.h>
 
 // SFML
 #include <SFML/Audio.hpp>

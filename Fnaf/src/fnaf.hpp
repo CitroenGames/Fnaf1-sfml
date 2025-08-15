@@ -166,21 +166,7 @@ public:
         return 0.0f;
     }
 
-    // New methods for power system
-    void SetDoorState(int doorIndex, bool isActive) {
-        if (doorIndex >= 0 && doorIndex < m_Doors.size()) {
-            m_Doors[doorIndex] = isActive;
-            UpdatePowerUsageLevel();
-        }
-    }
-
-    void SetLightState(int lightIndex, bool isActive) {
-        if (lightIndex >= 0 && lightIndex < m_Lights.size()) {
-            m_Lights[lightIndex] = isActive;
-            UpdatePowerUsageLevel();
-        }
-    }
-
+    // Power system methods - simplified since state is now centralized
     bool IsPowerOutage() const { return m_PowerOutage; }
     float GetPowerOutageTimer() const { return m_PowerOutageTimer; }
     float GetFreddyMusicBoxTimer() const { return m_FreddyMusicBoxTimer; }
@@ -201,8 +187,6 @@ private:
 
     // Movement tracking
     std::map<Room, std::vector<Room>> m_ValidMoves;
-    std::array<bool, 2> m_Doors;  // [0] = left, [1] = right
-    std::array<bool, 2> m_Lights; // [0] = left, [1] = right
 
     // AI and gameplay functions
     void UpdateAnimatronics(float deltaTime);
@@ -210,7 +194,6 @@ private:
     void CheckForJumpscare();
     void HandlePowerOutage(float deltaTime);
     void TriggerJumpscare(const Animatronic& character);
-    void UpdatePowerUsageLevel();
 
     // Movement logic
     void AttemptMove(Animatronic& animatronic);
