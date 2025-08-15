@@ -142,8 +142,6 @@ void FNAFGame::InitializeGame(int night) {
 
     // Reset player state
     player.m_UsingCamera = false;
-    player.m_UsingDoor = false;
-    player.m_UsingLight = false;
     player.m_LeftDoorClosed = false;
     player.m_RightDoorClosed = false;
     player.m_LeftLightOn = false;
@@ -210,8 +208,6 @@ void FNAFGame::UpdatePower(float deltaTime) {
 
             // Disable all systems and update player state
             player.m_UsingCamera = false;
-            player.m_UsingDoor = false;
-            player.m_UsingLight = false;
             player.m_LeftDoorClosed = false;
             player.m_RightDoorClosed = false;
             player.m_LeftLightOn = false;

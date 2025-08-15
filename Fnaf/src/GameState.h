@@ -5,10 +5,6 @@
 struct Player
 {
     bool m_UsingCamera = false;
-    bool m_UsingDoor = false;      // Deprecated - kept for compatibility
-    bool m_UsingLight = false;     // Deprecated - kept for compatibility
-    
-    // New centralized door and light states
     bool m_LeftDoorClosed = false;
     bool m_RightDoorClosed = false;
     bool m_LeftLightOn = false;

@@ -60,3 +60,7 @@
 - [ ] **Visual Effects**  
   - [ ] Implement screen flickers or static during power fluctuations.  
   - [ ] Design visual indicators for power usage levels.
+
+
+Issues:
+- [ ] If you open the camera while your using the lights from the doors it should turn off the lights.
