@@ -109,7 +109,10 @@ namespace Paingine2D {
             }
 #else
             std::string mkdirCmd = "mkdir -p \"" + m_crashReportFolder + "\"";
-            system(mkdirCmd.c_str());
+            int ret = system(mkdirCmd.c_str());
+            if (ret != 0) {
+                // TODO: handle error
+            }
 #endif
 
             // Set up platform-specific exception handlers
@@ -485,7 +488,7 @@ namespace Paingine2D {
                 << crashReportPath << ".log" << std::endl;
 
             // Restore default handler and re-raise signal
-            signal(signal, SIG_DFL);
+            ::signal(signal, SIG_DFL);
             raise(signal);
         }
 #endif
