@@ -27,8 +27,8 @@ To get started with the game on Linux, follow these steps:
    Open a terminal and run the following commands to install the required dependencies:
 
    ```bash
-  sudo apt update
-  sudo apt install build-essential cmake glew-utils libglew-dev libsfml-dev libopenal-dev libsndfile1
+    sudo apt update
+    sudo apt install build-essential cmake glew-utils libglew-dev libsfml-dev libopenal-dev libsndfile1
    ```
 
    This will install the necessary packages:
