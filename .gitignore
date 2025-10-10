@@ -11,3 +11,4 @@ imgui.ini
 *.pdb
 /Fnaf-SFML
 /profile_results.json
+/cmake-build-*

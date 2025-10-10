@@ -18,16 +18,30 @@ target_include_directories(${PROJECT_NAME} PRIVATE src)
 target_precompile_headers(${PROJECT_NAME} PUBLIC src/pch.h)
 target_link_libraries(${PROJECT_NAME} PRIVATE Engine)
 
-# Copy Assets directory to build directory (where executable looks for them)
-add_custom_command(
-    TARGET ${PROJECT_NAME}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/Assets
-        ${CMAKE_BINARY_DIR}/Fnaf/Assets
-    COMMENT "Copying Assets directory to build location"
-    VERBATIM
-)
+# Handle Assets directory differently depending on platform
+if(WIN32)
+    # On Windows, copy the assets
+    add_custom_command(
+        TARGET ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/Assets
+            ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Assets
+        COMMENT "Copying Assets directory to build location"
+        VERBATIM
+    )
+else()
+    # On Linux or macOS, create a symbolic link instead
+    add_custom_command(
+        TARGET ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E create_symlink
+            ${CMAKE_CURRENT_SOURCE_DIR}/Assets
+            ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Assets
+        COMMENT "Symlinking Assets directory to build location"
+        VERBATIM
+    )
+endif()
 
 if(WIN32)
     add_custom_command(
