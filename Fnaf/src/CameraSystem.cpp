@@ -178,7 +178,7 @@ void CameraSystem::Update(double deltaTime)
 
 void CameraSystem::FixedUpdate()
 {
-    auto window = Window::GetWindow();
+    const auto window = Window::GetWindow();
 
     // Only check for camera selection buttons if camera is active
     if (m_IsActive) {

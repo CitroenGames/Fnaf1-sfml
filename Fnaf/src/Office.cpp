@@ -182,7 +182,7 @@ void Office::FixedUpdate()
     if (player.m_UsingCamera)
         return;
 
-    std::shared_ptr<sf::RenderWindow> window = Window::GetWindow();
+    const auto window = Window::GetWindow();
 
     m_LeftButtons.updateButton(*window);
     m_RightButtons.updateButton(*window);
@@ -211,7 +211,7 @@ void Office::ToggleLeftLight(bool active)
         // Check if Bonnie is at the door and use appropriate texture
         bool bonnieAtDoor = false;
         if (m_GameRef) {
-            Room bonnieLocation = m_GameRef->GetAnimatronicLocation("Bonnie");
+            const Room bonnieLocation = m_GameRef->GetAnimatronicLocation("Bonnie");
             bonnieAtDoor = (bonnieLocation == Room::WEST_CORNER);
         }
 

@@ -25,7 +25,7 @@ void Resources::Unload() {
 
 std::shared_ptr<sf::Texture> Resources::GetTexture(const std::string& filename) {
     if (m_Textures.find(filename) == m_Textures.end()) {
-        auto textureData = m_PakHandler->LoadFile(m_PakFile, filename);
+        const auto textureData = m_PakHandler->LoadFile(m_PakFile, filename);
         if (!textureData) {
             std::cerr << "Resources::GetTexture: Failed to load texture: " << filename << std::endl;
             return nullptr;
@@ -45,13 +45,13 @@ std::shared_ptr<sf::Texture> Resources::GetTexture(const std::string& filename) 
 
 std::shared_ptr<sf::SoundBuffer> Resources::GetSoundBuffer(const std::string& filename) {
     if (m_SoundBuffers.find(filename) == m_SoundBuffers.end()) {
-        auto soundData = m_PakHandler->LoadFile(m_PakFile, filename);
+        const auto soundData = m_PakHandler->LoadFile(m_PakFile, filename);
         if (!soundData) {
             std::cerr << "Resources::GetSoundBuffer: Failed to load sound: " << filename << std::endl;
             return nullptr;
         }
 
-        std::shared_ptr<sf::SoundBuffer> buffer = std::make_shared<sf::SoundBuffer>();
+        const auto buffer = std::make_shared<sf::SoundBuffer>();
         if (!buffer->loadFromMemory(soundData->data(), soundData->size())) {
             std::cerr << "Resources::GetSoundBuffer: Failed to load sound from memory: " << filename << std::endl;
             return nullptr;
@@ -65,7 +65,7 @@ std::shared_ptr<sf::SoundBuffer> Resources::GetSoundBuffer(const std::string& fi
 
 std::shared_ptr<sf::Music> Resources::GetMusic(const std::string& filename) {
     if (m_MusicBuffers.find(filename) == m_MusicBuffers.end()) {
-        auto musicData = m_PakHandler->LoadFile(m_PakFile, filename);
+        const auto musicData = m_PakHandler->LoadFile(m_PakFile, filename);
         if (!musicData) {
             std::cerr << "Resources::GetMusic: Failed to load music: " << filename << std::endl;
             return nullptr;
@@ -85,13 +85,13 @@ std::shared_ptr<sf::Music> Resources::GetMusic(const std::string& filename) {
 
 std::shared_ptr<sf::Font> Resources::GetFont(const std::string& filename) {
     if (m_Fonts.find(filename) == m_Fonts.end()) {
-        auto fontData = m_PakHandler->LoadFile(m_PakFile, filename);
+        const auto fontData = m_PakHandler->LoadFile(m_PakFile, filename);
         if (!fontData) {
             std::cerr << "Resources::GetFont: Failed to load font: " << filename << std::endl;
             return nullptr;
         }
 
-        std::shared_ptr<sf::Font> font = std::make_shared<sf::Font>();
+        const std::shared_ptr<sf::Font> font = std::make_shared<sf::Font>();
         if (!font->loadFromMemory(fontData->data(), fontData->size())) {
             std::cerr << "Resources::GetFont: Failed to load font from memory: " << filename << std::endl;
             return nullptr;
