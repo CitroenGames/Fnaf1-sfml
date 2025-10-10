@@ -1,4 +1,5 @@
 #include "SceneManager.h"
+
 #include "Audio/AudioManager.h"
 
 std::shared_ptr<Scene> SceneManager::m_ActiveScene = nullptr;

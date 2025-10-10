@@ -15,6 +15,9 @@
 #include <unordered_map>
 #include <mutex>
 #include <functional>
+#include <cmath>
+#include <random>
+#include <stdexcept>
 
 // SFML
 #include <SFML/Audio.hpp>

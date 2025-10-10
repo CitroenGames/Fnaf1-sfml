@@ -12,8 +12,7 @@ public:
 
     // Play music with optional looping
     void PlayMusic(const std::string& id, bool loop = false, float volume = 100.0f) {
-        auto music = GetMusic(id);
-        if (music) {
+        if (const auto music = GetMusic(id)) {
             music->setLoop(loop);
             music->setVolume(volume);
             music->play();
@@ -23,8 +22,7 @@ public:
 
     // Play sound effect
     void PlaySFX(const std::string& id, float volume = 100.0f) {
-        auto sound = GetSound(id);
-        if (sound) {
+        if (const auto sound = GetSound(id)) {
             sound->setVolume(volume);
             sound->play();
             m_ActiveSounds.push_back(sound);
@@ -33,7 +31,7 @@ public:
 
     // Stop all audio immediately
     void StopAllAudio() {
-        for (auto& music : m_ActiveMusic) {
+        for (const auto& music : m_ActiveMusic) {
             if (music) music->stop();
         }
         m_ActiveMusic.clear();
@@ -46,13 +44,9 @@ public:
 
     // Stop specific music
     void StopMusic(const std::string& id) {
-        auto music = GetMusic(id);
-        if (music) {
+        if (const auto music = GetMusic(id)) {
             music->stop();
-            m_ActiveMusic.erase(
-                std::remove(m_ActiveMusic.begin(), m_ActiveMusic.end(), music),
-                m_ActiveMusic.end()
-            );
+            std::erase(m_ActiveMusic, music);
         }
     }
 

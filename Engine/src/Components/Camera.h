@@ -1,12 +1,6 @@
 #pragma once
+
 #include <SFML/Graphics.hpp>
-#include <algorithm>
-#include <cmath>
-#include <chrono>
-#include <random>
-#include <memory>
-#include <stdexcept>
-#include <array>
 
 class Camera2D {
 public:
