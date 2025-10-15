@@ -1,7 +1,4 @@
 #pragma once
-#include <SFML/Graphics.hpp>
-#include <iostream>
-#include <memory>
 
 constexpr float VIEWPORT_WIDTH = 1280.0f;
 constexpr float VIEWPORT_HEIGHT = 720.0f;

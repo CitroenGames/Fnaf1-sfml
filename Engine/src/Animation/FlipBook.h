@@ -1,8 +1,4 @@
 #pragma once
-#include <SFML/Graphics.hpp>
-#include <vector>
-#include "Graphics/LayerManager.h"
-#include <memory>
 
 class FlipBook {
 public:

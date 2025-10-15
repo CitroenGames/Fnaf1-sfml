@@ -1,11 +1,8 @@
 #pragma once
-#include <SFML/Graphics.hpp>
+
 #include <box2d/box2d.h>
 #include "Graphics/LayerManager.h"
 #include "Assets/Resources.h"
-#include <memory>
-#include <string>
-#include <iostream>
 
 class Actor {
 public:

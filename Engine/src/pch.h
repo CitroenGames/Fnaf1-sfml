@@ -18,6 +18,7 @@
 #include <cmath>
 #include <random>
 #include <stdexcept>
+#include <map>
 
 // SFML
 #include <SFML/Audio.hpp>

@@ -1,6 +1,5 @@
 #pragma once
-#include <SFML/Graphics.hpp>
-#include <memory>
+
 #include <Graphics/LayerManager.h>
 
 class GlitchEffect {

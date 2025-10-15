@@ -1,5 +1,4 @@
 #include "Resources.h"
-#include <iostream>
 
 std::string Resources::m_PakFile;
 Pakker* Resources::m_PakHandler = nullptr;

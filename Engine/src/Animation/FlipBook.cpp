@@ -1,4 +1,5 @@
 #include "FlipBook.h"
+#include "Graphics/LayerManager.h"
 
 FlipBook::FlipBook()
     : m_Layer(0), m_FrameDuration(0), m_ElapsedTime(0.f),

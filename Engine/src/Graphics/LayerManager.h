@@ -1,8 +1,6 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-#include <map>
-#include "Layer.h"
+#include "Graphics/Layer.h"
 
 class LayerManager {
 public:
