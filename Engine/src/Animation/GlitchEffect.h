@@ -8,6 +8,7 @@ private:
     int m_Layer;
     int m_CurrentFrame;
     int m_PreviousFrame;  // Track previous frame for proper cleanup
+    bool m_IsRunning;
 
     // Glitch effect parameters
     bool m_IsGlitching;
@@ -22,6 +23,7 @@ public:
         : m_Layer(0)
         , m_CurrentFrame(0)
         , m_PreviousFrame(-1)  // Initialize to invalid frame
+        , m_IsRunning(true)
         , m_IsGlitching(false)
         , m_GlitchTimer(0.0f)
         , m_GlitchChance(0.001f)
@@ -47,6 +49,15 @@ public:
         for (size_t i = 0; i < m_Frames.size(); i++) {
             LayerManager::RemoveDrawable(m_Frames[i].get());
         }
+    }
+
+    void Stop() {
+        m_IsRunning = false;
+    }
+
+    void Kill() {
+        m_IsRunning = false;
+        LayerManager::RemoveDrawable(m_Frames[m_CurrentFrame].get());
     }
 
     void AddFrame(std::shared_ptr<sf::Texture> texture) {
@@ -99,7 +110,7 @@ public:
     }
 
     void Update() {
-        if (m_Frames.empty()) return;
+        if (m_Frames.empty() || m_IsRunning) return;
 
         if (m_IsGlitching) {
             m_GlitchTimer += 1.0f / 66.0f;  // Fixed timestep for 66 tickrate

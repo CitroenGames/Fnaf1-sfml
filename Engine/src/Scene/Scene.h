@@ -14,6 +14,10 @@ public:
 
     virtual void Destroy();
 
+    virtual ~Scene() {
+        Destroy();
+    }
+
     std::shared_ptr<Composable::Node> CreateEntity(const std::string &name) {
         return m_Scene.CreateNode(name);
     }

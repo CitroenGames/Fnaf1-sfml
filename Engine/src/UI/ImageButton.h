@@ -25,6 +25,14 @@ public:
         sf::Sprite::setPosition(position);
     }
 
+    void SetVisible(bool visible) {
+        if (visible) {
+            LayerManager::RemoveDrawable(this);
+        } else {
+            LayerManager::AddDrawable(m_Layer, this);
+        }
+    }
+
     virtual void SetTexture(const std::string& textureFile)
     {
         m_ButtonTexture = Resources::GetTexture(textureFile);

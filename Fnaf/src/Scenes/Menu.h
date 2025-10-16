@@ -17,7 +17,7 @@ public:
     void Update(double deltaTime) override;
     void FixedUpdate() override;
     void Render() override {}
-    void Destroy() override {}
+    void Destroy() override {LayerManager::Clear();}
     void SwitchToGameplay();
 
     void ShowNewsPaper();

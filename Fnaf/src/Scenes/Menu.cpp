@@ -76,20 +76,20 @@ void Menu::Init() {
 
     m_TimeText.setFont(*font);
     m_TimeText.setString("12:00 AM");
-    m_TimeText.setCharacterSize(50);
+    m_TimeText.setCharacterSize(75);
     m_TimeText.setFillColor(sf::Color::White);
     m_TimeText.setPosition(
         (Window::GetWindow()->getSize().x - m_TimeText.getGlobalBounds().width) / 2,
-        Window::GetWindow()->getSize().y / 2 - 50
+        Window::GetWindow()->getSize().y / 2 - 25
     );
 
     m_NightText.setFont(*font);
     m_NightText.setString("1st Night");
-    m_NightText.setCharacterSize(50);
+    m_NightText.setCharacterSize(75);
     m_NightText.setFillColor(sf::Color::White);
     m_NightText.setPosition(
         (Window::GetWindow()->getSize().x - m_NightText.getGlobalBounds().width) / 2,
-        Window::GetWindow()->getSize().y / 2 + 50
+        Window::GetWindow()->getSize().y / 2 + 25
     );
 
     // Setup loading screen sprite
@@ -131,8 +131,11 @@ void Menu::Init() {
 void Menu::HideGlitchEffects() {
     // Set glitch effects to an invisible layer
     m_FreddyGlitchEffect.SetLayer(-1);
+    m_FreddyGlitchEffect.Kill();
     m_StaticGlitchEffect.SetLayer(-1);
+    m_StaticGlitchEffect.Kill();
     m_WhiteGlitchEffect.SetLayer(-1);
+    m_WhiteGlitchEffect.Kill();
 }
 
 void Menu::ShowGlitchEffects() {
@@ -156,8 +159,8 @@ void Menu::HideAllMenuElements() {
     LayerManager::RemoveDrawable(&m_LoadingScreenSprite);
     LayerManager::RemoveDrawable(&m_WarningMessageSprite);
 
-    // Remove button from layer
-    newbutton.SetLayer(-1); // Use a non-visible layer
+    // Remove buttons from layer
+    newbutton.SetVisible(false);
 
     // Hide glitch effects
     HideGlitchEffects();
