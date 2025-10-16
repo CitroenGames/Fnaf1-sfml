@@ -6,6 +6,7 @@ std::map<std::string, std::shared_ptr<sf::Texture> > Resources::m_Textures;
 std::map<std::string, std::shared_ptr<sf::SoundBuffer> > Resources::m_SoundBuffers;
 std::map<std::string, std::shared_ptr<std::vector<uint8_t> > > Resources::m_MusicBuffers;
 std::map<std::string, std::shared_ptr<sf::Font> > Resources::m_Fonts;
+std::map<std::string, std::shared_ptr<std::vector<uint8_t> > > Resources::m_FontBuffers;
 
 void Resources::BindPakFile(const std::string &pakFilename) {
     if (m_PakHandler == nullptr) {
@@ -20,6 +21,7 @@ void Resources::Unload() {
     m_SoundBuffers.clear();
     m_MusicBuffers.clear();
     m_Fonts.clear();
+    m_FontBuffers.clear();
 }
 
 std::shared_ptr<sf::Texture> Resources::GetTexture(const std::string &filename) {
@@ -90,8 +92,11 @@ std::shared_ptr<sf::Font> Resources::GetFont(const std::string &filename) {
             return nullptr;
         }
 
+        // Store the font data buffer to keep it alive
+        m_FontBuffers[filename] = fontData;
+
         const std::shared_ptr<sf::Font> font = std::make_shared<sf::Font>();
-        if (!font->loadFromMemory(fontData->data(), fontData->size())) {
+        if (!font->loadFromMemory(m_FontBuffers[filename]->data(), m_FontBuffers[filename]->size())) {
             std::cerr << "Resources::GetFont: Failed to load font from memory: " << filename << std::endl;
             return nullptr;
         }

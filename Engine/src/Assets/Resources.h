@@ -30,4 +30,7 @@ private:
 
     // Store the loaded fonts
     static std::map<std::string, std::shared_ptr<sf::Font> > m_Fonts;
+    
+    // Store font data buffers to keep them alive
+    static std::map<std::string, std::shared_ptr<std::vector<uint8_t> > > m_FontBuffers;
 };

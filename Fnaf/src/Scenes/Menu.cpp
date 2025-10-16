@@ -76,7 +76,7 @@ void Menu::Init() {
 
     m_TimeText.setFont(*font);
     m_TimeText.setString("12:00 AM");
-    m_TimeText.setCharacterSize(10);
+    m_TimeText.setCharacterSize(50);
     m_TimeText.setFillColor(sf::Color::White);
     m_TimeText.setPosition(
         (Window::GetWindow()->getSize().x - m_TimeText.getGlobalBounds().width) / 2,
@@ -85,7 +85,7 @@ void Menu::Init() {
 
     m_NightText.setFont(*font);
     m_NightText.setString("1st Night");
-    m_NightText.setCharacterSize(10);
+    m_NightText.setCharacterSize(50);
     m_NightText.setFillColor(sf::Color::White);
     m_NightText.setPosition(
         (Window::GetWindow()->getSize().x - m_NightText.getGlobalBounds().width) / 2,
