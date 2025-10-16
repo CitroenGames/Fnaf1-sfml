@@ -15,12 +15,11 @@ constexpr int WARNING_MESSAGE_DURATION = 2; // 2 seconds
 constexpr float WARNING_MESSAGE_DURATION = 5.0f; // 5 seconds
 #endif
 
-WarningMessage::WarningMessage()
-{
+WarningMessage::WarningMessage() {
     // Load warning message texture
     m_WarningMessageTexture = ProcessText(Resources::GetTexture("Graphics/MainMenu/WarningMessage.png"));
     m_WarningMessageSprite.setTexture(*m_WarningMessageTexture);
-    
+
     // Center the warning message
     m_WarningMessageSprite.setPosition(
         (Window::GetWindow()->getSize().x - m_WarningMessageSprite.getGlobalBounds().width) / 2,
@@ -28,19 +27,17 @@ WarningMessage::WarningMessage()
     );
 
     // reason why we are doing this is to not waste time on loading the menu while we wait for the warning message
-	MainMenuScene = std::make_shared<Menu>(); 
+    MainMenuScene = std::make_shared<Menu>();
 }
 
-void WarningMessage::Init()
-{
+void WarningMessage::Init() {
     // Start with warning message
     m_State = WARNING;
     m_WarningMessageTimer = 0.0f;
     LayerManager::AddDrawable(MENU_BUTTON_LAYER, &m_WarningMessageSprite);
 }
 
-void WarningMessage::Update(double deltaTime)
-{
+void WarningMessage::Update(double deltaTime) {
     if (m_State == WARNING) {
         m_WarningMessageTimer += deltaTime;
         if (m_WarningMessageTimer >= WARNING_MESSAGE_DURATION) {
@@ -51,14 +48,13 @@ void WarningMessage::Update(double deltaTime)
     }
 }
 
-void WarningMessage::SwitchToMainMenu()
-{
+void WarningMessage::SwitchToMainMenu() {
     // Remove warning message from layer
     LayerManager::RemoveDrawable(&m_WarningMessageSprite);
-    
+
     // Clean up before switching scenes
     Destroy();
-    
+
     // Switch to Menu scene
     SceneManager::QueueSwitchScene(MainMenuScene);
 }

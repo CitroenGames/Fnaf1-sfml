@@ -13,7 +13,7 @@
 
 int main() {
     PROFILE_BEGIN_SESSION("Application", "profile_results.json");
-    Paingine2D::CrashHandler* crashHandler = Paingine2D::CrashHandler::GetInstance();
+    Paingine2D::CrashHandler *crashHandler = Paingine2D::CrashHandler::GetInstance();
     crashHandler->Initialize("FNaF");
     Pakker p(KEY);
 #if CAN_BUILD_ASSET_PAK
@@ -22,17 +22,20 @@ int main() {
         std::cout << "Packing Assets.pak" << std::endl;
         // Check if assets folder exists
         if (!std::filesystem::exists("Assets")) {
-            std::cerr << "Error: Assets folder not found in current directory: " << std::filesystem::current_path().string() << std::endl;
+            std::cerr << "Error: Assets folder not found in current directory: " << std::filesystem::current_path().
+                    string() << std::endl;
             return 1;
         }
         if (!p.CreatePakFromFolder("Assets.pak", "Assets")) {
-            std::cerr << "Error: Failed to create Assets.pak in current directory: " << std::filesystem::current_path().string() << std::endl;
+            std::cerr << "Error: Failed to create Assets.pak in current directory: " << std::filesystem::current_path().
+                    string() << std::endl;
             return 1;
         }
     }
     // List contents of the PAK
     if (!p.ListPak("Assets.pak")) {
-        std::cerr << "Error: Failed to list contents of assets.pak in current directory: " << std::filesystem::current_path().string() << std::endl;
+        std::cerr << "Error: Failed to list contents of assets.pak in current directory: " <<
+                std::filesystem::current_path().string() << std::endl;
         return 1;
     }
 #endif
@@ -47,12 +50,12 @@ int main() {
     Application::Init(1280, 720, "Five Nights at Freddy's");
     PROFILE_END();
 
-	PROFILE_BEGIN("Scene Initialization");
+    PROFILE_BEGIN("Scene Initialization");
     SceneManager::QueueSwitchScene(std::make_shared<WarningMessage>());
     PROFILE_END();
     PROFILE_BEGIN("Game");
     Application::Run();
-	PROFILE_END();
+    PROFILE_END();
     crashHandler->Shutdown();
     PROFILE_END_SESSION();
     return 0;

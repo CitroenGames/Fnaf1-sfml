@@ -1,13 +1,13 @@
 #include "Resources.h"
 
 std::string Resources::m_PakFile;
-Pakker* Resources::m_PakHandler = nullptr;
-std::map<std::string, std::shared_ptr<sf::Texture>> Resources::m_Textures;
-std::map<std::string, std::shared_ptr<sf::SoundBuffer>> Resources::m_SoundBuffers;
-std::map<std::string, std::shared_ptr<std::vector<uint8_t>>> Resources::m_MusicBuffers;
-std::map<std::string, std::shared_ptr<sf::Font>> Resources::m_Fonts;
+Pakker *Resources::m_PakHandler = nullptr;
+std::map<std::string, std::shared_ptr<sf::Texture> > Resources::m_Textures;
+std::map<std::string, std::shared_ptr<sf::SoundBuffer> > Resources::m_SoundBuffers;
+std::map<std::string, std::shared_ptr<std::vector<uint8_t> > > Resources::m_MusicBuffers;
+std::map<std::string, std::shared_ptr<sf::Font> > Resources::m_Fonts;
 
-void Resources::BindPakFile(const std::string& pakFilename) {
+void Resources::BindPakFile(const std::string &pakFilename) {
     if (m_PakHandler == nullptr) {
         std::cerr << "Resources::Load: Pakker instance not set." << std::endl;
         return;
@@ -22,7 +22,7 @@ void Resources::Unload() {
     m_Fonts.clear();
 }
 
-std::shared_ptr<sf::Texture> Resources::GetTexture(const std::string& filename) {
+std::shared_ptr<sf::Texture> Resources::GetTexture(const std::string &filename) {
     if (m_Textures.find(filename) == m_Textures.end()) {
         const auto textureData = m_PakHandler->LoadFile(m_PakFile, filename);
         if (!textureData) {
@@ -42,7 +42,7 @@ std::shared_ptr<sf::Texture> Resources::GetTexture(const std::string& filename) 
     return m_Textures[filename];
 }
 
-std::shared_ptr<sf::SoundBuffer> Resources::GetSoundBuffer(const std::string& filename) {
+std::shared_ptr<sf::SoundBuffer> Resources::GetSoundBuffer(const std::string &filename) {
     if (m_SoundBuffers.find(filename) == m_SoundBuffers.end()) {
         const auto soundData = m_PakHandler->LoadFile(m_PakFile, filename);
         if (!soundData) {
@@ -62,7 +62,7 @@ std::shared_ptr<sf::SoundBuffer> Resources::GetSoundBuffer(const std::string& fi
     return m_SoundBuffers[filename];
 }
 
-std::shared_ptr<sf::Music> Resources::GetMusic(const std::string& filename) {
+std::shared_ptr<sf::Music> Resources::GetMusic(const std::string &filename) {
     if (m_MusicBuffers.find(filename) == m_MusicBuffers.end()) {
         const auto musicData = m_PakHandler->LoadFile(m_PakFile, filename);
         if (!musicData) {
@@ -82,7 +82,7 @@ std::shared_ptr<sf::Music> Resources::GetMusic(const std::string& filename) {
     return music;
 }
 
-std::shared_ptr<sf::Font> Resources::GetFont(const std::string& filename) {
+std::shared_ptr<sf::Font> Resources::GetFont(const std::string &filename) {
     if (m_Fonts.find(filename) == m_Fonts.end()) {
         const auto fontData = m_PakHandler->LoadFile(m_PakFile, filename);
         if (!fontData) {

@@ -13,8 +13,7 @@
 constexpr float m_OfficeWidth = 1600.0f;
 constexpr float m_ViewportWidth = 1280.0f;
 
-void Gameplay::Init()
-{
+void Gameplay::Init() {
     gameplay = std::make_shared<FNAFGame>();
     gameplay->InitializeGame(player.m_Night);
 
@@ -70,7 +69,8 @@ void Gameplay::Init()
         // IDK where else i would put this.
     }
 
-    { // Camera stuff
+    {
+        // Camera stuff
         Camera2D::Config config;
         config.resolution = sf::Vector2f(1280.0f, 720.0f);
         config.initialZoom = 1.0f;
@@ -79,11 +79,9 @@ void Gameplay::Init()
 
         m_Camera = std::make_unique<Camera2D>(config);
     }
-
 }
 
-void Gameplay::FixedUpdate()
-{
+void Gameplay::FixedUpdate() {
     Scene::FixedUpdate();
 
     auto window = Window::GetWindow(); // TODO: We REALLY should get rid of this shitty mess but who cares for now
@@ -94,8 +92,7 @@ void Gameplay::FixedUpdate()
     }
 }
 
-void Gameplay::Update(double deltaTime)
-{
+void Gameplay::Update(double deltaTime) {
     Scene::Update(deltaTime);
 
     gameplay->Update(deltaTime);
@@ -128,7 +125,7 @@ void Gameplay::Update(double deltaTime)
 
         // Check if mouse is actually within the window
         bool mouseInWindow = (mousePos.x >= 0 && mousePos.x < static_cast<int>(windowSize.x) &&
-            mousePos.y >= 0 && mousePos.y < static_cast<int>(windowSize.y));
+                              mousePos.y >= 0 && mousePos.y < static_cast<int>(windowSize.y));
 
         if (mouseInWindow) {
             // Left edge scrolling with dynamic speed
@@ -165,8 +162,8 @@ void Gameplay::Update(double deltaTime)
         );
         // Calculate new camera position
         sf::Vector2f newCameraPos(
-            scrollOffset + (m_ViewportWidth / 2.0f),  // Center horizontally
-            (720.0f / 2.0f)                           // Center vertically
+            scrollOffset + (m_ViewportWidth / 2.0f), // Center horizontally
+            (720.0f / 2.0f) // Center vertically
         );
         m_Camera->setPosition(newCameraPos);
     }
@@ -178,8 +175,7 @@ void Gameplay::Update(double deltaTime)
     m_Camera->applyTo(*window);
 }
 
-void Gameplay::Render()
-{
+void Gameplay::Render() {
     auto window = Window::GetWindow();
 
     // Now draw HUD elements in screen space
@@ -189,8 +185,7 @@ void Gameplay::Render()
 
 #if defined(_DEBUG)
     // Render UI debug information
-    ImGui::Begin("PlayerInfo");
-    {
+    ImGui::Begin("PlayerInfo"); {
         ImGui::Text("Night: %d", player.m_Night);
         ImGui::Text("Time: %d AM", (player.m_Time == 0) ? 12 : player.m_Time);
         ImGui::Text("Power Usage: %d", player.m_UsageLevel);
@@ -199,30 +194,29 @@ void Gameplay::Render()
     ImGui::End();
 
     // Add new debug window for animatronic AI information
-    ImGui::Begin("Animatronics AI Debug");
-    {
+    ImGui::Begin("Animatronics AI Debug"); {
         if (gameplay) {
             // Helper function to convert Room enum to string
             auto RoomToString = [](Room room) -> std::string {
                 switch (room) {
-                case Room::SHOW_STAGE: return "Show Stage";
-                case Room::DINING_AREA: return "Dining Area";
-                case Room::PIRATE_COVE: return "Pirate Cove";
-                case Room::WEST_HALL: return "West Hall";
-                case Room::EAST_HALL: return "East Hall";
-                case Room::WEST_CORNER: return "West Hall Corner";
-                case Room::EAST_CORNER: return "East Hall Corner";
-                case Room::SUPPLY_CLOSET: return "Supply Closet";
-                case Room::KITCHEN: return "Kitchen";
-                case Room::RESTROOMS: return "Restrooms";
-                case Room::OFFICE: return "Office";
-                default: return "Unknown";
+                    case Room::SHOW_STAGE: return "Show Stage";
+                    case Room::DINING_AREA: return "Dining Area";
+                    case Room::PIRATE_COVE: return "Pirate Cove";
+                    case Room::WEST_HALL: return "West Hall";
+                    case Room::EAST_HALL: return "East Hall";
+                    case Room::WEST_CORNER: return "West Hall Corner";
+                    case Room::EAST_CORNER: return "East Hall Corner";
+                    case Room::SUPPLY_CLOSET: return "Supply Closet";
+                    case Room::KITCHEN: return "Kitchen";
+                    case Room::RESTROOMS: return "Restrooms";
+                    case Room::OFFICE: return "Office";
+                    default: return "Unknown";
                 }
-                };
+            };
 
-            std::vector<std::string> characters = { "Freddy", "Bonnie", "Chica", "Foxy" };
+            std::vector<std::string> characters = {"Freddy", "Bonnie", "Chica", "Foxy"};
 
-            for (const auto& character : characters) {
+            for (const auto &character: characters) {
                 if (ImGui::CollapsingHeader(character.c_str())) {
                     // Get animatronic information
                     Room location = gameplay->GetAnimatronicLocation(character);
@@ -243,8 +237,10 @@ void Gameplay::Render()
                     // Add progress bar for move timer
                     float timerRatio = timeSinceLastMove / moveInterval;
                     ImGui::ProgressBar(timerRatio, ImVec2(-1, 0),
-                        ("Move Chance: " + std::to_string(int(100 * std::min(1.0f,
-                            float(aiLevel) / float(MAX_RANDOM_ROLL)))) + "%").c_str());
+                                       ("Move Chance: " + std::to_string(int(100 * std::min(1.0f,
+                                                                                 float(aiLevel) /
+                                                                                 float(MAX_RANDOM_ROLL)))) + "%").
+                                       c_str());
 
                     // Add a visual indicator for movement probability
                     ImGui::Text("Movement Roll: AI Level (%d) vs Random(1-20)", aiLevel);
@@ -252,28 +248,23 @@ void Gameplay::Render()
                     // Character-specific info
                     if (character == "Freddy") {
                         ImGui::Text("Special: Stalled by camera, moves in dark");
-                    }
-                    else if (character == "Bonnie") {
+                    } else if (character == "Bonnie") {
                         ImGui::Text("Special: Approaches from left side");
-                    }
-                    else if (character == "Chica") {
+                    } else if (character == "Chica") {
                         ImGui::Text("Special: Approaches from right side, makes kitchen noises");
-                    }
-                    else if (character == "Foxy") {
+                    } else if (character == "Foxy") {
                         ImGui::Text("Special: Simplified behavior (original complex AI commented out)");
                     }
                 }
             }
-        }
-        else {
+        } else {
             ImGui::Text("Gameplay not initialized!");
         }
     }
     ImGui::End();
 
     // New debug window for power system
-    ImGui::Begin("Power System Debug");
-    {
+    ImGui::Begin("Power System Debug"); {
         if (gameplay) {
             ImGui::Text("Power Level: %.2f%%", player.m_PowerLevel);
 
@@ -296,13 +287,11 @@ void Gameplay::Render()
 
                 if (gameplay->GetFreddyMusicBoxTimer() > 0) {
                     ImGui::Text("Freddy Music Box: %.2f seconds", gameplay->GetFreddyMusicBoxTimer());
-                }
-                else {
+                } else {
                     ImGui::Text("Freddy is coming...");
                 }
             }
-        }
-        else {
+        } else {
             ImGui::Text("Gameplay not initialized!");
         }
     }
@@ -310,8 +299,7 @@ void Gameplay::Render()
 #endif
 }
 
-void Gameplay::Destroy()
-{
+void Gameplay::Destroy() {
     if (m_CameraSystem) {
         m_CameraSystem->Destroy();
     }

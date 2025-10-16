@@ -2,6 +2,7 @@
 
 #include "BaseButton.h"
 #include "Core/Window.h"
+#include "Assets/Resources.h"
 
 // THIS CLASS IS NOT FINAL AT ALL IT LACKS MANY STUFF BUT WORKS WELL ENOUGH FOR THE GAME.
 class HUDButton : public BaseButton {

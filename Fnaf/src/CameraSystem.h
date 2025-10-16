@@ -3,9 +3,7 @@
 #include "Animation/FlipBook.h"
 #include "UI/HUDButton.h"
 #include "Composable.h"
-#include "LayerDefines.h"
 #include "UI/ImageButton.h"
-#include "GameState.h"
 
 class CameraSystem : public Composable::Component {
 public:

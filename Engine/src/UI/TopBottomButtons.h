@@ -12,9 +12,9 @@ public:
         BottomActive = 3
     };
 
-    TopBottomButtons() :
-        m_CurrentState(ButtonState::NoActive),
-        m_WasMousePressed(false) {}
+    TopBottomButtons() : m_CurrentState(ButtonState::NoActive),
+                         m_WasMousePressed(false) {
+    }
 
     void SetCallbacks(
         std::function<void(bool active)> onTopClick,
@@ -24,9 +24,10 @@ public:
         m_OnBottomClick = onBottomClick;
     }
 
-    void SetTextures(const std::vector<std::shared_ptr<sf::Texture>>& textures) {
+    void SetTextures(const std::vector<std::shared_ptr<sf::Texture> > &textures) {
         if (textures.size() != 4) {
-            std::cerr << "Error: Expected exactly 4 textures (NoActive, TopActive, BothActive, BottomActive)." << std::endl;
+            std::cerr << "Error: Expected exactly 4 textures (NoActive, TopActive, BothActive, BottomActive)." <<
+                    std::endl;
             return;
         }
 
@@ -36,8 +37,8 @@ public:
         SetTexture(m_Textures[static_cast<int>(ButtonState::NoActive)]);
     }
 
-    void updateButton(sf::RenderWindow& window) {
-		if (!m_Enabled) return; // Skip update if not enabled
+    void updateButton(sf::RenderWindow &window) {
+        if (!m_Enabled) return; // Skip update if not enabled
 
         // Check if mouse is over button
         if (IsMouseOver(window)) {
@@ -45,7 +46,7 @@ public:
             if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !m_WasMousePressed) {
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                 sf::Vector2f viewPos = window.mapPixelToCoords(mousePos);
-                sf::FloatRect buttonBounds = getGlobalBounds();  // Use inherited method
+                sf::FloatRect buttonBounds = getGlobalBounds(); // Use inherited method
 
                 float relativeY = viewPos.y - buttonBounds.top;
 
@@ -53,14 +54,15 @@ public:
                     // Top half clicked
                     updateTopState();
                     if (m_OnTopClick) {
-                        m_OnTopClick(m_CurrentState == ButtonState::TopActive || m_CurrentState == ButtonState::BothActive);
+                        m_OnTopClick(
+                            m_CurrentState == ButtonState::TopActive || m_CurrentState == ButtonState::BothActive);
                     }
-                }
-                else {
+                } else {
                     // Bottom half clicked
                     updateBottomState();
                     if (m_OnBottomClick) {
-                        m_OnBottomClick(m_CurrentState == ButtonState::BottomActive || m_CurrentState == ButtonState::BothActive);
+                        m_OnBottomClick(
+                            m_CurrentState == ButtonState::BottomActive || m_CurrentState == ButtonState::BothActive);
                     }
                 }
 
@@ -83,71 +85,67 @@ public:
         if (active) {
             if (m_CurrentState == ButtonState::NoActive) {
                 m_CurrentState = ButtonState::BottomActive;
-            }
-            else if (m_CurrentState == ButtonState::TopActive) {
+            } else if (m_CurrentState == ButtonState::TopActive) {
                 m_CurrentState = ButtonState::BothActive;
             }
-        }
-        else {
+        } else {
             if (m_CurrentState == ButtonState::BottomActive) {
                 m_CurrentState = ButtonState::NoActive;
-            }
-            else if (m_CurrentState == ButtonState::BothActive) {
+            } else if (m_CurrentState == ButtonState::BothActive) {
                 m_CurrentState = ButtonState::TopActive;
             }
         }
         updateTexture();
     }
 
-    void SetEnabled(bool IsEnabled)
-    {
-		m_CurrentState = ButtonState::NoActive;
-		m_WasMousePressed = false;
-		m_Enabled = IsEnabled;
-		updateTexture();
+    void SetEnabled(bool IsEnabled) {
+        m_CurrentState = ButtonState::NoActive;
+        m_WasMousePressed = false;
+        m_Enabled = IsEnabled;
+        updateTexture();
     }
 
 private:
     std::function<void(bool active)> m_OnTopClick;
     std::function<void(bool active)> m_OnBottomClick;
-    std::vector<std::shared_ptr<sf::Texture>> m_Textures;
+    std::vector<std::shared_ptr<sf::Texture> > m_Textures;
 
     ButtonState m_CurrentState;
     bool m_WasMousePressed;
-	bool m_Enabled = true;
+    bool m_Enabled = true;
 
     void updateTopState() {
         switch (m_CurrentState) {
-        case ButtonState::NoActive:
-            m_CurrentState = ButtonState::TopActive;
-            break;
-        case ButtonState::BottomActive:
-            m_CurrentState = ButtonState::BothActive;
-            break;
-        case ButtonState::TopActive:
-            m_CurrentState = ButtonState::NoActive;
-            break;
-        case ButtonState::BothActive:
-            m_CurrentState = ButtonState::BottomActive;
-            break;
+            case ButtonState::NoActive:
+                m_CurrentState = ButtonState::TopActive;
+                break;
+            case ButtonState::BottomActive:
+                m_CurrentState = ButtonState::BothActive;
+                break;
+            case ButtonState::TopActive:
+                m_CurrentState = ButtonState::NoActive;
+                break;
+            case ButtonState::BothActive:
+                m_CurrentState = ButtonState::BottomActive;
+                break;
         }
         updateTexture();
     }
 
     void updateBottomState() {
         switch (m_CurrentState) {
-        case ButtonState::NoActive:
-            m_CurrentState = ButtonState::BottomActive;
-            break;
-        case ButtonState::TopActive:
-            m_CurrentState = ButtonState::BothActive;
-            break;
-        case ButtonState::BottomActive:
-            m_CurrentState = ButtonState::NoActive;
-            break;
-        case ButtonState::BothActive:
-            m_CurrentState = ButtonState::TopActive;
-            break;
+            case ButtonState::NoActive:
+                m_CurrentState = ButtonState::BottomActive;
+                break;
+            case ButtonState::TopActive:
+                m_CurrentState = ButtonState::BothActive;
+                break;
+            case ButtonState::BottomActive:
+                m_CurrentState = ButtonState::NoActive;
+                break;
+            case ButtonState::BothActive:
+                m_CurrentState = ButtonState::TopActive;
+                break;
         }
         updateTexture();
     }
@@ -159,7 +157,7 @@ private:
         SetTexture(m_Textures[static_cast<int>(m_CurrentState)]);
     }
 
-    bool IsClicked(sf::RenderWindow& window) override {
+    bool IsClicked(sf::RenderWindow &window) override {
         return false; // Disable base class click detection
     }
 };

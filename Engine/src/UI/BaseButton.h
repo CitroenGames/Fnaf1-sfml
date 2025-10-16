@@ -1,10 +1,4 @@
 #pragma once
-#include <SFML/Graphics.hpp>
-
-#include "Graphics/LayerManager.h"
-#include "Assets/Resources.h"
-#include <iostream>
-#include <memory>
 
 class BaseButton : public sf::Sprite {
 public:

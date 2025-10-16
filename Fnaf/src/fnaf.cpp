@@ -14,11 +14,11 @@ namespace {
     constexpr float HOUR_PROGRESS_RATE = 1.0f / SECONDS_PER_HOUR;
 
     // FNAF 1 AI mechanics constants
-    constexpr float FREDDY_MOVE_INTERVAL = 3.0f;   // 3 seconds for Freddy
-    constexpr float OTHER_MOVE_INTERVAL = 4.97f;   // ~5 seconds for others
+    constexpr float FREDDY_MOVE_INTERVAL = 3.0f; // 3 seconds for Freddy
+    constexpr float OTHER_MOVE_INTERVAL = 4.97f; // ~5 seconds for others
 
     // Hour-based AI increments - based on FNAF 1 mechanics
-    const std::map<int, std::map<std::string, int>> HOUR_AI_INCREMENTS = {
+    const std::map<int, std::map<std::string, int> > HOUR_AI_INCREMENTS = {
         {2, {{"Bonnie", 1}, {"Chica", 0}, {"Foxy", 0}, {"Freddy", 0}}},
         {3, {{"Bonnie", 1}, {"Chica", 1}, {"Foxy", 1}, {"Freddy", 0}}},
         {4, {{"Bonnie", 1}, {"Chica", 1}, {"Foxy", 1}, {"Freddy", 0}}}
@@ -26,18 +26,17 @@ namespace {
 }
 
 // Initialize static member for GameEvents
-std::map<GameEvent, std::vector<std::function<void()>>> GameEvents::s_Subscribers;
+std::map<GameEvent, std::vector<std::function<void()> > > GameEvents::s_Subscribers;
 
-Animatronic::Animatronic(const std::string& name, int aiLevel)
+Animatronic::Animatronic(const std::string &name, int aiLevel)
     : name(name)
-    , currentLocation(Room::SHOW_STAGE)
-    , aiLevel(aiLevel)
-    , movementProgress(0.0f)
-    , isInOffice(false)
-    , isActive(true)
-    , timeSinceLastMoveCheck(0.0f)
-    , moveInterval(name == "Freddy" ? FREDDY_MOVE_INTERVAL : OTHER_MOVE_INTERVAL)
-{
+      , currentLocation(Room::SHOW_STAGE)
+      , aiLevel(aiLevel)
+      , movementProgress(0.0f)
+      , isInOffice(false)
+      , isActive(true)
+      , timeSinceLastMoveCheck(0.0f)
+      , moveInterval(name == "Freddy" ? FREDDY_MOVE_INTERVAL : OTHER_MOVE_INTERVAL) {
     lastMoved = std::chrono::system_clock::now();
 
     // Initialize character-specific paths
@@ -50,8 +49,7 @@ Animatronic::Animatronic(const std::string& name, int aiLevel)
             {Room::EAST_HALL, Room::EAST_CORNER, 1.0f},
             {Room::EAST_CORNER, Room::OFFICE, 1.0f}
         };
-    }
-    else if (name == "Bonnie") {
+    } else if (name == "Bonnie") {
         possiblePaths = {
             {Room::SHOW_STAGE, Room::DINING_AREA, 1.0f},
             {Room::DINING_AREA, Room::WEST_HALL, 0.8f},
@@ -59,8 +57,7 @@ Animatronic::Animatronic(const std::string& name, int aiLevel)
             {Room::WEST_HALL, Room::WEST_CORNER, 0.7f},
             {Room::WEST_CORNER, Room::OFFICE, 1.0f}
         };
-    }
-    else if (name == "Chica") {
+    } else if (name == "Chica") {
         possiblePaths = {
             {Room::SHOW_STAGE, Room::DINING_AREA, 1.0f},
             {Room::DINING_AREA, Room::KITCHEN, 0.6f},
@@ -69,8 +66,7 @@ Animatronic::Animatronic(const std::string& name, int aiLevel)
             {Room::EAST_HALL, Room::EAST_CORNER, 0.8f},
             {Room::EAST_CORNER, Room::OFFICE, 1.0f}
         };
-    }
-    else if (name == "Foxy") {
+    } else if (name == "Foxy") {
         possiblePaths = {
             {Room::PIRATE_COVE, Room::WEST_HALL, 1.0f},
             {Room::WEST_HALL, Room::OFFICE, 1.0f}
@@ -81,9 +77,9 @@ Animatronic::Animatronic(const std::string& name, int aiLevel)
 
 bool Animatronic::canMove(Room destination) const {
     auto it = std::find_if(possiblePaths.begin(), possiblePaths.end(),
-        [this, destination](const AnimatronicPath& path) {
-            return path.from == currentLocation && path.to == destination;
-        });
+                           [this, destination](const AnimatronicPath &path) {
+                               return path.from == currentLocation && path.to == destination;
+                           });
     return it != possiblePaths.end();
 }
 
@@ -94,13 +90,11 @@ void Animatronic::updateMovementProgress(float delta) {
         if (!player.m_UsingCamera) {
             // Scale progress by AI level and delta time
             movementProgress += delta * (aiLevel * PROGRESS_RATE);
-        }
-        else {
+        } else {
             // Regression when watched - commented out for now as Foxy is simplified
             // movementProgress = std::max(0.0f, movementProgress - delta * 0.5f);
         }
-    }
-    else {
+    } else {
         // Standard movement progress for other animatronics
         movementProgress += delta * (aiLevel * PROGRESS_RATE);
     }
@@ -109,8 +103,7 @@ void Animatronic::updateMovementProgress(float delta) {
 void Animatronic::reset() {
     if (name == "Foxy") {
         currentLocation = Room::PIRATE_COVE;
-    }
-    else {
+    } else {
         currentLocation = Room::SHOW_STAGE;
     }
     movementProgress = 0.0f;
@@ -120,13 +113,12 @@ void Animatronic::reset() {
 
 FNAFGame::FNAFGame()
     : m_GameOver(false)
-    , m_PowerOutage(false)
-    , m_PowerOutageTimer(0.0f)
-    , m_FreddyMusicBoxTimer(0.0f)
-    , m_RNG(std::random_device{}())
-    , m_LastHourAIUpdated(0)
-    , m_CameraSystem(nullptr)
-{
+      , m_PowerOutage(false)
+      , m_PowerOutageTimer(0.0f)
+      , m_FreddyMusicBoxTimer(0.0f)
+      , m_RNG(std::random_device{}())
+      , m_LastHourAIUpdated(0)
+      , m_CameraSystem(nullptr) {
     InitializeMovementPaths();
 }
 
@@ -250,7 +242,7 @@ float FNAFGame::CalculatePowerDrain() const {
 }
 
 void FNAFGame::UpdateAnimatronics(float deltaTime) {
-    for (auto& [name, animatronic] : m_Animatronics) {
+    for (auto &[name, animatronic]: m_Animatronics) {
         if (!animatronic->isActive) continue;
 
         // Update movement check timer
@@ -273,14 +265,11 @@ void FNAFGame::UpdateAnimatronics(float deltaTime) {
         // Character-specific updates
         if (name == "Freddy") {
             UpdateFreddy(*animatronic, deltaTime);
-        }
-        else if (name == "Bonnie") {
+        } else if (name == "Bonnie") {
             UpdateBonnie(*animatronic, deltaTime);
-        }
-        else if (name == "Chica") {
+        } else if (name == "Chica") {
             UpdateChica(*animatronic, deltaTime);
-        }
-        else if (name == "Foxy") {
+        } else if (name == "Foxy") {
             UpdateFoxy(*animatronic, deltaTime);
         }
 
@@ -291,7 +280,7 @@ void FNAFGame::UpdateAnimatronics(float deltaTime) {
     }
 }
 
-bool FNAFGame::ShouldAttemptMove(const Animatronic& animatronic) {
+bool FNAFGame::ShouldAttemptMove(const Animatronic &animatronic) {
     if (!animatronic.isActive) return false;
 
     // Check if it's time for a movement opportunity
@@ -321,7 +310,7 @@ bool FNAFGame::ShouldAttemptMove(const Animatronic& animatronic) {
     return roll <= animatronic.aiLevel;
 }
 
-void FNAFGame::AttemptMove(Animatronic& animatronic) {
+void FNAFGame::AttemptMove(Animatronic &animatronic) {
     Room nextRoom = GetNextRoom(animatronic);
 
     if (animatronic.canMove(nextRoom)) {
@@ -339,7 +328,7 @@ void FNAFGame::AttemptMove(Animatronic& animatronic) {
     }
 }
 
-void FNAFGame::UpdateFreddy(Animatronic& freddy, float deltaTime) {
+void FNAFGame::UpdateFreddy(Animatronic &freddy, float deltaTime) {
     // Freddy only moves when cameras are down
     if (player.m_UsingCamera && freddy.currentLocation != Room::OFFICE) {
         // Freddy gets "stalled" by camera check
@@ -365,12 +354,12 @@ void FNAFGame::UpdateFreddy(Animatronic& freddy, float deltaTime) {
     }
 }
 
-void FNAFGame::UpdateBonnie(Animatronic& bonnie, float deltaTime) {
+void FNAFGame::UpdateBonnie(Animatronic &bonnie, float deltaTime) {
     // Bonnie movement is fairly standard - mainly handled by core AI
     // No camera stalling effect
 }
 
-void FNAFGame::UpdateChica(Animatronic& chica, float deltaTime) {
+void FNAFGame::UpdateChica(Animatronic &chica, float deltaTime) {
     // Chica makes noise in the kitchen
     if (chica.currentLocation == Room::KITCHEN) {
         if (std::uniform_real_distribution<float>(0.0f, 1.0f)(m_RNG) < 0.05f) {
@@ -379,7 +368,7 @@ void FNAFGame::UpdateChica(Animatronic& chica, float deltaTime) {
     }
 }
 
-void FNAFGame::UpdateFoxy(Animatronic& foxy, float deltaTime) {
+void FNAFGame::UpdateFoxy(Animatronic &foxy, float deltaTime) {
     // Simplified Foxy behavior - movement based on FNAF 1 mechanics
     if (player.m_UsingCamera && m_CameraSystem) {
         // Check if player is viewing Pirate Cove
@@ -439,11 +428,11 @@ void FNAFGame::HandlePowerOutage(float deltaTime) {
     }
 }
 
-Room FNAFGame::GetNextRoom(const Animatronic& animatronic) {
+Room FNAFGame::GetNextRoom(const Animatronic &animatronic) {
     std::vector<Room> possibleRooms;
     std::vector<float> probabilities;
 
-    for (const auto& path : animatronic.possiblePaths) {
+    for (const auto &path: animatronic.possiblePaths) {
         if (path.from == animatronic.currentLocation) {
             possibleRooms.push_back(path.to);
             probabilities.push_back(path.probability);
@@ -456,7 +445,7 @@ Room FNAFGame::GetNextRoom(const Animatronic& animatronic) {
 
     // Normalize probabilities
     float sum = std::accumulate(probabilities.begin(), probabilities.end(), 0.0f);
-    for (float& prob : probabilities) {
+    for (float &prob: probabilities) {
         prob /= sum;
     }
 
@@ -475,7 +464,7 @@ Room FNAFGame::GetNextRoom(const Animatronic& animatronic) {
     return possibleRooms.back();
 }
 
-void FNAFGame::MoveAnimatronic(Animatronic& animatronic, Room destination) {
+void FNAFGame::MoveAnimatronic(Animatronic &animatronic, Room destination) {
     if (!animatronic.canMove(destination)) return;
 
     animatronic.currentLocation = destination;
@@ -485,8 +474,7 @@ void FNAFGame::MoveAnimatronic(Animatronic& animatronic, Room destination) {
     if (destination == Room::OFFICE) {
         if (!IsDefendedAgainst(animatronic)) {
             TriggerJumpscare(animatronic);
-        }
-        else {
+        } else {
             // Retreat if blocked
             animatronic.reset();
         }
@@ -498,18 +486,17 @@ void FNAFGame::MoveAnimatronic(Animatronic& animatronic, Room destination) {
     }
 }
 
-bool FNAFGame::IsDefendedAgainst(const Animatronic& animatronic) const {
+bool FNAFGame::IsDefendedAgainst(const Animatronic &animatronic) const {
     if (animatronic.name == "Freddy" || animatronic.name == "Chica") {
         return player.m_RightDoorClosed; // Right door
-    }
-    else if (animatronic.name == "Bonnie" || animatronic.name == "Foxy") {
+    } else if (animatronic.name == "Bonnie" || animatronic.name == "Foxy") {
         return player.m_LeftDoorClosed; // Left door
     }
     return false;
 }
 
 void FNAFGame::CheckForJumpscare() {
-    for (const auto& [name, animatronic] : m_Animatronics) {
+    for (const auto &[name, animatronic]: m_Animatronics) {
         if (animatronic->currentLocation == Room::OFFICE && !IsDefendedAgainst(*animatronic)) {
             TriggerJumpscare(*animatronic);
             return;
@@ -517,7 +504,7 @@ void FNAFGame::CheckForJumpscare() {
     }
 }
 
-void FNAFGame::TriggerJumpscare(const Animatronic& character) {
+void FNAFGame::TriggerJumpscare(const Animatronic &character) {
     PlaySound("JumpScare/XSCREAM");
     m_GameOver = true;
 }
@@ -526,7 +513,7 @@ void FNAFGame::InitializeCustomNight(AILevels _AILevels) {
     // Validate AI levels
     auto validateLevel = [](int level) {
         return std::clamp(level, 0, MAX_AI_LEVEL);
-        };
+    };
 
     InitializeGame(7); // Custom night is night 7
 
@@ -538,37 +525,39 @@ void FNAFGame::InitializeCustomNight(AILevels _AILevels) {
 
 void FNAFGame::InitializeMovementPaths() {
     // Initialize valid movement paths for each room
-    m_ValidMoves[Room::SHOW_STAGE] = { Room::DINING_AREA };
-    m_ValidMoves[Room::DINING_AREA] = { Room::WEST_HALL, Room::EAST_HALL, Room::RESTROOMS, Room::KITCHEN };
-    m_ValidMoves[Room::WEST_HALL] = { Room::WEST_CORNER, Room::SUPPLY_CLOSET };
-    m_ValidMoves[Room::EAST_HALL] = { Room::EAST_CORNER, Room::KITCHEN };
-    m_ValidMoves[Room::WEST_CORNER] = { Room::OFFICE };
-    m_ValidMoves[Room::EAST_CORNER] = { Room::OFFICE };
-    m_ValidMoves[Room::PIRATE_COVE] = { Room::WEST_HALL };
-    m_ValidMoves[Room::KITCHEN] = { Room::EAST_HALL };
-    m_ValidMoves[Room::RESTROOMS] = { Room::KITCHEN, Room::DINING_AREA };
+    m_ValidMoves[Room::SHOW_STAGE] = {Room::DINING_AREA};
+    m_ValidMoves[Room::DINING_AREA] = {Room::WEST_HALL, Room::EAST_HALL, Room::RESTROOMS, Room::KITCHEN};
+    m_ValidMoves[Room::WEST_HALL] = {Room::WEST_CORNER, Room::SUPPLY_CLOSET};
+    m_ValidMoves[Room::EAST_HALL] = {Room::EAST_CORNER, Room::KITCHEN};
+    m_ValidMoves[Room::WEST_CORNER] = {Room::OFFICE};
+    m_ValidMoves[Room::EAST_CORNER] = {Room::OFFICE};
+    m_ValidMoves[Room::PIRATE_COVE] = {Room::WEST_HALL};
+    m_ValidMoves[Room::KITCHEN] = {Room::EAST_HALL};
+    m_ValidMoves[Room::RESTROOMS] = {Room::KITCHEN, Room::DINING_AREA};
 }
 
-int FNAFGame::GetAILevel(int night, const std::string& character) const {
+int FNAFGame::GetAILevel(int night, const std::string &character) const {
     // Default AI levels for each night based on FNAF 1 mechanics
     struct NightLevels {
         int freddy, bonnie, chica, foxy;
     };
 
     // Updated AI levels to match FNAF 1 mechanics
-    const std::array<NightLevels, 7> nightConfigs = { {
-        {0, 0, 0, 0},  // Night 1
-        {0, 3, 1, 1},  // Night 2
-        {1, 0, 5, 2},  // Night 3
-        {1, 2, 4, 6},  // Night 4 (Freddy should have 50/50 chance to be 1 or 2, using 1 for simplicity)
-        {3, 5, 7, 5},  // Night 5
-        {4, 10, 12, 6}, // Night 6
-        {5, 14, 14, 12}  // Night 7 (Default Custom Night)
-    } };
+    const std::array<NightLevels, 7> nightConfigs = {
+        {
+            {0, 0, 0, 0}, // Night 1
+            {0, 3, 1, 1}, // Night 2
+            {1, 0, 5, 2}, // Night 3
+            {1, 2, 4, 6}, // Night 4 (Freddy should have 50/50 chance to be 1 or 2, using 1 for simplicity)
+            {3, 5, 7, 5}, // Night 5
+            {4, 10, 12, 6}, // Night 6
+            {5, 14, 14, 12} // Night 7 (Default Custom Night)
+        }
+    };
 
     if (night < 1 || night > 7) night = 1;
 
-    const auto& config = nightConfigs[night - 1];
+    const auto &config = nightConfigs[night - 1];
 
     if (character == "Freddy") return config.freddy;
     if (character == "Bonnie") return config.bonnie;
@@ -578,7 +567,7 @@ int FNAFGame::GetAILevel(int night, const std::string& character) const {
     return 0;
 }
 
-void FNAFGame::PlaySound(const std::string& soundName) const {
+void FNAFGame::PlaySound(const std::string &soundName) const {
     auto sound = Resources::GetMusic("Audio/" + soundName + ".wav");
     if (sound) {
         sound->play();

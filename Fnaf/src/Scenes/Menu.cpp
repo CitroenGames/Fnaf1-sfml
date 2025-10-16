@@ -5,9 +5,9 @@
 #include "Graphics/LayerManager.h"
 #include "LayerDefines.h"
 #include "Utils/Helpers.h"
+#include "Audio/AudioManager.h"
 
 int NewsPaperTimer = 0;
-bool IsShowingNewsPaper = false;
 
 // NOTE: this is in ticks not seconds so 66 ticks = 1 second
 #if _DEBUG
@@ -16,15 +16,13 @@ bool IsShowingNewsPaper = false;
 #define SHOWNEWPAPERTIME 12 * 66 // 12 seconds
 #endif
 
-Menu::Menu()
-{
+Menu::Menu() {
     // Preload audio - no longer keeping music objects directly in the Menu class
     Resources::GetMusic(STATIC_AUDIO_KEY);
     Resources::GetMusic(MENU_MUSIC_KEY);
 
     // Noise textures
-    for (int i = 1; i <= 8; i++)
-    {
+    for (int i = 1; i <= 8; i++) {
         m_NoiseTextures.push_back(MakeTextureTransparent(
             Resources::GetTexture("Graphics/Static/Noise" + std::to_string(i) + ".png"),
             0.15f
@@ -32,8 +30,7 @@ Menu::Menu()
     }
 
     // Load & Setup white textures
-    for (int i = 1; i <= 8; i++)
-    {
+    for (int i = 1; i <= 8; i++) {
         m_WhiteTextures.push_back(RemoveBlackBackground(
             Resources::GetTexture("Graphics/White/WhiteThing" + std::to_string(i) + ".png")
         ));
@@ -41,8 +38,7 @@ Menu::Menu()
 
     // Load & Setup Freddy glitch effect
     m_FreddyGlitchEffect = GlitchEffect(0);
-    for (int i = 1; i < 4; i++)
-    {
+    for (int i = 1; i < 4; i++) {
         m_FreddyGlitchEffect.AddFrame(Resources::GetTexture(
             "Graphics/MainMenu/FreddyBackground/Frame" + std::to_string(i) + ".png"
         ));
@@ -71,8 +67,7 @@ Menu::Menu()
     m_LogoSprite.setPosition(100, 100);
 }
 
-void Menu::Init()
-{
+void Menu::Init() {
     ShowMainMenuElements();
 
     // Start audio using AudioManager
@@ -97,7 +92,7 @@ void Menu::Init()
         Window::GetWindow()->getSize().y / 2 + 50
     );
 
-	// Setup loading screen sprite
+    // Setup loading screen sprite
     m_LoadingScreenSprite.setTexture(*m_LoadingScreenTexture);
     m_LoadingScreenSprite.setPosition(
         Window::GetWindow()->getSize().x - m_LoadingScreenSprite.getGlobalBounds().width,
@@ -106,15 +101,13 @@ void Menu::Init()
 
     // Setup white glitch effect
     m_WhiteGlitchEffect = GlitchEffect(2);
-    for (int i = 0; i < m_WhiteTextures.size(); i++)
-    {
+    for (int i = 0; i < m_WhiteTextures.size(); i++) {
         m_WhiteGlitchEffect.AddFrame(m_WhiteTextures[i]);
     }
 
     // Setup static glitch effect
     m_StaticGlitchEffect = GlitchEffect(1);
-    for (int i = 0; i < m_NoiseTextures.size(); i++)
-    {
+    for (int i = 0; i < m_NoiseTextures.size(); i++) {
         m_StaticGlitchEffect.AddFrame(m_NoiseTextures[i]);
     }
 
@@ -135,24 +128,26 @@ void Menu::Init()
     newbutton.SetPosition(100, 400);
 }
 
-void Menu::HideGlitchEffects()
-{
-    // Set glitch effects to an invisible layer 
+void Menu::HideGlitchEffects() {
+    // Set glitch effects to an invisible layer
     m_FreddyGlitchEffect.SetLayer(-1);
     m_StaticGlitchEffect.SetLayer(-1);
     m_WhiteGlitchEffect.SetLayer(-1);
 }
 
-void Menu::ShowGlitchEffects()
-{
+void Menu::ShowGlitchEffects() {
     // Restore glitch effects to their original layers
     m_FreddyGlitchEffect.SetLayer(0);
     m_StaticGlitchEffect.SetLayer(1);
     m_WhiteGlitchEffect.SetLayer(2);
 }
 
-void Menu::HideAllMenuElements()
-{
+void Menu::SwitchState(GameplayTransitionState state) {
+    m_GameplayTransitionState = state;
+    NewsPaperTimer = 0; // Reset timer
+}
+
+void Menu::HideAllMenuElements() {
     // Remove all menu elements from the layer manager
     LayerManager::RemoveDrawable(&m_LogoSprite);
     LayerManager::RemoveDrawable(&NewsPaperSprite);
@@ -168,8 +163,7 @@ void Menu::HideAllMenuElements()
     HideGlitchEffects();
 }
 
-void Menu::ShowMainMenuElements()
-{
+void Menu::ShowMainMenuElements() {
     // Add main menu elements to the layer manager
     LayerManager::AddDrawable(MENU_BUTTON_LAYER, &m_LogoSprite);
 
@@ -180,8 +174,7 @@ void Menu::ShowMainMenuElements()
     ShowGlitchEffects();
 }
 
-void Menu::Update(double deltaTime)
-{
+void Menu::Update(double deltaTime) {
     //accumulatedTime += (float)deltaTime;
 
     //switch (m_State) {
@@ -208,8 +201,7 @@ void Menu::Update(double deltaTime)
     //}
 }
 
-void Menu::SwitchToGameplay()
-{
+void Menu::SwitchToGameplay() {
     // Clean up all transition elements before switching scenes
     HideAllMenuElements();
 
@@ -217,71 +209,68 @@ void Menu::SwitchToGameplay()
     SceneManager::QueueSwitchScene(std::make_shared<Gameplay>());
 }
 
-void Menu::FixedUpdate()
-{
-    // Handle the main menu to gameplay transition if active
-    if (IsShowingNewsPaper)
-    {
-        NewsPaperTimer += 1;
-        float seconds = NewsPaperTimer / 66.0f; // Convert ticks to seconds
+void Menu::FixedUpdate() {
+    // TODO: idk remove this stupid seconds thing
+    NewsPaperTimer += 1;
+    const float seconds = NewsPaperTimer / 66.0f; // Convert ticks to seconds
+    switch (m_GameplayTransitionState) {
+        case MAIN_MENU: {
+            m_FreddyGlitchEffect.Update();
+            m_StaticGlitchEffect.Update();
+            m_WhiteGlitchEffect.Update();
 
-        switch (m_GameplayTransitionState)
-        {
-        case NEWSPAPER:
+            auto window = Window::GetWindow();
+
+            if (newbutton.IsClicked(*window)) {
+                // Hide all menu elements when transitioning to newspaper
+                HideAllMenuElements();
+
+                // Show only the newspaper
+                LayerManager::AddDrawable(4, &NewsPaperSprite);
+                SwitchState(NEWSPAPER);
+            }
+            break;
+        }
+        case FADE_IN: {
+            break;
+        }
+        case NEWSPAPER: {
             if (seconds >= NEWSPAPER_DURATION) {
                 // Switch to time display
                 LayerManager::RemoveDrawable(&NewsPaperSprite);
                 LayerManager::AddDrawable(MENU_BUTTON_LAYER, &m_TimeText);
                 LayerManager::AddDrawable(MENU_BUTTON_LAYER, &m_NightText);
-                m_GameplayTransitionState = TIME_DISPLAY;
-                NewsPaperTimer = 0; // Reset timer
+                SwitchState(TIME_DISPLAY);
             }
             break;
+        }
 
-        case TIME_DISPLAY:
+        case FADE_OUT: {
+            break;
+        }
+
+        case TIME_DISPLAY: {
             if (seconds >= TIME_DISPLAY_DURATION) {
                 // Switch to loading screen
                 LayerManager::RemoveDrawable(&m_TimeText);
                 LayerManager::RemoveDrawable(&m_NightText);
                 LayerManager::AddDrawable(MENU_BUTTON_LAYER, &m_LoadingScreenSprite);
-                m_GameplayTransitionState = LOADING_SCREEN;
-                NewsPaperTimer = 0; // Reset timer
+                SwitchState(LOADING_SCREEN);
             }
             break;
+        }
 
-        case LOADING_SCREEN:
+        case LOADING_SCREEN: {
             if (seconds >= LOADING_SCREEN_DURATION) {
                 // Transition complete, switch to gameplay
-                m_GameplayTransitionState = COMPLETE;
+                SwitchState(COMPLETE);
                 SwitchToGameplay();
             }
             break;
+        }
+
 
         default:
             break;
-        }
-
-        return;
-    }
-
-    // Only process main menu interactions if in main menu state
-    if (m_State == MAIN_MENU) {
-        m_FreddyGlitchEffect.Update();
-        m_StaticGlitchEffect.Update();
-        m_WhiteGlitchEffect.Update();
-
-        auto window = Window::GetWindow();
-
-        if (newbutton.IsClicked(*window))
-        {
-            // Hide all menu elements when transitioning to newspaper
-            HideAllMenuElements();
-
-            // Show only the newspaper
-            LayerManager::AddDrawable(4, &NewsPaperSprite);
-            IsShowingNewsPaper = true;
-            NewsPaperTimer = 0;
-            m_GameplayTransitionState = NEWSPAPER;
-        }
     }
 }

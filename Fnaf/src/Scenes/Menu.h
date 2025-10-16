@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Scene/Scene.h"
-#include "Animation/FlipBook.h"
 #include "Animation/GlitchEffect.h"
 #include "UI/ImageButton.h"
 #include "Graphics/FadeEffect.h"
-#include "Audio/AudioManager.h"
+
+// Audio keys - store just the identifiers
+#define STATIC_AUDIO_KEY "Audio/static2.wav"
+#define MENU_MUSIC_KEY "Audio/Menu/darknessmusic.wav"
 
 class Menu : public Scene
 {
@@ -26,11 +28,9 @@ public:
     void HideGlitchEffects();
     void ShowGlitchEffects();
 
-private:
-    // Audio keys - store just the identifiers
-    const std::string STATIC_AUDIO_KEY = "Audio/static2.wav";
-    const std::string MENU_MUSIC_KEY = "Audio/Menu/darknessmusic.wav";
 
+
+private:
     // Textures
     std::shared_ptr<sf::Texture> m_Logo;
     std::shared_ptr<sf::Texture> NewsPaperTexture;
@@ -49,13 +49,17 @@ private:
     GlitchEffect m_StaticGlitchEffect;
     GlitchEffect m_WhiteGlitchEffect;
 
-    enum State { MAIN_MENU, FADE_IN, WAIT, FADE_OUT, DONE } m_State = MAIN_MENU;
     enum GameplayTransitionState {
+        MAIN_MENU,
+        FADE_IN,
         NEWSPAPER,
+        FADE_OUT,
         TIME_DISPLAY,
         LOADING_SCREEN,
         COMPLETE
-    } m_GameplayTransitionState = NEWSPAPER;
+    } m_GameplayTransitionState = MAIN_MENU;
+
+    inline void SwitchState(GameplayTransitionState state);
 
     sf::Time waitTime = sf::seconds(5);
     sf::Time accumulatedTime = sf::Time::Zero;
@@ -65,7 +69,7 @@ private:
     const float WARNING_MESSAGE_DURATION = 4.0f; // 4 seconds
     const float NEWSPAPER_DURATION = 3.0f; // 3 seconds for newspaper display
     const float TIME_DISPLAY_DURATION = 3.0f; // 3 seconds for time and night text
-    const float LOADING_SCREEN_DURATION = 2.0f; // 2 seconds for loading screen
+    const float LOADING_SCREEN_DURATION = 2.0f; // 2 seconds wait for gameplay
 
 private:
     // Static texture collections

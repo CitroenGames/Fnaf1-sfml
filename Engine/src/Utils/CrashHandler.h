@@ -25,10 +25,9 @@
 constexpr int MAX_FRAMES = 20; // limit the number of frames for brevity
 
 namespace Paingine2D {
-
     class CrashHandler {
     private:
-        static CrashHandler* s_instance;
+        static CrashHandler *s_instance;
         std::string m_applicationName;
         std::string m_crashReportFolder;
 
@@ -43,10 +42,11 @@ namespace Paingine2D {
 #endif
 
         // Private constructor for singleton
-        CrashHandler() {}
+        CrashHandler() {
+        }
 
     public:
-        static CrashHandler* GetInstance() {
+        static CrashHandler *GetInstance() {
             if (!s_instance)
                 s_instance = new CrashHandler();
             return s_instance;
@@ -62,29 +62,26 @@ namespace Paingine2D {
             HRESULT result = SHGetFolderPathA(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, documentsPath);
             if (SUCCEEDED(result)) {
                 path = std::string(documentsPath) + "\\Paingine\\Crashes\\";
-            }
-            else {
+            } else {
                 // Fallback to current directory if Documents folder can't be retrieved
                 path = ".\\Crashes\\";
             }
 #elif defined(__APPLE__)
             // macOS home directory + Documents
-            const char* homeDir = getenv("HOME");
+            const char *homeDir = getenv("HOME");
             if (homeDir) {
                 path = std::string(homeDir) + "/Documents/Paingine/Crashes/";
-            }
-            else {
-                struct passwd* pw = getpwuid(getuid());
+            } else {
+                struct passwd *pw = getpwuid(getuid());
                 path = std::string(pw->pw_dir) + "/Documents/Paingine/Crashes/";
             }
 #else // Linux
             // Linux home directory
-            const char* homeDir = getenv("HOME");
+            const char *homeDir = getenv("HOME");
             if (homeDir) {
                 path = std::string(homeDir) + "/.paingine/crashes/";
-            }
-            else {
-                struct passwd* pw = getpwuid(getuid());
+            } else {
+                struct passwd *pw = getpwuid(getuid());
                 path = std::string(pw->pw_dir) + "/.paingine/crashes/";
             }
 #endif
@@ -92,7 +89,7 @@ namespace Paingine2D {
             return path;
         }
 
-        bool Initialize(const std::string& applicationName, const std::string& crashReportFolder = "") {
+        bool Initialize(const std::string &applicationName, const std::string &crashReportFolder = "") {
             m_applicationName = applicationName;
             m_crashReportFolder = crashReportFolder;
 
@@ -138,7 +135,7 @@ namespace Paingine2D {
         std::string GenerateCrashReportPath() {
             // Generate a filename with timestamp
             time_t now = time(0);
-            tm* timeinfo = localtime(&now);
+            tm *timeinfo = localtime(&now);
 
             char timestamp[80];
             strftime(timestamp, sizeof(timestamp), "%Y%m%d_%H%M%S", timeinfo);
@@ -149,7 +146,7 @@ namespace Paingine2D {
             return ss.str();
         }
 
-        void WriteSystemInfo(std::ofstream& logFile) {
+        void WriteSystemInfo(std::ofstream &logFile) {
             logFile << "======= Crash Report for " << m_applicationName << " =======" << std::endl;
             logFile << "Time: " << time(nullptr) << std::endl;
 
@@ -167,7 +164,8 @@ namespace Paingine2D {
             if (GlobalMemoryStatusEx(&memInfo)) {
                 logFile << "Memory load: " << memInfo.dwMemoryLoad << "%" << std::endl;
                 logFile << "Total physical memory: " << (memInfo.ullTotalPhys / (1024 * 1024)) << " MB" << std::endl;
-                logFile << "Available physical memory: " << (memInfo.ullAvailPhys / (1024 * 1024)) << " MB" << std::endl;
+                logFile << "Available physical memory: " << (memInfo.ullAvailPhys / (1024 * 1024)) << " MB" <<
+                        std::endl;
             }
 
             // OS Version info
@@ -176,8 +174,9 @@ namespace Paingine2D {
             osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXA);
 
 #pragma warning(disable: 4996) // GetVersionEx is deprecated
-            if (GetVersionExA((OSVERSIONINFOA*)&osvi)) {
-                logFile << "OS Version: " << osvi.dwMajorVersion << "." << osvi.dwMinorVersion << " Build " << osvi.dwBuildNumber << std::endl;
+            if (GetVersionExA((OSVERSIONINFOA *) &osvi)) {
+                logFile << "OS Version: " << osvi.dwMajorVersion << "." << osvi.dwMinorVersion << " Build " << osvi.
+                        dwBuildNumber << std::endl;
             }
 #elif defined(__APPLE__)
             // macOS system info
@@ -200,11 +199,11 @@ namespace Paingine2D {
 
             vm_statistics_data_t vm_stats;
             mach_msg_type_number_t count = sizeof(vm_stats) / sizeof(natural_t);
-            if (host_statistics(host_port, HOST_VM_INFO, (host_info_t)&vm_stats, &count) == KERN_SUCCESS) {
-                uint64_t free_memory = (uint64_t)vm_stats.free_count * (uint64_t)page_size;
-                uint64_t used_memory = ((uint64_t)vm_stats.active_count +
-                    (uint64_t)vm_stats.inactive_count +
-                    (uint64_t)vm_stats.wire_count) * (uint64_t)page_size;
+            if (host_statistics(host_port, HOST_VM_INFO, (host_info_t) & vm_stats, &count) == KERN_SUCCESS) {
+                uint64_t free_memory = (uint64_t) vm_stats.free_count * (uint64_t) page_size;
+                uint64_t used_memory = ((uint64_t) vm_stats.active_count +
+                                        (uint64_t) vm_stats.inactive_count +
+                                        (uint64_t) vm_stats.wire_count) * (uint64_t) page_size;
                 logFile << "Free memory: " << (free_memory / (1024 * 1024)) << " MB" << std::endl;
                 logFile << "Used memory: " << (used_memory / (1024 * 1024)) << " MB" << std::endl;
             }
@@ -225,8 +224,10 @@ namespace Paingine2D {
             // Get memory info
             struct sysinfo memInfo;
             if (sysinfo(&memInfo) == 0) {
-                logFile << "Total memory: " << (memInfo.totalram * memInfo.mem_unit / (1024 * 1024)) << " MB" << std::endl;
-                logFile << "Free memory: " << (memInfo.freeram * memInfo.mem_unit / (1024 * 1024)) << " MB" << std::endl;
+                logFile << "Total memory: " << (memInfo.totalram * memInfo.mem_unit / (1024 * 1024)) << " MB" <<
+                        std::endl;
+                logFile << "Free memory: " << (memInfo.freeram * memInfo.mem_unit / (1024 * 1024)) << " MB" <<
+                        std::endl;
                 logFile << "Uptime: " << (memInfo.uptime / 3600) << " hours" << std::endl;
             }
 
@@ -248,7 +249,7 @@ namespace Paingine2D {
 #ifdef _WIN32
         // Windows-specific functions
 
-        bool WriteMiniDump(EXCEPTION_POINTERS* exceptionPointers, const std::string& filePath) {
+        bool WriteMiniDump(EXCEPTION_POINTERS *exceptionPointers, const std::string &filePath) {
             // Open the file
             HANDLE hFile = CreateFileA(
                 (filePath + ".dmp").c_str(),
@@ -283,7 +284,7 @@ namespace Paingine2D {
             return (result == TRUE);
         }
 
-        void WriteLogFile(EXCEPTION_POINTERS* exceptionPointers, const std::string& crashReportPath) {
+        void WriteLogFile(EXCEPTION_POINTERS *exceptionPointers, const std::string &crashReportPath) {
             // Create a log file alongside the minidump
             std::string logPath = crashReportPath + ".log";
             std::ofstream logFile(logPath);
@@ -294,7 +295,7 @@ namespace Paingine2D {
 
                 // Exception specific info
                 if (exceptionPointers) {
-                    EXCEPTION_RECORD* record = exceptionPointers->ExceptionRecord;
+                    EXCEPTION_RECORD *record = exceptionPointers->ExceptionRecord;
                     logFile << "Exception code: 0x" << std::hex << record->ExceptionCode << std::dec << std::endl;
                     logFile << "Exception address: 0x" << std::hex << record->ExceptionAddress << std::dec << std::endl;
 
@@ -307,7 +308,7 @@ namespace Paingine2D {
         }
 
         // Extracts and writes the stack trace using StackWalk64.
-        static void WriteWindowsStackTrace(std::ofstream& logFile, EXCEPTION_POINTERS* exceptionPointers) {
+        static void WriteWindowsStackTrace(std::ofstream &logFile, EXCEPTION_POINTERS *exceptionPointers) {
             HANDLE process = GetCurrentProcess();
             HANDLE thread = GetCurrentThread();
 
@@ -321,27 +322,27 @@ namespace Paingine2D {
             memset(&stackFrame, 0, sizeof(STACKFRAME64));
 
 #if defined(_M_IX86)
-            DWORD machineType = IMAGE_FILE_MACHINE_I386;
-            stackFrame.AddrPC.Offset = context.Eip;
-            stackFrame.AddrPC.Mode = AddrModeFlat;
-            stackFrame.AddrFrame.Offset = context.Ebp;
-            stackFrame.AddrFrame.Mode = AddrModeFlat;
-            stackFrame.AddrStack.Offset = context.Esp;
-            stackFrame.AddrStack.Mode = AddrModeFlat;
+        DWORD machineType = IMAGE_FILE_MACHINE_I386;
+        stackFrame.AddrPC.Offset= context.Eip;
+        stackFrame.AddrPC.Mode= AddrModeFlat;
+        stackFrame.AddrFrame.Offset= context.Ebp;
+        stackFrame.AddrFrame.Mode= AddrModeFlat;
+        stackFrame.AddrStack.Offset= context.Esp;
+        stackFrame.AddrStack.Mode= AddrModeFlat;
 #elif defined(_M_X64)
-            DWORD machineType = IMAGE_FILE_MACHINE_AMD64;
-            stackFrame.AddrPC.Offset = context.Rip;
-            stackFrame.AddrPC.Mode = AddrModeFlat;
-            stackFrame.AddrFrame.Offset = context.Rsp;
-            stackFrame.AddrFrame.Mode = AddrModeFlat;
-            stackFrame.AddrStack.Offset = context.Rsp;
-            stackFrame.AddrStack.Mode = AddrModeFlat;
+        DWORD machineType = IMAGE_FILE_MACHINE_AMD64;
+        stackFrame.AddrPC.Offset= context.Rip;
+        stackFrame.AddrPC.Mode= AddrModeFlat;
+        stackFrame.AddrFrame.Offset= context.Rsp;
+        stackFrame.AddrFrame.Mode= AddrModeFlat;
+        stackFrame.AddrStack.Offset= context.Rsp;
+        stackFrame.AddrStack.Mode= AddrModeFlat;
 #else
-            DWORD machineType = 0;
+        DWORD machineType = 0;
 #endif
 
-            logFile << "Stack trace:" << std::endl;
-            for (int frame = 0; frame < MAX_FRAMES; ++frame) {
+        logFile<< "Stack trace:" << std::endl;
+            for (int frame = 0; frame<MAX_FRAMES;++frame) {
                 BOOL result = StackWalk64(
                     machineType,
                     process,
@@ -381,11 +382,11 @@ namespace Paingine2D {
                     logFile << "  " << frame << ": ??? - 0x" << std::hex << address << std::dec << std::endl;
                 }
             }
-            SymCleanup(process);
+        SymCleanup (process);
         }
 
-        static LONG WINAPI WindowsExceptionHandler(EXCEPTION_POINTERS* exceptionPointers) {
-            CrashHandler* handler = CrashHandler::GetInstance();
+        static LONG WINAPI WindowsExceptionHandler(EXCEPTION_POINTERS *exceptionPointers) {
+            CrashHandler *handler = CrashHandler::GetInstance();
 
             // Generate the crash report path
             std::string crashReportPath = handler->GenerateCrashReportPath();
@@ -400,7 +401,7 @@ namespace Paingine2D {
 
             // Show crash dialog (just console output for now)
             std::cerr << "The application has crashed. A crash report has been saved to: "
-                << crashReportPath << ".dmp" << std::endl;
+                    << crashReportPath << ".dmp" << std::endl;
 
             // If you had a previous exception filter, you could call it here
             if (handler->m_previousFilter)
@@ -432,12 +433,12 @@ namespace Paingine2D {
             sigaction(SIGBUS, &m_previousSignalActions[SIGBUS], NULL);
         }
 
-        void WriteStackTrace(std::ofstream& logFile) {
+        void WriteStackTrace(std::ofstream &logFile) {
             const int MAX_STACK_FRAMES = 64;
-            void* stack[MAX_STACK_FRAMES];
+            void *stack[MAX_STACK_FRAMES];
 
             int frames = backtrace(stack, MAX_STACK_FRAMES);
-            char** symbols = backtrace_symbols(stack, frames);
+            char **symbols = backtrace_symbols(stack, frames);
 
             logFile << "Stack trace:" << std::endl;
 
@@ -446,13 +447,12 @@ namespace Paingine2D {
                     logFile << "  " << symbols[i] << std::endl;
                 }
                 free(symbols);
-            }
-            else {
+            } else {
                 logFile << "  (Failed to obtain stack trace)" << std::endl;
             }
         }
 
-        void WriteUnixCrashReport(int signal, siginfo_t* info, const std::string& crashReportPath) {
+        void WriteUnixCrashReport(int signal, siginfo_t *info, const std::string &crashReportPath) {
             std::string logPath = crashReportPath + ".log";
             std::ofstream logFile(logPath);
 
@@ -474,8 +474,8 @@ namespace Paingine2D {
             }
         }
 
-        static void UnixSignalHandler(int signal, siginfo_t* info, void* context) {
-            CrashHandler* handler = CrashHandler::GetInstance();
+        static void UnixSignalHandler(int signal, siginfo_t *info, void *context) {
+            CrashHandler *handler = CrashHandler::GetInstance();
 
             // Generate the crash report path
             std::string crashReportPath = handler->GenerateCrashReportPath();
@@ -485,7 +485,7 @@ namespace Paingine2D {
 
             // Show crash info
             std::cerr << "The application has crashed. A crash report has been saved to: "
-                << crashReportPath << ".log" << std::endl;
+                    << crashReportPath << ".log" << std::endl;
 
             // Restore default handler and re-raise signal
             ::signal(signal, SIG_DFL);
@@ -495,6 +495,5 @@ namespace Paingine2D {
     };
 
     // Initialize static member
-    CrashHandler* CrashHandler::s_instance = nullptr;
-
+    CrashHandler *CrashHandler::s_instance = nullptr;
 } // namespace Paingine

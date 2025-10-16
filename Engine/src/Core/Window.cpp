@@ -4,12 +4,12 @@ std::shared_ptr<sf::RenderWindow> Window::m_Window = nullptr;
 sf::View Window::m_GameView;
 
 std::shared_ptr<sf::RenderWindow> Window::Init(int width, int height, std::string title) {
-	if (m_Window) 
-		return m_Window;
+    if (m_Window)
+        return m_Window;
 
     m_Window = std::make_shared<sf::RenderWindow>(sf::VideoMode(width, height), title);
     m_GameView.setSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-    
+
     m_GameView.setCenter(sf::Vector2f(VIEWPORT_WIDTH / 2.0f, VIEWPORT_HEIGHT / 2.0f));
     m_Window->setView(m_GameView);
     return m_Window;
@@ -17,7 +17,7 @@ std::shared_ptr<sf::RenderWindow> Window::Init(int width, int height, std::strin
 
 void Window::UpdateViewport() {
     sf::Vector2u windowSize = m_Window->getSize();
-    float windowAspectRatio = windowSize.x / (float)windowSize.y;
+    float windowAspectRatio = windowSize.x / (float) windowSize.y;
     float viewportAspectRatio = VIEWPORT_WIDTH / VIEWPORT_HEIGHT;
 
     float viewWidth = VIEWPORT_WIDTH;
@@ -26,8 +26,7 @@ void Window::UpdateViewport() {
     if (windowAspectRatio > viewportAspectRatio) {
         // Window is wider than viewport
         viewWidth = viewHeight * windowAspectRatio;
-    }
-    else {
+    } else {
         // Window is taller than viewport
         viewHeight = viewWidth / windowAspectRatio;
     }

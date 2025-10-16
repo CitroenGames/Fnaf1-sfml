@@ -1,6 +1,7 @@
 #pragma once
 
-inline std::shared_ptr<sf::Texture> MakeTextureTransparent(const std::shared_ptr<sf::Texture>& inputTexture, float alpha = 0.5f) {
+inline std::shared_ptr<sf::Texture> MakeTextureTransparent(const std::shared_ptr<sf::Texture> &inputTexture,
+                                                           float alpha = 0.5f) {
     if (!inputTexture || !inputTexture->getSize().x || !inputTexture->getSize().y) {
         return nullptr;
     }
@@ -33,7 +34,7 @@ inline std::shared_ptr<sf::Texture> MakeTextureTransparent(const std::shared_ptr
     return outputTexture;
 }
 
-static std::shared_ptr<sf::Texture> ProcessText(const std::shared_ptr<sf::Texture>& inputTexture, int tolerance = 5) {
+static std::shared_ptr<sf::Texture> ProcessText(const std::shared_ptr<sf::Texture> &inputTexture, int tolerance = 5) {
     if (!inputTexture || !inputTexture->getSize().x || !inputTexture->getSize().y) {
         return nullptr;
     }
@@ -54,9 +55,9 @@ static std::shared_ptr<sf::Texture> ProcessText(const std::shared_ptr<sf::Textur
 
             // Check if pixel is grey (R, G, and B values are similar)
             bool isGrey = std::abs(pixel.r - pixel.g) <= tolerance &&
-                std::abs(pixel.g - pixel.b) <= tolerance &&
-                std::abs(pixel.r - pixel.b) <= tolerance &&
-                pixel.r < 240; // Don't process white pixels
+                          std::abs(pixel.g - pixel.b) <= tolerance &&
+                          std::abs(pixel.r - pixel.b) <= tolerance &&
+                          pixel.r < 240; // Don't process white pixels
 
             if (isGrey) {
                 // Make grey pixels transparent
@@ -73,7 +74,8 @@ static std::shared_ptr<sf::Texture> ProcessText(const std::shared_ptr<sf::Textur
     return outputTexture;
 }
 
-inline std::shared_ptr<sf::Texture> RemoveBlackBackground(const std::shared_ptr<sf::Texture>& inputTexture, int threshold = 30) {
+inline std::shared_ptr<sf::Texture> RemoveBlackBackground(const std::shared_ptr<sf::Texture> &inputTexture,
+                                                          int threshold = 30) {
     if (!inputTexture || !inputTexture->getSize().x || !inputTexture->getSize().y) {
         return nullptr;
     }

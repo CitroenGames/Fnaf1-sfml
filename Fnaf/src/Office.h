@@ -6,22 +6,31 @@
 #include "Animation/FlipBook.h"
 #include "fnaf.hpp"
 
-class Office : public Composable::Component
-{
+class Office : public Composable::Component {
 public:
     Office();
-    void Init();
-    void Update(double deltaTime) override;
-    void FixedUpdate() override;
-    void Render() {};
-    void Destroy() {};
 
-    nlohmann::json Serialize()const override { return nlohmann::json(); };
-    void Deserialize(const nlohmann::json& data) override {};
+    void Init();
+
+    void Update(double deltaTime) override;
+
+    void FixedUpdate() override;
+
+    void Render() {
+    };
+
+    void Destroy() {
+    };
+
+    nlohmann::json Serialize() const override { return nlohmann::json(); };
+
+    void Deserialize(const nlohmann::json &data) override {
+    };
 
     std::string GetTypeName() const override { return "Office"; }
 
     void HideOfficeElements();
+
     void ShowOfficeElements();
 
     // Set game reference
@@ -62,6 +71,7 @@ private:
 
     // Light callback methods
     void ToggleLeftLight(bool active);
+
     void ToggleRightLight(bool active);
 
     // Power outage handling

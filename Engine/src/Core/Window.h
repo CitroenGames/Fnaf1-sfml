@@ -6,7 +6,9 @@ constexpr float VIEWPORT_HEIGHT = 720.0f;
 class Window {
 public:
     static std::shared_ptr<sf::RenderWindow> Init(int width, int height, std::string title);
+
     static void UpdateViewport();
+
     static void Destroy();
 
     static std::shared_ptr<sf::RenderWindow> const GetWindow() {

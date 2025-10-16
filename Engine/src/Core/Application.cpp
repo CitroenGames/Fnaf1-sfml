@@ -7,33 +7,30 @@
 
 std::shared_ptr<sf::RenderWindow> Application::m_Window = nullptr;
 
-constexpr int TICKRATE = 66;  // Desired tickrate (ticks per second)
-constexpr double FRAME_TIME = 1.0 / TICKRATE;  // Time per tick (seconds)
+constexpr int TICKRATE = 66; // Desired tickrate (ticks per second)
+constexpr double FRAME_TIME = 1.0 / TICKRATE; // Time per tick (seconds)
 
-void Application::Init(const int width, const int height, const std::string& title)
-{
-	m_Window = Window::Init(width, height, title.data());
+void Application::Init(const int width, const int height, const std::string &title) {
+    m_Window = Window::Init(width, height, title.data());
     m_Window->setVerticalSyncEnabled(true);
     ImGui::SFML::Init(*m_Window, true);
     Window::UpdateViewport();
 }
 
-void Application::Run()
-{
+void Application::Run() {
     auto previousTime = std::chrono::high_resolution_clock::now();
     double accumulator = 0.0;
-    
+
     sf::Event event;
     sf::Clock deltaClock;
 
     while (m_Window->isOpen()) {
-		PROFILE_BEGIN("Application Loop");
+        PROFILE_BEGIN("Application Loop");
         while (m_Window->pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 m_Window->close();
                 break;
-            }
-            else if (event.type == sf::Event::Resized) {
+            } else if (event.type == sf::Event::Resized) {
                 Window::UpdateViewport();
             }
             ImGui::SFML::ProcessEvent(event);
@@ -62,19 +59,18 @@ void Application::Run()
         SceneManager::Render();
         ImGui::SFML::Render(*m_Window);
         m_Window->display();
-		PROFILE_END();
+        PROFILE_END();
     }
 
     Application::Destroy();
 }
 
-void Application::Destroy()
-{
-	PROFILE_BEGIN("Application Shutdown");
+void Application::Destroy() {
+    PROFILE_BEGIN("Application Shutdown");
     //TODO: Add a proper way to close the application
     LayerManager::Clear();
     SceneManager::Destroy();
     ImGui::SFML::Shutdown();
-	Window::Destroy();
+    Window::Destroy();
     PROFILE_END();
 }

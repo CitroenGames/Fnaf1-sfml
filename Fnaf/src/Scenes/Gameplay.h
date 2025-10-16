@@ -8,13 +8,16 @@
 
 constexpr float scrollspeed = 10.0f;
 
-class Gameplay : public Scene
-{
+class Gameplay : public Scene {
 public:
     void Init() override;
+
     void FixedUpdate() override;
+
     void Update(double deltaTime) override;
+
     void Render() override;
+
     void Destroy() override;
 
 private:
@@ -28,12 +31,12 @@ private:
 
     Office m_Office;
     std::unique_ptr<Camera2D> m_Camera;
-    
+
     std::shared_ptr<CameraSystem> m_CameraSystem;
     std::shared_ptr<HUDButton> m_CameraButton;
 
     std::shared_ptr<FNAFGame> gameplay;
 
-	std::shared_ptr<Office> m_OfficeComponent;
+    std::shared_ptr<Office> m_OfficeComponent;
     bool m_WasCameraActive = false;
 };

@@ -2,6 +2,8 @@
 #include "Assets/Resources.h"
 #include "Core/Window.h"
 #include "Graphics/LayerManager.h"
+#include "LayerDefines.h"
+#include "GameState.h"
 
 CameraSystem::CameraSystem()
     : m_IsActive(false)

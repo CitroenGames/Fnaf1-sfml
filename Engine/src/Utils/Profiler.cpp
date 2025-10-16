@@ -1,11 +1,10 @@
 #include "Utils/Profiler.h"
 #include <csignal>
 
-InstrumentationTimer* ManualInstrumentationScope::s_CurrentTimer = nullptr;
+InstrumentationTimer *ManualInstrumentationScope::s_CurrentTimer = nullptr;
 
 // Signal handler for graceful shutdown
-static void ProfilerSignalHandler(int signal)
-{
+static void ProfilerSignalHandler(int signal) {
     // Ensure profiling session is properly closed before program termination
     Instrumentor::Get().EndSession();
 
@@ -15,11 +14,9 @@ static void ProfilerSignalHandler(int signal)
 }
 
 // Class to register signal handlers at program startup
-class ProfilerSignalHandlerRegistration
-{
+class ProfilerSignalHandlerRegistration {
 public:
-    ProfilerSignalHandlerRegistration()
-    {
+    ProfilerSignalHandlerRegistration() {
         // Register handlers for common termination signals
         std::signal(SIGINT, ProfilerSignalHandler);
         std::signal(SIGTERM, ProfilerSignalHandler);

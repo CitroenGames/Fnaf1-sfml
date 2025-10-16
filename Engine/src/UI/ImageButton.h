@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BaseButton.h"
+#include "Assets/Resources.h"
 
 class ImageButton : public BaseButton {
 public:

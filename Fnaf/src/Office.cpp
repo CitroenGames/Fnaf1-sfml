@@ -8,8 +8,7 @@
 
 Office::Office()
     : m_IsVisible(true)
-    , m_GameRef(nullptr)
-{
+      , m_GameRef(nullptr) {
     m_OfficeTexture = Resources::GetTexture("Graphics/Office/NormalOffice.png");
     m_DoorTexture = Resources::GetTexture("Graphics/Office/door.png");
     m_PowerOutageTexture = Resources::GetTexture("Graphics/Office/Office_NoPower1.png");
@@ -21,7 +20,7 @@ Office::Office()
     m_RightLightChicaTexture = Resources::GetTexture("Graphics/Office/Light/Office_LightChicka.png");
 
     {
-        std::vector<std::shared_ptr<sf::Texture>> LeftButtonsTextures;
+        std::vector<std::shared_ptr<sf::Texture> > LeftButtonsTextures;
 
         LeftButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsLeft/NoActive.png"));
         LeftButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsLeft/TopActive.png"));
@@ -29,7 +28,7 @@ Office::Office()
         LeftButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsLeft/BottomActive.png"));
         m_LeftButtons.SetTextures(LeftButtonsTextures);
 
-        std::vector<std::shared_ptr<sf::Texture>> RightButtonsTextures;
+        std::vector<std::shared_ptr<sf::Texture> > RightButtonsTextures;
 
         RightButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsRight/NoActive.png"));
         RightButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsRight/TopActive.png"));
@@ -75,8 +74,7 @@ Office::Office()
 
     m_LeftDoor = FlipBook(2, 0.016f, false);
     m_RightDoor = FlipBook(2, 0.016f, false);
-    for (int i = 1; i < 16; i++)
-    {
+    for (int i = 1; i < 16; i++) {
         m_LeftDoor.AddFrame(Resources::GetTexture("Graphics/Office/LeftDoor/Frame" + std::to_string(i) + ".png"));
         m_RightDoor.AddFrame(Resources::GetTexture("Graphics/Office/RightDoor/Frame" + std::to_string(i) + ".png"));
     }
@@ -86,8 +84,7 @@ Office::Office()
     m_LightSound = Resources::GetMusic("Audio/Office/BallastHumMedium2.wav");
 }
 
-void Office::Init()
-{
+void Office::Init() {
     // Create sprites
     m_OfficeSprite = sf::Sprite(*m_OfficeTexture);
 
@@ -108,11 +105,10 @@ void Office::Init()
     // Subscribe to power outage event
     GameEvents::Subscribe(GameEvent::POWER_OUTAGE, [this]() {
         HandlePowerOutage();
-        });
+    });
 }
 
-void Office::HandlePowerOutage()
-{
+void Office::HandlePowerOutage() {
     // Switch to power outage texture
     m_OfficeSprite.setTexture(*m_PowerOutageTexture);
 
@@ -139,8 +135,7 @@ void Office::HandlePowerOutage()
     m_RightButtons.SetEnabled(false);
 }
 
-void Office::HideOfficeElements()
-{
+void Office::HideOfficeElements() {
     m_IsVisible = false;
 
     // Remove office sprite from layer manager
@@ -154,8 +149,7 @@ void Office::HideOfficeElements()
     LayerManager::RemoveDrawable(&m_FreddyNoseButton);
 }
 
-void Office::ShowOfficeElements()
-{
+void Office::ShowOfficeElements() {
     m_IsVisible = true;
 
     // Add office sprite back to layer manager
@@ -169,16 +163,14 @@ void Office::ShowOfficeElements()
     LayerManager::AddDrawable(BUTTON_LAYER, &m_FreddyNoseButton);
 }
 
-void Office::Update(double deltaTime)
-{
+void Office::Update(double deltaTime) {
     m_RightDoor.Update(deltaTime);
     m_RightDoor.RegisterToLayerManager();
     m_LeftDoor.Update(deltaTime);
     m_LeftDoor.RegisterToLayerManager();
 }
 
-void Office::FixedUpdate()
-{
+void Office::FixedUpdate() {
     if (player.m_UsingCamera)
         return;
 
@@ -187,15 +179,13 @@ void Office::FixedUpdate()
     m_LeftButtons.updateButton(*window);
     m_RightButtons.updateButton(*window);
 
-    if (m_FreddyNoseButton.IsClicked(*window))
-    {
+    if (m_FreddyNoseButton.IsClicked(*window)) {
         // play click sound
         m_FreddyNose->play();
     }
 }
 
-void Office::ToggleLeftLight(bool active)
-{
+void Office::ToggleLeftLight(bool active) {
     // If right light is on and we're activating left light, turn off right light first
     if (active && player.m_RightLightOn) {
         // Update right button state
@@ -206,8 +196,7 @@ void Office::ToggleLeftLight(bool active)
     player.m_LeftLightOn = active;
     player.UpdateUsageLevel();
 
-    if (active)
-    {
+    if (active) {
         // Check if Bonnie is at the door and use appropriate texture
         bool bonnieAtDoor = false;
         if (m_GameRef) {
@@ -215,12 +204,9 @@ void Office::ToggleLeftLight(bool active)
             bonnieAtDoor = (bonnieLocation == Room::WEST_CORNER);
         }
 
-        if (bonnieAtDoor)
-        {
+        if (bonnieAtDoor) {
             m_OfficeSprite.setTexture(*m_LeftLightBonnieTexture);
-        }
-        else
-        {
+        } else {
             m_OfficeSprite.setTexture(*m_LeftLightTexture);
         }
 
@@ -229,9 +215,7 @@ void Office::ToggleLeftLight(bool active)
             m_LightSound->setLoop(true);
             m_LightSound->play();
         }
-    }
-    else
-    {
+    } else {
         // Reset office texture if not in power outage
         if (m_GameRef && !m_GameRef->IsPowerOutage()) {
             m_OfficeSprite.setTexture(*m_OfficeTexture);
@@ -244,8 +228,7 @@ void Office::ToggleLeftLight(bool active)
     }
 }
 
-void Office::ToggleRightLight(bool active)
-{
+void Office::ToggleRightLight(bool active) {
     // If left light is on and we're activating right light, turn off left light first
     if (active && player.m_LeftLightOn) {
         // Update left button state
@@ -256,8 +239,7 @@ void Office::ToggleRightLight(bool active)
     player.m_RightLightOn = active;
     player.UpdateUsageLevel();
 
-    if (active)
-    {
+    if (active) {
         // Check if Chica is at the door and use appropriate texture
         bool chicaAtDoor = false;
         if (m_GameRef) {
@@ -265,12 +247,9 @@ void Office::ToggleRightLight(bool active)
             chicaAtDoor = (chicaLocation == Room::EAST_CORNER);
         }
 
-        if (chicaAtDoor)
-        {
+        if (chicaAtDoor) {
             m_OfficeSprite.setTexture(*m_RightLightChicaTexture);
-        }
-        else
-        {
+        } else {
             m_OfficeSprite.setTexture(*m_RightLightTexture);
         }
 
@@ -279,9 +258,7 @@ void Office::ToggleRightLight(bool active)
             m_LightSound->setLoop(true);
             m_LightSound->play();
         }
-    }
-    else
-    {
+    } else {
         // Reset office texture if not in power outage
         if (m_GameRef && !m_GameRef->IsPowerOutage()) {
             m_OfficeSprite.setTexture(*m_OfficeTexture);
