@@ -21,19 +21,20 @@ void Application::Run() {
     auto previousTime = std::chrono::high_resolution_clock::now();
     double accumulator = 0.0;
 
-    sf::Event event;
     sf::Clock deltaClock;
 
     while (m_Window->isOpen()) {
         PROFILE_BEGIN("Application Loop");
-        while (m_Window->pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
+
+        while (std::optional<sf::Event> event = m_Window->pollEvent()) {
+            // Handle the event using std::visit
+            if (event->is<sf::Event::Closed>()) {
                 m_Window->close();
                 break;
-            } else if (event.type == sf::Event::Resized) {
+            } else if (event->is<sf::Event::Resized>()) {
                 Window::UpdateViewport();
             }
-            ImGui::SFML::ProcessEvent(event);
+            ImGui::SFML::ProcessEvent(*m_Window, *event);
         }
 
         auto currentTime = std::chrono::high_resolution_clock::now();

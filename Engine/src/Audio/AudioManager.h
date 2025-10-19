@@ -13,7 +13,7 @@ public:
     // Play music with optional looping
     void PlayMusic(const std::string &id, bool loop = false, float volume = 100.0f) {
         if (const auto music = GetMusic(id)) {
-            music->setLoop(loop);
+            music->setLooping(loop);
             music->setVolume(volume);
             music->play();
             m_ActiveMusic.push_back(music);

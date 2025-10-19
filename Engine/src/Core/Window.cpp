@@ -7,8 +7,8 @@ std::shared_ptr<sf::RenderWindow> Window::Init(int width, int height, std::strin
     if (m_Window)
         return m_Window;
 
-    m_Window = std::make_shared<sf::RenderWindow>(sf::VideoMode(width, height), title);
-    m_GameView.setSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+    m_Window = std::make_shared<sf::RenderWindow>(sf::VideoMode(sf::Vector2u(width, height)), title);
+    m_GameView.setSize(sf::Vector2f(VIEWPORT_WIDTH, VIEWPORT_HEIGHT));
 
     m_GameView.setCenter(sf::Vector2f(VIEWPORT_WIDTH / 2.0f, VIEWPORT_HEIGHT / 2.0f));
     m_Window->setView(m_GameView);
@@ -33,7 +33,7 @@ void Window::UpdateViewport() {
 
     // Keep the current camera position when updating the viewport
     sf::Vector2f currentCenter = m_GameView.getCenter();
-    m_GameView.setSize(viewWidth, viewHeight);
+    m_GameView.setSize(sf::Vector2f(viewWidth, viewHeight));
     m_GameView.setCenter(currentCenter);
     m_Window->setView(m_GameView);
 }

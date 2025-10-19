@@ -144,7 +144,7 @@ void FlipBook::Cleanup() {
 
 void FlipBook::SetPosition(float x, float y) {
     for (auto& frame : m_Frames) {
-        frame->setPosition(x, y);
+        frame->setPosition(sf::Vector2f(x,y));
     }
 }
 

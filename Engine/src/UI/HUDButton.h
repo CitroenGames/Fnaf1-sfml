@@ -7,11 +7,6 @@
 // THIS CLASS IS NOT FINAL AT ALL IT LACKS MANY STUFF BUT WORKS WELL ENOUGH FOR THE GAME.
 class HUDButton : public BaseButton {
 public:
-    HUDButton() {
-        // Don't register with LayerManager in constructor
-        // We'll handle drawing differently for HUD elements
-    }
-
     ~HUDButton() {
         // Clean up LayerManager registration
         LayerManager::RemoveDrawable(this);
@@ -92,30 +87,30 @@ public:
         sf::Vector2f viewPos;
 
         // Handle letterboxing/pillarboxing by applying the inverse viewport transformation
-        if (viewport.width < 1.0f) { // Pillarboxing (black bars on sides)
+        if (viewport.size.x < 1.0f) { // Pillarboxing (black bars on sides)
             // Check if mouse is in the viewable area
-            if (mousePos.x < viewport.left * windowSize.x ||
-                mousePos.x >(viewport.left + viewport.width) * windowSize.x) {
+            if (mousePos.x < viewport.position.x * windowSize.x ||
+                mousePos.x > (viewport.position.x + viewport.size.x) * windowSize.x) {
                 // Mouse is in black bar, not over any HUD element
                 window.setView(currentView);
                 return false;
-            }
+                }
 
             // Adjust x-coordinate to account for pillarboxing
-            float adjustedX = (mousePos.x - (viewport.left * windowSize.x)) / (viewport.width * windowSize.x) * windowSize.x;
+            float adjustedX = (mousePos.x - (viewport.position.x * windowSize.x)) / (viewport.size.x * windowSize.x) * windowSize.x;
             viewPos = window.mapPixelToCoords(sf::Vector2i(static_cast<int>(adjustedX), mousePos.y));
         }
-        else if (viewport.height < 1.0f) { // Letterboxing (black bars on top/bottom)
+        else if (viewport.size.y < 1.0f) { // Letterboxing (black bars on top/bottom)
             // Check if mouse is in the viewable area
-            if (mousePos.y < viewport.top * windowSize.y ||
-                mousePos.y >(viewport.top + viewport.height) * windowSize.y) {
+            if (mousePos.y < viewport.position.y * windowSize.y ||
+                mousePos.y > (viewport.position.y + viewport.size.y) * windowSize.y) {
                 // Mouse is in black bar, not over any HUD element
                 window.setView(currentView);
                 return false;
-            }
+                }
 
             // Adjust y-coordinate to account for letterboxing
-            float adjustedY = (mousePos.y - (viewport.top * windowSize.y)) / (viewport.height * windowSize.y) * windowSize.y;
+            float adjustedY = (mousePos.y - (viewport.position.y * windowSize.y)) / (viewport.size.y * windowSize.y) * windowSize.y;
             viewPos = window.mapPixelToCoords(sf::Vector2i(mousePos.x, static_cast<int>(adjustedY)));
         }
         else {

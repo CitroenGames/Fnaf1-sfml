@@ -96,7 +96,7 @@ std::shared_ptr<sf::Font> Resources::GetFont(const std::string &filename) {
         m_FontBuffers[filename] = fontData;
 
         const std::shared_ptr<sf::Font> font = std::make_shared<sf::Font>();
-        if (!font->loadFromMemory(m_FontBuffers[filename]->data(), m_FontBuffers[filename]->size())) {
+        if (!font->openFromMemory(m_FontBuffers[filename]->data(), m_FontBuffers[filename]->size())) {
             std::cerr << "Resources::GetFont: Failed to load font from memory: " << filename << std::endl;
             return nullptr;
         }
