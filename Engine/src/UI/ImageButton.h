@@ -17,7 +17,7 @@ public:
 
     void SetPosition(float x, float y)
     {
-        sf::Sprite::setPosition(x, y);
+        sf::Sprite::setPosition(sf::Vector2f(x, y));
     }
 
     void SetPosition(sf::Vector2f position)

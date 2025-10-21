@@ -51,10 +51,10 @@ Menu::Menu() {
 
     // Setup warning message sprite
     m_WarningMessageSprite.setTexture(*m_WarningMessageTexture);
-    m_WarningMessageSprite.setPosition(
-        (Window::GetWindow()->getSize().x - m_WarningMessageSprite.getGlobalBounds().width) / 2,
-        (Window::GetWindow()->getSize().y - m_WarningMessageSprite.getGlobalBounds().height) / 2
-    );
+    m_WarningMessageSprite.setPosition(sf::Vector2f(
+        (Window::GetWindow()->getSize().x - m_WarningMessageSprite.getGlobalBounds().size.x) / 2,
+        (Window::GetWindow()->getSize().y - m_WarningMessageSprite.getGlobalBounds().size.y) / 2
+    ));
 
     // load loading screen sprite
     m_LoadingScreenTexture = Resources::GetTexture("Graphics/Loading.png");
@@ -64,7 +64,7 @@ Menu::Menu() {
 
     // Prepare logo sprite
     m_LogoSprite = sf::Sprite(*m_Logo);
-    m_LogoSprite.setPosition(100, 100);
+    m_LogoSprite.setPosition(sf::Vector2f(100, 100));
 }
 
 void Menu::Init() {
@@ -78,26 +78,26 @@ void Menu::Init() {
     m_TimeText.setString("12:00 AM");
     m_TimeText.setCharacterSize(75);
     m_TimeText.setFillColor(sf::Color::White);
-    m_TimeText.setPosition(
-        (Window::GetWindow()->getSize().x - m_TimeText.getGlobalBounds().width) / 2,
+    m_TimeText.setPosition(sf::Vector2f(
+        (Window::GetWindow()->getSize().x - m_TimeText.getGlobalBounds().size.x) / 2,
         Window::GetWindow()->getSize().y / 2 - 25
-    );
+    ));
 
     m_NightText.setFont(*font);
     m_NightText.setString("1st Night");
     m_NightText.setCharacterSize(75);
     m_NightText.setFillColor(sf::Color::White);
-    m_NightText.setPosition(
-        (Window::GetWindow()->getSize().x - m_NightText.getGlobalBounds().width) / 2,
+    m_NightText.setPosition(sf::Vector2f(
+        (Window::GetWindow()->getSize().x - m_NightText.getGlobalBounds().size.x) / 2,
         Window::GetWindow()->getSize().y / 2 + 25
-    );
+    ));
 
     // Setup loading screen sprite
     m_LoadingScreenSprite.setTexture(*m_LoadingScreenTexture);
-    m_LoadingScreenSprite.setPosition(
-        Window::GetWindow()->getSize().x - m_LoadingScreenSprite.getGlobalBounds().width,
-        Window::GetWindow()->getSize().y - m_LoadingScreenSprite.getGlobalBounds().height
-    );
+    m_LoadingScreenSprite.setPosition(sf::Vector2f(
+        Window::GetWindow()->getSize().x - m_LoadingScreenSprite.getGlobalBounds().size.x,
+        Window::GetWindow()->getSize().y - m_LoadingScreenSprite.getGlobalBounds().size.y
+    ));
 
     // Setup white glitch effect
     m_WhiteGlitchEffect = GlitchEffect(2);
@@ -118,10 +118,10 @@ void Menu::Init() {
 
     // Prepare newspaper sprite
     NewsPaperSprite = sf::Sprite(*NewsPaperTexture);
-    NewsPaperSprite.setPosition(
-        (Window::GetWindow()->getSize().x - NewsPaperSprite.getGlobalBounds().width) / 2,
-        (Window::GetWindow()->getSize().y - NewsPaperSprite.getGlobalBounds().height) / 2
-    );
+    NewsPaperSprite.setPosition(sf::Vector2f(
+        (Window::GetWindow()->getSize().x - NewsPaperSprite.getGlobalBounds().size.y) / 2,
+        (Window::GetWindow()->getSize().y - NewsPaperSprite.getGlobalBounds().size.y) / 2
+    ));
 
     // Setup new game button
     newbutton.SetTexture(ProcessText(Resources::GetTexture("Graphics/MainMenu/NewGame.png")));

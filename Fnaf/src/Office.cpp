@@ -6,9 +6,10 @@
 #include "GameState.h"
 #include "LayerDefines.h"
 
-Office::Office()
-    : m_IsVisible(true)
-      , m_GameRef(nullptr) {
+Office::Office() :
+    m_IsVisible(true), 
+    m_GameRef(nullptr) 
+{
     m_OfficeTexture = Resources::GetTexture("Graphics/Office/NormalOffice.png");
     m_DoorTexture = Resources::GetTexture("Graphics/Office/door.png");
     m_PowerOutageTexture = Resources::GetTexture("Graphics/Office/Office_NoPower1.png");
@@ -254,8 +255,8 @@ void Office::ToggleRightLight(bool active) {
         }
 
         // Start looping light sound
-        if (m_LightSound->getStatus() != sf::Music::Playing) {
-            m_LightSound->setLoop(true);
+        if (m_LightSound->getStatus() != sf::Music::Status::Playing) {
+            m_LightSound->setLooping(true);
             m_LightSound->play();
         }
     } else {

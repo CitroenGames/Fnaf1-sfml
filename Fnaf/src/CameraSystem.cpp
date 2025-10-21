@@ -15,9 +15,9 @@ void CameraSystem::Init()
 {
     // Load camera map
     m_CameraMapSprite = std::make_shared<sf::Sprite>(*Resources::GetTexture("Graphics/CameraSystem/CameraMap.png"));
-    m_CameraMapSprite->setPosition(640.0f, 360.0f);
-    m_CameraMapSprite->setOrigin(m_CameraMapSprite->getGlobalBounds().width / 2,
-        m_CameraMapSprite->getGlobalBounds().height / 2);
+    m_CameraMapSprite->setPosition(sf::Vector2f(640.0f, 360.0f));
+    m_CameraMapSprite->setOrigin(sf::Vector2f(m_CameraMapSprite->getGlobalBounds().size.x / 2,
+        m_CameraMapSprite->getGlobalBounds().size.y / 2));
 
     // Initialize camera views, buttons, and animations
     InitializeCameraViews();
@@ -50,9 +50,9 @@ void CameraSystem::InitializeCameraViews()
 
     // Center all camera views
     for (auto& [id, sprite] : m_CameraViews) {
-        sprite->setPosition(640.0f, 360.0f);
-        sprite->setOrigin(sprite->getGlobalBounds().width / 2,
-            sprite->getGlobalBounds().height / 2);
+        sprite->setPosition(sf::Vector2f(640.0f, 360.0f));
+        sprite->setOrigin(sf::Vector2f(sprite->getGlobalBounds().size.x / 2,
+            sprite->getGlobalBounds().size.y / 2));
     }
 
     // Initialize alternative states for camera views (for animatronics)
@@ -77,9 +77,9 @@ void CameraSystem::InitializeCameraViews()
     // Center all camera state views
     for (auto& [camId, states] : m_CameraStateViews) {
         for (auto& [stateId, sprite] : states) {
-            sprite->setPosition(640.0f, 360.0f);
-            sprite->setOrigin(sprite->getGlobalBounds().width / 2,
-                sprite->getGlobalBounds().height / 2);
+            sprite->setPosition(sf::Vector2f(640.0f, 360.0f));
+            sprite->setOrigin(sf::Vector2f(sprite->getGlobalBounds().size.x / 2,
+                sprite->getGlobalBounds().size.y / 2));
         }
     }
 

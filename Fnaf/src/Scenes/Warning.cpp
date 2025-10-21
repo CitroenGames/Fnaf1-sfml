@@ -21,10 +21,10 @@ WarningMessage::WarningMessage() {
     m_WarningMessageSprite.setTexture(*m_WarningMessageTexture);
 
     // Center the warning message
-    m_WarningMessageSprite.setPosition(
-        (Window::GetWindow()->getSize().x - m_WarningMessageSprite.getGlobalBounds().width) / 2,
-        (Window::GetWindow()->getSize().y - m_WarningMessageSprite.getGlobalBounds().height) / 2
-    );
+    m_WarningMessageSprite.setPosition(sf::Vector2f(
+        (Window::GetWindow()->getSize().x - m_WarningMessageSprite.getGlobalBounds().size.x) / 2,
+        (Window::GetWindow()->getSize().y - m_WarningMessageSprite.getGlobalBounds().size.y) / 2
+    ));
 
     // reason why we are doing this is to not waste time on loading the menu while we wait for the warning message
     MainMenuScene = std::make_shared<Menu>();
