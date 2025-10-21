@@ -21,7 +21,7 @@ inline std::shared_ptr<sf::Texture> MakeTextureTransparent(const std::shared_ptr
     // Process each pixel
     for (unsigned int x = 0; x < size.x; x++) {
         for (unsigned int y = 0; y < size.y; y++) {
-            const sf::Color pixel = image.getPixel(x, y);
+            const sf::Color pixel = image.getPixel(sf::Vector2u(x, y));
             image.setPixel(sf::Vector2u(x, y), sf::Color(pixel.r, pixel.g, pixel.b, alphaValue));
         }
     }
@@ -90,7 +90,7 @@ inline std::shared_ptr<sf::Texture> RemoveBlackBackground(const std::shared_ptr<
     // Process each pixel
     for (unsigned int x = 0; x < size.x; x++) {
         for (unsigned int y = 0; y < size.y; y++) {
-            const sf::Color pixel = image.getPixel(x, y);
+            const sf::Color pixel = image.getPixel(sf::Vector2u(x, y));
 
             // Check if pixel is black or very dark
             if (pixel.r <= threshold && pixel.g <= threshold && pixel.b <= threshold) {

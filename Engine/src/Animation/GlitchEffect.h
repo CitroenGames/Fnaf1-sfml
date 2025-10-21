@@ -96,7 +96,7 @@ public:
 
     void SetPosition(float x, float y) {
         for (auto& sprite : m_Frames) {
-            sprite->setPosition(x, y);
+            sprite->setPosition(sf::Vector2f(x, y));
         }
     }
 

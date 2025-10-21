@@ -8,9 +8,10 @@
 
 Office::Office() :
     m_IsVisible(true), 
-    m_GameRef(nullptr) 
+    m_GameRef(nullptr),
+    m_OfficeTexture(Resources::GetTexture("Graphics/Office/NormalOffice.png")),
+	m_OfficeSprite(*m_OfficeTexture)
 {
-    m_OfficeTexture = Resources::GetTexture("Graphics/Office/NormalOffice.png");
     m_DoorTexture = Resources::GetTexture("Graphics/Office/door.png");
     m_PowerOutageTexture = Resources::GetTexture("Graphics/Office/Office_NoPower1.png");
 
@@ -86,9 +87,6 @@ Office::Office() :
 }
 
 void Office::Init() {
-    // Create sprites
-    m_OfficeSprite = sf::Sprite(*m_OfficeTexture);
-
     LayerManager::AddDrawable(0, &m_OfficeSprite);
 
     // Set positions

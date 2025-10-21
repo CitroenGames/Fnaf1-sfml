@@ -15,16 +15,17 @@ constexpr int WARNING_MESSAGE_DURATION = 2; // 2 seconds
 constexpr float WARNING_MESSAGE_DURATION = 5.0f; // 5 seconds
 #endif
 
-WarningMessage::WarningMessage() {
-    // Load warning message texture
-    m_WarningMessageTexture = ProcessText(Resources::GetTexture("Graphics/MainMenu/WarningMessage.png"));
-    m_WarningMessageSprite.setTexture(*m_WarningMessageTexture);
-
+WarningMessage::WarningMessage()
+    : m_WarningMessageTexture(ProcessText(Resources::GetTexture("Graphics/MainMenu/WarningMessage.png")))
+    , m_WarningMessageSprite(*m_WarningMessageTexture)
+{
     // Center the warning message
-    m_WarningMessageSprite.setPosition(sf::Vector2f(
-        (Window::GetWindow()->getSize().x - m_WarningMessageSprite.getGlobalBounds().size.x) / 2,
-        (Window::GetWindow()->getSize().y - m_WarningMessageSprite.getGlobalBounds().size.y) / 2
-    ));
+    m_WarningMessageSprite.setPosition(
+        sf::Vector2f(
+            (Window::GetWindow()->getSize().x - m_WarningMessageSprite.getGlobalBounds().size.x) / 2,
+            (Window::GetWindow()->getSize().y - m_WarningMessageSprite.getGlobalBounds().size.y) / 2
+        )
+    );
 
     // reason why we are doing this is to not waste time on loading the menu while we wait for the warning message
     MainMenuScene = std::make_shared<Menu>();

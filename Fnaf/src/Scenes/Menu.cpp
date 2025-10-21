@@ -16,7 +16,20 @@ int NewsPaperTimer = 0;
 #define SHOWNEWPAPERTIME 12 * 66 // 12 seconds
 #endif
 
-Menu::Menu() {
+Menu::Menu() :
+    // load loading screen sprite
+    m_LoadingScreenTexture(Resources::GetTexture("Graphics/Loading.png")),
+	m_Logo(Resources::GetTexture("Graphics/MainMenu/Logo.png")),
+
+    font(Resources::GetFont("Font/five-nights-at-freddys.ttf")),
+
+	m_LoadingScreenSprite(*m_LoadingScreenTexture),
+    m_LogoSprite(*m_Logo),
+    NewsPaperSprite(*NewsPaperTexture),
+	m_WarningMessageSprite(*m_WarningMessageTexture),
+	m_TimeText(*font),
+	m_NightText(*font)
+{
     // Preload audio - no longer keeping music objects directly in the Menu class
     Resources::GetMusic(STATIC_AUDIO_KEY);
     Resources::GetMusic(MENU_MUSIC_KEY);
@@ -45,7 +58,6 @@ Menu::Menu() {
     }
 
     // Load textures
-    m_Logo = ProcessText(Resources::GetTexture("Graphics/MainMenu/Logo.png"));
     NewsPaperTexture = Resources::GetTexture("Graphics/MainMenu/NewsPaper.png");
     m_WarningMessageTexture = ProcessText(Resources::GetTexture("Graphics/MainMenu/WarningMessage.png"));
 
@@ -55,12 +67,6 @@ Menu::Menu() {
         (Window::GetWindow()->getSize().x - m_WarningMessageSprite.getGlobalBounds().size.x) / 2,
         (Window::GetWindow()->getSize().y - m_WarningMessageSprite.getGlobalBounds().size.y) / 2
     ));
-
-    // load loading screen sprite
-    m_LoadingScreenTexture = Resources::GetTexture("Graphics/Loading.png");
-
-    // load time and night text
-    font = Resources::GetFont("Font/five-nights-at-freddys.ttf");
 
     // Prepare logo sprite
     m_LogoSprite = sf::Sprite(*m_Logo);
@@ -74,7 +80,6 @@ void Menu::Init() {
     AudioManager::GetInstance().PlayMusic(STATIC_AUDIO_KEY, false, 100.0f);
     AudioManager::GetInstance().PlayMusic(MENU_MUSIC_KEY, true, 100.0f);
 
-    m_TimeText.setFont(*font);
     m_TimeText.setString("12:00 AM");
     m_TimeText.setCharacterSize(75);
     m_TimeText.setFillColor(sf::Color::White);
@@ -83,7 +88,6 @@ void Menu::Init() {
         Window::GetWindow()->getSize().y / 2 - 25
     ));
 
-    m_NightText.setFont(*font);
     m_NightText.setString("1st Night");
     m_NightText.setCharacterSize(75);
     m_NightText.setFillColor(sf::Color::White);
@@ -93,7 +97,6 @@ void Menu::Init() {
     ));
 
     // Setup loading screen sprite
-    m_LoadingScreenSprite.setTexture(*m_LoadingScreenTexture);
     m_LoadingScreenSprite.setPosition(sf::Vector2f(
         Window::GetWindow()->getSize().x - m_LoadingScreenSprite.getGlobalBounds().size.x,
         Window::GetWindow()->getSize().y - m_LoadingScreenSprite.getGlobalBounds().size.y
