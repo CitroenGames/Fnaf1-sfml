@@ -50,9 +50,10 @@ public:
         }
 
         if (m_State == In) {
-            m_Alpha = static_cast<sf::Uint8>(255 * progress);
-        } else if (m_State == Out) {
-            m_Alpha = static_cast<sf::Uint8>(255 * (1.0f - progress));
+            m_Alpha = static_cast<std::uint8_t>(255 * progress);
+        }
+        else if (m_State == Out) {
+            m_Alpha = static_cast<std::uint8_t>(255 * (1.0f - progress));
         }
 
         ApplyAlpha();
@@ -68,7 +69,7 @@ private:
     sf::Time m_Duration;
     FadeState m_State;
     sf::Time m_ElapsedTime;
-    sf::Uint8 m_Alpha;
+    std::uint8_t m_Alpha;
 
     void ApplyAlpha() {
         if (!m_Drawable) return;

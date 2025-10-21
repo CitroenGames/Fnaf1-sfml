@@ -51,17 +51,15 @@ static std::shared_ptr<sf::Texture> ProcessText(const std::shared_ptr<sf::Textur
     // Process each pixel
     for (unsigned int x = 0; x < size.x; x++) {
         for (unsigned int y = 0; y < size.y; y++) {
-            const sf::Color pixel = image.getPixel(x, y);
-
+            const sf::Color pixel = image.getPixel(sf::Vector2u(x, y));
             // Check if pixel is grey (R, G, and B values are similar)
             bool isGrey = std::abs(pixel.r - pixel.g) <= tolerance &&
-                          std::abs(pixel.g - pixel.b) <= tolerance &&
-                          std::abs(pixel.r - pixel.b) <= tolerance &&
-                          pixel.r < 240; // Don't process white pixels
-
+                std::abs(pixel.g - pixel.b) <= tolerance &&
+                std::abs(pixel.r - pixel.b) <= tolerance &&
+                pixel.r < 240; // Don't process white pixels
             if (isGrey) {
                 // Make grey pixels transparent
-                image.setPixel(x, y, sf::Color(pixel.r, pixel.g, pixel.b, 0));
+                image.setPixel(sf::Vector2u(x, y), sf::Color(pixel.r, pixel.g, pixel.b, 0));
             }
         }
     }

@@ -125,7 +125,7 @@ public:
 
     // Bounds management
     void setBounds(const sf::FloatRect &newBounds) {
-        if (newBounds.width <= 0 || newBounds.height <= 0) {
+        if (newBounds.size.x <= 0 || newBounds.size.y <= 0) {
             throw std::invalid_argument("Bounds dimensions must be positive");
         }
         bounds = newBounds;
@@ -195,10 +195,8 @@ public:
         auto size = view.getSize();
         auto center = view.getCenter();
         return sf::FloatRect(
-            center.x - size.x / 2,
-            center.y - size.y / 2,
-            size.x,
-            size.y
+            { center.x - size.x / 2, center.y - size.y / 2 },
+            { size.x, size.y }
         );
     }
 
@@ -218,28 +216,29 @@ private:
     void updateView() noexcept {
         view.setCenter(position);
         view.setSize(baseResolution / zoomLevel);
-        view.setRotation(rotation);
+        view.setRotation(sf::degrees(rotation));
     }
 
-    void updateViewport(const sf::Vector2u &actualWindowSize) noexcept {
+    void updateViewport(const sf::Vector2u& actualWindowSize) noexcept {
         if (!maintainResolution) return;
 
         float windowAspectRatio = static_cast<float>(actualWindowSize.x) / static_cast<float>(actualWindowSize.y);
         float targetAspectRatio = baseResolution.x / baseResolution.y;
 
-        sf::FloatRect viewport(0.f, 0.f, 1.f, 1.f);
+        sf::FloatRect viewport({ 0.f, 0.f }, { 1.f, 1.f });
 
         if (std::abs(windowAspectRatio - targetAspectRatio) > 0.001f) {
             if (windowAspectRatio > targetAspectRatio) {
                 // Ultrawide case - add black bars on the sides (pillarboxing)
                 float ratio = targetAspectRatio / windowAspectRatio;
-                viewport.left = (1.f - ratio) / 2.f;
-                viewport.width = ratio;
-            } else {
+                viewport.position.x = (1.f - ratio) / 2.f;
+                viewport.size.x = ratio;
+            }
+            else {
                 // Tall case - add black bars on top/bottom (letterboxing)
                 float ratio = windowAspectRatio / targetAspectRatio;
-                viewport.top = (1.f - ratio) / 2.f;
-                viewport.height = ratio;
+                viewport.position.y = (1.f - ratio) / 2.f;
+                viewport.size.y = ratio;
             }
         }
 
@@ -261,11 +260,11 @@ private:
         targetPosition = boundingEnabled ? clampToBounds(target) : target;
     }
 
-    [[nodiscard]] sf::Vector2f clampToBounds(const sf::Vector2f &pos) const noexcept {
-        return sf::Vector2f(
-            std::clamp(pos.x, bounds.left, bounds.left + bounds.width),
-            std::clamp(pos.y, bounds.top, bounds.top + bounds.height)
-        );
+    [[nodiscard]] sf::Vector2f clampToBounds(const sf::Vector2f& pos) const noexcept {
+        return {
+            std::clamp(pos.x, bounds.position.x, bounds.position.x + bounds.size.x),
+            std::clamp(pos.y, bounds.position.y, bounds.position.y + bounds.size.y)
+        };
     }
 
     void updateSmoothMovement(float deltaTime) noexcept {

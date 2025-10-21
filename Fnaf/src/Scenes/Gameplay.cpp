@@ -50,15 +50,15 @@ void Gameplay::Init() {
         bgaudio2 = Resources::GetMusic("Audio/Ambience/EerieAmbienceLargeSca_MV005.wav");
         m_FanBuzzing = Resources::GetMusic("Audio/Office/Buzz_Fan_Florescent2.wav");
 
-        bgaudio1->setLoop(true);
+        bgaudio1->setLooping(true);
         bgaudio1->play();
         bgaudio1->setVolume(100.f);
 
-        bgaudio2->setLoop(true);
+        bgaudio2->setLooping(true);
         bgaudio2->play();
         bgaudio2->setVolume(50.f);
 
-        m_FanBuzzing->setLoop(true);
+        m_FanBuzzing->setLooping(true);
         m_FanBuzzing->play();
         m_FanBuzzing->setVolume(40.f);
     }
@@ -101,13 +101,13 @@ void Gameplay::Update(double deltaTime) {
     }
 
     // Add keyboard shortcuts for debugging
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::F1)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F1)) {
         // Skip to next night
         player.m_Night++;
         SceneManager::QueueSwitchScene(std::make_shared<Menu>());
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::F2)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F2)) {
         // Force power outage
         player.m_PowerLevel = 0;
     }

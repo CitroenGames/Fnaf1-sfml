@@ -76,7 +76,7 @@ public:
 
     virtual bool IsClicked(sf::RenderWindow& window) override
     {
-        bool isCurrentlyPressed = (IsMouseOver(window) && sf::Mouse::isButtonPressed(sf::Mouse::Left));
+        bool isCurrentlyPressed = (IsMouseOver(window) && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left));
         if (isCurrentlyPressed && !m_IsPressed)
         {
             m_IsPressed = true;

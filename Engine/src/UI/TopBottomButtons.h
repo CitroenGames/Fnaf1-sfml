@@ -43,14 +43,12 @@ public:
         // Check if mouse is over button
         if (IsMouseOver(window)) {
             // Detect mouse press (only trigger once per click)
-            if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !m_WasMousePressed) {
+            if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && !m_WasMousePressed) {
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                 sf::Vector2f viewPos = window.mapPixelToCoords(mousePos);
                 sf::FloatRect buttonBounds = getGlobalBounds(); // Use inherited method
-
-                float relativeY = viewPos.y - buttonBounds.top;
-
-                if (relativeY < buttonBounds.height / 2) {
+                float relativeY = viewPos.y - buttonBounds.position.y;
+                if (relativeY < buttonBounds.size.y / 2) {
                     // Top half clicked
                     updateTopState();
                     if (m_OnTopClick) {
@@ -71,7 +69,7 @@ public:
             }
 
             // Reset flag when mouse button is released
-            if (!sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+            if (!sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
                 m_WasMousePressed = false;
             }
         }

@@ -97,7 +97,7 @@ void Office::Init() {
     m_RightDoor.SetPosition(1255, 0);
 
     // Configure light sound for looping
-    m_LightSound->setLoop(true);
+    m_LightSound->setLooping(true);
     m_LightSound->setVolume(50.0f);
 
     auto FanEnt = SceneManager::GetActiveScene()->CreateEntity("Fan");
@@ -126,7 +126,7 @@ void Office::HandlePowerOutage() {
     player.UpdateUsageLevel();
 
     // Stop light sound if playing
-    if (m_LightSound->getStatus() == sf::Music::Playing) {
+    if (m_LightSound->getStatus() == sf::Music::Status::Playing) {
         m_LightSound->stop();
     }
 
@@ -211,8 +211,8 @@ void Office::ToggleLeftLight(bool active) {
         }
 
         // Start looping light sound
-        if (m_LightSound->getStatus() != sf::Music::Playing) {
-            m_LightSound->setLoop(true);
+        if (m_LightSound->getStatus() != sf::Music::Status::Playing) {
+            m_LightSound->setLooping(true);
             m_LightSound->play();
         }
     } else {

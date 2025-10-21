@@ -130,7 +130,7 @@ public:
 
     bool IsClicked(sf::RenderWindow& window) override
     {
-        bool isCurrentlyPressed = (IsMouseOver(window) && sf::Mouse::isButtonPressed(sf::Mouse::Left));
+        bool isCurrentlyPressed = (IsMouseOver(window) && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left));
         if (isCurrentlyPressed && !m_IsPressed)
         {
             m_IsPressed = true;
@@ -199,7 +199,7 @@ protected:
     {
         // Center origin of sprite for better positioning
         sf::FloatRect bounds = getLocalBounds();
-        setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+        setOrigin(sf::Vector2f(bounds.size.x / 2.f, bounds.size.y / 2.f));
         UpdatePosition();
     }
 
@@ -217,15 +217,15 @@ protected:
         sf::Vector2f adjustedPos = position;
 
         // Adjust for pillarboxing (black bars on sides)
-        if (viewport.width < 1.0f) {
+        if (viewport.size.x < 1.0f) {
             // Scale the x-coordinate to fit within the visible area
-            adjustedPos.x = (viewport.left * windowSize.x) + (position.x * viewport.width);
+            adjustedPos.x = (viewport.position.x * windowSize.x) + (position.x * viewport.size.x);
         }
 
         // Adjust for letterboxing (black bars on top/bottom)
-        if (viewport.height < 1.0f) {
+        if (viewport.size.y < 1.0f) {
             // Scale the y-coordinate to fit within the visible area
-            adjustedPos.y = (viewport.top * windowSize.y) + (position.y * viewport.height);
+            adjustedPos.y = (viewport.position.y * windowSize.y) + (position.y * viewport.size.y);
         }
 
         return adjustedPos;
