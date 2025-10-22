@@ -2,10 +2,11 @@
 
 #include "BaseButton.h"
 #include "Assets/Resources.h"
+#include "utils/Helpers.h"
 
-class ImageButton : public BaseButton {
+class ImageButton : public BaseButton, public sf::Sprite {
 public:
-    ImageButton() {
+    ImageButton() : sf::Sprite(GetDummyTexture()) {
         // Register with LayerManager in constructor
         LayerManager::AddDrawable(m_Layer, this);
     }
@@ -27,9 +28,10 @@ public:
 
     void SetVisible(bool visible) {
         if (visible) {
-            LayerManager::RemoveDrawable(this);
-        } else {
             LayerManager::AddDrawable(m_Layer, this);
+        }
+        else {
+            LayerManager::RemoveDrawable(this);
         }
     }
 
@@ -102,6 +104,5 @@ protected:
     int m_Layer = 0;
 
 private:
-    // These are no longer needed since we're inheriting from sf::Sprite
     using sf::Sprite::setPosition;
 };

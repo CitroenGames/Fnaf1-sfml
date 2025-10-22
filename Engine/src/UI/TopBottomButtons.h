@@ -12,8 +12,10 @@ public:
         BottomActive = 3
     };
 
-    TopBottomButtons() : m_CurrentState(ButtonState::NoActive),
-                         m_WasMousePressed(false) {
+    TopBottomButtons() : 
+        m_CurrentState(ButtonState::NoActive),
+        m_WasMousePressed(false)
+    {
     }
 
     void SetCallbacks(

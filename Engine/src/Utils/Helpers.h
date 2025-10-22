@@ -107,3 +107,13 @@ inline std::shared_ptr<sf::Texture> RemoveBlackBackground(const std::shared_ptr<
 
     return outputTexture;
 }
+
+static const sf::Texture& GetDummyTexture() {
+    static sf::Texture dummyTexture;
+    static bool initialized = false;
+    if (!initialized) {
+        dummyTexture.resize({ 1, 1 });
+        initialized = true;
+    }
+    return dummyTexture;
+}

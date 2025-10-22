@@ -3,11 +3,12 @@
 #include "BaseButton.h"
 #include "Core/Window.h"
 #include "Assets/Resources.h"
+#include "utils/Helpers.h"
 
 // THIS CLASS IS NOT FINAL AT ALL IT LACKS MANY STUFF BUT WORKS WELL ENOUGH FOR THE GAME.
-class HUDButton : public BaseButton {
+class HUDButton : public BaseButton, public sf::Sprite{
 public:
-    ~HUDButton() {
+    ~HUDButton() : sf::Sprite(GetDummyTexture()){
         // Clean up LayerManager registration
         LayerManager::RemoveDrawable(this);
     }
