@@ -5,6 +5,7 @@
 #include "Graphics/LayerManager.h"
 #include "LayerDefines.h"
 #include "GameState.h"
+#include "fnaf.hpp"
 
 CameraSystem::CameraSystem()
     : m_IsActive(false)
@@ -30,6 +31,11 @@ void CameraSystem::Init()
     m_CameraOpenSound = Resources::GetMusic("Audio/CameraSystem/Camera_Open.wav");
     m_CameraCloseSound = Resources::GetMusic("Audio/CameraSystem/Camera_Close.wav");
     m_CameraSwitchSound = Resources::GetMusic("Audio/CameraSystem/Camera_Switch.wav");
+
+    // Force-close camera when power runs out
+    GameEvents::Subscribe(GameEvent::POWER_OUTAGE, [this]() {
+        ForceClose();
+    });
 
     // Start with everything hidden except the camera button - which is always visible
     HideAllCameraElements();
@@ -150,9 +156,10 @@ void CameraSystem::InitializeCameraButtons()
     m_CameraButtons["7"]->SetTexture("Graphics/CameraSystem/Cam7Button.png");
     m_CameraButtons["7"]->SetPosition(945.0f, 393.0f);
 
-    // Set layer for all buttons but don't add them to the layer manager yet
+    // Set layer for all buttons and store base positions
     for (auto& [id, button] : m_CameraButtons) {
         button->SetLayer(CAMERA_BUTTONS);
+        m_ButtonBasePositions[id] = button->getPosition();
         // Initially, all buttons are hidden
         LayerManager::RemoveDrawable(button.get());
     }
@@ -208,6 +215,7 @@ void CameraSystem::InitializeCameraOverlays()
             m_CameraNameSprites[camId] = std::make_shared<sf::Sprite>(*tex);
             // Position in bottom-left area of the camera view (like the real game)
             m_CameraNameSprites[camId]->setPosition(100.0f, 600.0f);
+            m_NameBasePositions[camId] = {100.0f, 600.0f};
         }
     }
 }
@@ -247,6 +255,8 @@ void CameraSystem::Update(double deltaTime)
 
     if (m_IsActive && !m_IsAnimatingOpen) {
         m_StaticAnimation.Update(deltaTime);
+        UpdateCameraMovement(deltaTime);
+        UpdateUIPositions();
     }
 }
 
@@ -270,8 +280,8 @@ void CameraSystem::FixedUpdate()
 
 void CameraSystem::ToggleCamera()
 {
-    // Prevent toggling while animating
-    if (m_IsAnimatingOpen || m_IsAnimatingClose) {
+    // Prevent toggling while animating or during power outage
+    if (m_IsAnimatingOpen || m_IsAnimatingClose || player.m_PowerLevel <= 0) {
         return;
     }
 
@@ -286,6 +296,9 @@ void CameraSystem::ToggleCamera()
         m_CameraOpenSound->play();
 
         m_IsAnimatingOpen = true;
+        m_CameraPanOffset = 0.0f; // Start centered
+        m_PanDirection = 1.0f;
+        m_PanPauseTimer = 0.0f;
 
         // Reset and play flip animation forward
         // Stop() resets to frame 0, then Play(true) starts forward playback
@@ -311,6 +324,25 @@ void CameraSystem::ToggleCamera()
 
         // Play reverse camera flip animation
         m_CameraFlipAnimation.Play(false);
+    }
+}
+
+void CameraSystem::ForceClose()
+{
+    if (!m_IsActive && !m_IsAnimatingOpen) return;
+
+    m_IsActive = false;
+    player.m_UsingCamera = false;
+    player.UpdateUsageLevel();
+    m_IsAnimatingOpen = false;
+    m_IsAnimatingClose = false;
+
+    HideAllCameraElements();
+    m_CameraFlipAnimation.Stop();
+    m_CameraFlipAnimation.UnregisterFromLayerManager();
+
+    if (m_OfficeRef) {
+        m_OfficeRef->ShowOfficeElements();
     }
 }
 
@@ -343,6 +375,11 @@ void CameraSystem::ShowCameraView(const std::string& cameraId)
             LayerManager::RemoveDrawable(sprite.get());
         }
     }
+
+    // Reset pan to center when switching cameras
+    m_CameraPanOffset = 0.0f;
+    m_PanDirection = 1.0f;
+    m_PanPauseTimer = 0.0f;
 
     // Show selected camera view
     LayerManager::AddDrawable(CAMERA_FEED_LAYER, it->second.get());
@@ -407,6 +444,62 @@ void CameraSystem::HideAllCameraElements()
     // Stop and remove static animation
     m_StaticAnimation.Stop();
     m_StaticAnimation.UnregisterFromLayerManager();
+}
+
+void CameraSystem::UpdateCameraMovement(double deltaTime)
+{
+    if (!m_IsActive || m_IsAnimatingOpen || m_IsAnimatingClose) return;
+
+    const float panSpeed = 15.0f;   // pixels per second
+    const float panMax = 80.0f;     // max drift in each direction from center
+    const float edgePause = 1.5f;   // seconds to pause at each edge before reversing
+
+    // If paused at edge, count down before reversing
+    if (m_PanPauseTimer > 0.0f) {
+        m_PanPauseTimer -= static_cast<float>(deltaTime);
+        return;
+    }
+
+    m_CameraPanOffset += m_PanDirection * panSpeed * static_cast<float>(deltaTime);
+
+    // Hit edge — clamp and start pause timer
+    if (m_CameraPanOffset >= panMax) {
+        m_CameraPanOffset = panMax;
+        m_PanDirection = -1.0f;
+        m_PanPauseTimer = edgePause;
+    }
+    else if (m_CameraPanOffset <= -panMax) {
+        m_CameraPanOffset = -panMax;
+        m_PanDirection = 1.0f;
+        m_PanPauseTimer = edgePause;
+    }
+}
+
+void CameraSystem::UpdateUIPositions()
+{
+    float offsetX = m_CameraPanOffset;
+
+    if (m_CameraMapSprite) {
+        m_CameraMapSprite->setPosition(m_MapBasePos.x + offsetX, m_MapBasePos.y);
+    }
+    if (m_CameraBorderSprite) {
+        m_CameraBorderSprite->setPosition(m_BorderBasePos.x + offsetX, m_BorderBasePos.y);
+    }
+    for (auto& [id, button] : m_CameraButtons) {
+        auto baseIt = m_ButtonBasePositions.find(id);
+        if (baseIt != m_ButtonBasePositions.end()) {
+            button->SetPosition(baseIt->second.x + offsetX, baseIt->second.y);
+        }
+    }
+    for (auto& [id, sprite] : m_CameraNameSprites) {
+        auto baseIt = m_NameBasePositions.find(id);
+        if (baseIt != m_NameBasePositions.end()) {
+            sprite->setPosition(baseIt->second.x + offsetX, baseIt->second.y);
+        }
+    }
+
+    // Static animation follows the camera center so it always covers the viewport
+    m_StaticAnimation.SetPosition(640.0f + offsetX, 360.0f);
 }
 
 void CameraSystem::UpdateCameraViewBasedOnAnimatronics()

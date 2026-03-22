@@ -119,8 +119,17 @@ void Gameplay::Update(double deltaTime) {
     sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
     sf::Vector2u windowSize = window->getSize();
 
-    // Only handle office panning when the camera is NOT active
-    if (!player.m_UsingCamera) {
+    // Handle panning for office (when camera is down) or camera feed (when camera is up)
+    if (player.m_UsingCamera && m_CameraSystem) {
+        // Camera feed panning - Camera2D at 640 (center) + pan offset
+        float panOffset = m_CameraSystem->GetCameraPanOffset();
+        sf::Vector2f newCameraPos(
+            (m_ViewportWidth / 2.0f) + panOffset,
+            720.0f / 2.0f
+        );
+        m_Camera->setPosition(newCameraPos);
+    }
+    else if (!player.m_UsingCamera) {
         // Scrolling parameters
         const float scrollThreshold = 400.0f;
         const float maxScrollSpeed = 500.0f;

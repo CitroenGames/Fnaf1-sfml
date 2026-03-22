@@ -18,9 +18,11 @@ public:
     void Destroy();
 
     void ToggleCamera();
+    void ForceClose();
     void SetActiveCamera(const std::string& cameraId);
     bool IsActive() const { return m_IsActive; }
     void SetOfficeComponent(std::shared_ptr<Office> office) { m_OfficeRef = office; }
+    float GetCameraPanOffset() const { return m_CameraPanOffset; }
     
     nlohmann::json Serialize() const override { return nlohmann::json(); }
     void Deserialize(const nlohmann::json& data) override {}
@@ -49,12 +51,16 @@ private:
     FlipBook m_CameraFlipAnimation;
     FlipBook m_StaticAnimation;
 
-    // Automated camera movement
-    float m_CameraShakeTimer = 0.0f;
-    float m_CameraShakeIntensity = 0.0f;
-    sf::Vector2f m_CameraBasePosition = {0.0f, 0.0f};
-    sf::Vector2f m_CameraOffset = {0.0f, 0.0f};
-    std::mt19937 m_RNG{std::random_device{}()};
+    // Camera feed panning (mouse-based, like office scrolling)
+    float m_CameraPanOffset = 0.0f;  // 0=center, negative=left, positive=right
+    float m_PanDirection = 1.0f;       // 1.0=right, -1.0=left
+    float m_PanPauseTimer = 0.0f;      // countdown at edges before reversing
+
+    // Base screen positions for UI elements (repositioned when panning)
+    sf::Vector2f m_MapBasePos = {830.0f, 450.0f};
+    sf::Vector2f m_BorderBasePos = {640.0f, 360.0f};
+    std::map<std::string, sf::Vector2f> m_ButtonBasePositions;
+    std::map<std::string, sf::Vector2f> m_NameBasePositions;
 
     void InitializeCameraViews();
     void InitializeCameraButtons();
@@ -66,6 +72,7 @@ private:
     void UpdateCameraViewBasedOnAnimatronics();
     void HideAllCameraElements();
     void UpdateCameraMovement(double deltaTime);
+    void UpdateUIPositions();
     
     // Office reference for syncing visibility with animation
     std::shared_ptr<Office> m_OfficeRef;
