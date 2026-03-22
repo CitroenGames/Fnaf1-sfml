@@ -25,7 +25,7 @@ struct Player {
         if (m_LeftLightOn) usage++;
         if (m_RightLightOn) usage++;
 
-        return std::min(5, usage);
+        return std::min(4, usage);
     }
 
     // Update the usage level

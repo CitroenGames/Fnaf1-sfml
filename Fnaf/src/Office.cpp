@@ -12,6 +12,7 @@ Office::Office()
     m_OfficeTexture = Resources::GetTexture("Graphics/Office/NormalOffice.png");
     m_DoorTexture = Resources::GetTexture("Graphics/Office/door.png");
     m_PowerOutageTexture = Resources::GetTexture("Graphics/Office/Office_NoPower1.png");
+    m_PowerOutageTexture2 = Resources::GetTexture("Graphics/Office/Office_NoPower2.png");
 
     // Load light textures
     m_LeftLightTexture = Resources::GetTexture("Graphics/Office/Light/Office_LightLeft.png");
@@ -109,6 +110,8 @@ void Office::Init() {
 }
 
 void Office::HandlePowerOutage() {
+    m_PowerOutage = true;
+
     // Switch to power outage texture
     m_OfficeSprite.setTexture(*m_PowerOutageTexture);
 
@@ -176,6 +179,24 @@ void Office::ShowOfficeElements() {
 void Office::Update(double deltaTime) {
     m_RightDoor.Update(deltaTime);
     m_LeftDoor.Update(deltaTime);
+
+    // Flicker Freddy's face during power outage FREDDY_FACE phase
+    if (m_PowerOutage && m_GameRef) {
+        auto phase = m_GameRef->GetPowerOutagePhase();
+
+        if (phase == PowerOutagePhase::FREDDY_FACE) {
+            m_FlickerTimer += static_cast<float>(deltaTime);
+            if (m_FlickerTimer >= 0.25f) {
+                m_FlickerTimer = 0.0f;
+                m_FlickerState = !m_FlickerState;
+                m_OfficeSprite.setTexture(
+                    m_FlickerState ? *m_PowerOutageTexture2 : *m_PowerOutageTexture);
+            }
+        }
+        else if (phase == PowerOutagePhase::LIGHTS_OFF || phase == PowerOutagePhase::JUMPSCARE) {
+            m_OfficeSprite.setTexture(*m_PowerOutageTexture);
+        }
+    }
 }
 
 void Office::FixedUpdate() {

@@ -9,6 +9,7 @@
 #include "GameState.h"
 #include "Scene/SceneManager.h"
 #include "CameraSystem.h"
+#include "Utils/Helpers.h"
 
 constexpr float m_OfficeWidth = 1600.0f;
 constexpr float m_ViewportWidth = 1280.0f;
@@ -44,6 +45,39 @@ void Gameplay::Init() {
         m_CameraButton = std::make_shared<HUDButton>();
         m_CameraButton->SetTexture("Graphics/CameraSystem/CameraButton.png");
         m_CameraButton->SetPosition(640.0f, 650.0f);
+    }
+
+    // Power HUD
+    {
+        m_PowerLeftTexture = ProcessText(Resources::GetTexture("Graphics/Gameplay/Hud/PowerLeft.png"));
+        m_UsageLabelTexture = ProcessText(Resources::GetTexture("Graphics/Gameplay/Hud/Usage.png"));
+
+        for (int i = 0; i < 5; i++) {
+            m_UsageBarTextures[i] = RemoveBlackBackground(
+                Resources::GetTexture("Graphics/PowerUsage/" + std::to_string(i + 1) + ".png"));
+        }
+
+        m_PowerLeftSprite.setTexture(*m_PowerLeftTexture);
+        m_UsageLabelSprite.setTexture(*m_UsageLabelTexture);
+        m_UsageBarsSprite.setTexture(*m_UsageBarTextures[0]);
+
+        // Position in bottom-left
+        m_PowerLeftSprite.setPosition(30.f, 590.f);
+        m_UsageLabelSprite.setPosition(30.f, 620.f);
+
+        // Usage bars positioned right after the "Usage" label
+        float usageLabelRight = 30.f + m_UsageLabelSprite.getGlobalBounds().width + 8.f;
+        m_UsageBarsSprite.setPosition(usageLabelRight, 620.f);
+
+        // Power percentage text (rendered with FNAF font)
+        m_PowerFont = Resources::GetFont("Font/five-nights-at-freddys.ttf");
+        m_PowerPercentText.setFont(*m_PowerFont);
+        m_PowerPercentText.setCharacterSize(24);
+        m_PowerPercentText.setFillColor(sf::Color::White);
+
+        // Position percentage text right after "Power left:" label
+        float powerLabelRight = 30.f + m_PowerLeftSprite.getGlobalBounds().width + 8.f;
+        m_PowerPercentText.setPosition(powerLabelRight, 585.f);
     }
 
     // Load music
@@ -193,6 +227,47 @@ void Gameplay::Render() {
     // Now draw HUD elements in screen space
     if (m_CameraButton) {
         m_CameraButton->Draw(*window);
+    }
+
+    // Draw power HUD in screen space
+    if (gameplay && !gameplay->IsPowerOutage()) {
+        sf::View currentView = window->getView();
+        sf::FloatRect viewport = currentView.getViewport();
+        window->setView(window->getDefaultView());
+
+        // Compute viewport offset for letterboxing/pillarboxing
+        sf::Vector2u winSize = window->getSize();
+        auto adjustPos = [&](sf::Vector2f pos) -> sf::Vector2f {
+            sf::Vector2f adjusted = pos;
+            if (viewport.width < 1.0f) {
+                adjusted.x = (viewport.left * winSize.x) + (pos.x * viewport.width);
+            }
+            if (viewport.height < 1.0f) {
+                adjusted.y = (viewport.top * winSize.y) + (pos.y * viewport.height);
+            }
+            return adjusted;
+        };
+
+        // Update usage bars based on current usage level
+        int usageIndex = std::clamp(player.m_UsageLevel, 1, 4) - 1;
+        m_UsageBarsSprite.setTexture(*m_UsageBarTextures[usageIndex]);
+
+        // Update power percentage text
+        int powerPercent = std::max(0, static_cast<int>(player.m_PowerLevel));
+        m_PowerPercentText.setString(std::to_string(powerPercent) + "%");
+
+        // Adjust all positions for viewport
+        m_PowerLeftSprite.setPosition(adjustPos({30.f, 590.f}));
+        m_PowerPercentText.setPosition(adjustPos({30.f + m_PowerLeftSprite.getLocalBounds().width + 8.f, 585.f}));
+        m_UsageLabelSprite.setPosition(adjustPos({30.f, 620.f}));
+        m_UsageBarsSprite.setPosition(adjustPos({30.f + m_UsageLabelSprite.getLocalBounds().width + 8.f, 620.f}));
+
+        window->draw(m_PowerLeftSprite);
+        window->draw(m_PowerPercentText);
+        window->draw(m_UsageLabelSprite);
+        window->draw(m_UsageBarsSprite);
+
+        window->setView(currentView);
     }
 
 #if defined(_DEBUG)

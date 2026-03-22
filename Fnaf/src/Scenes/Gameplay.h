@@ -5,6 +5,7 @@
 #include "CameraSystem.h"
 #include "Office.h"
 #include "fnaf.hpp"
+#include <array>
 
 class Gameplay : public Scene {
 public:
@@ -35,4 +36,14 @@ private:
     std::shared_ptr<FNAFGame> gameplay;
 
     std::shared_ptr<Office> m_OfficeComponent;
+
+    // Power HUD
+    std::shared_ptr<sf::Texture> m_PowerLeftTexture;
+    std::shared_ptr<sf::Texture> m_UsageLabelTexture;
+    std::array<std::shared_ptr<sf::Texture>, 5> m_UsageBarTextures;
+    sf::Sprite m_PowerLeftSprite;
+    sf::Sprite m_UsageLabelSprite;
+    sf::Sprite m_UsageBarsSprite;
+    std::shared_ptr<sf::Font> m_PowerFont;
+    sf::Text m_PowerPercentText;
 };

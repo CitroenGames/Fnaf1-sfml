@@ -55,7 +55,11 @@ private:
     std::shared_ptr<sf::Texture> m_RightLightChicaTexture;
 
     // Power outage textures
-    std::shared_ptr<sf::Texture> m_PowerOutageTexture;
+    std::shared_ptr<sf::Texture> m_PowerOutageTexture;   // Office_NoPower1.png (dim/dark)
+    std::shared_ptr<sf::Texture> m_PowerOutageTexture2;  // Office_NoPower2.png (Freddy face)
+    bool m_PowerOutage = false;
+    float m_FlickerTimer = 0.0f;
+    bool m_FlickerState = false;  // false=NoPower1, true=NoPower2
 
     ImageButton m_FreddyNoseButton;
 

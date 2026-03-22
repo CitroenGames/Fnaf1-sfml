@@ -183,16 +183,18 @@ void FNAFGame::UpdatePower(float deltaTime) {
 }
 
 float FNAFGame::CalculatePowerDrain() const {
-    // Real FNAF 1 power drain formula:
-    // Every 0.1s tick: drain = usageLevel/10 + 0.1/nightDivisor
-    // Per second (×10): drain = usageLevel + 1/nightDivisor
-    // Usage level is always >= 1 (base drain from office systems)
+    // Real FNAF 1 power drain formula (decompiled):
+    // Internal power = 999 (displayed as 99.9%). Every 0.1s tick:
+    //   - Subtract usageLevel from internal counter
+    //   - Every nightDivisor seconds: subtract 1 extra
+    // Per second in internal units: 10*usageLevel + 1/nightDivisor
+    // Converted to displayed %/s: (usageLevel + 0.1/nightDivisor) / 10
     float usageLevel = static_cast<float>(player.CalculateUsageLevel());
 
     int nightIdx = std::clamp(player.m_Night - 1, 0, 6);
     float divisor = NIGHT_POWER_DIVISORS[nightIdx];
 
-    return usageLevel + 1.0f / divisor;
+    return (usageLevel + 0.1f / divisor) / 10.0f;
 }
 
 // ============================================================================
@@ -451,12 +453,9 @@ void FNAFGame::UpdateFoxy(Animatronic &foxy, float deltaTime) {
             PlaySound("foxy_run");
             TriggerJumpscare(foxy);
         } else {
-            // Door closed - bang on it, drain power (real FNAF1: 1%, 6%, then caps at 11%)
+            // Door closed - bang on it, drain power (real FNAF1: 1%, 6%, 11%, 16%, 21%...)
             PlaySound("door_bang");
-            float powerDrain;
-            if (foxy.foxyDoorBangCount == 0) powerDrain = 1.0f;
-            else if (foxy.foxyDoorBangCount == 1) powerDrain = 6.0f;
-            else powerDrain = 11.0f;
+            float powerDrain = 1.0f + foxy.foxyDoorBangCount * 5.0f;
             player.m_PowerLevel = std::max(0.0f, player.m_PowerLevel - powerDrain);
             foxy.foxyDoorBangCount++;
 
