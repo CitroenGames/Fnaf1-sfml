@@ -6,8 +6,6 @@
 #include "Office.h"
 #include "fnaf.hpp"
 
-constexpr float scrollspeed = 10.0f;
-
 class Gameplay : public Scene {
 public:
     void Init() override;
@@ -29,7 +27,6 @@ private:
 
     float scrollOffset = 175.0f; // Initial scroll offset
 
-    Office m_Office;
     std::unique_ptr<Camera2D> m_Camera;
 
     std::shared_ptr<CameraSystem> m_CameraSystem;
@@ -38,5 +35,4 @@ private:
     std::shared_ptr<FNAFGame> gameplay;
 
     std::shared_ptr<Office> m_OfficeComponent;
-    bool m_WasCameraActive = false;
 };

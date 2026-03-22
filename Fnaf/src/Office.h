@@ -20,6 +20,9 @@ public:
     };
 
     void Destroy() {
+        HideOfficeElements();
+        m_LeftDoor.Cleanup();
+        m_RightDoor.Cleanup();
     };
 
     nlohmann::json Serialize() const override { return nlohmann::json(); };
@@ -43,7 +46,6 @@ private:
     FlipBook m_LeftDoor, m_RightDoor;
 
     std::shared_ptr<sf::Texture> m_OfficeTexture;
-    std::shared_ptr<sf::Texture> m_LeftButtonTexture;
     std::shared_ptr<sf::Texture> m_DoorTexture;
 
     // Add textures for office lights
@@ -58,8 +60,6 @@ private:
     ImageButton m_FreddyNoseButton;
 
     TopBottomButtons m_LeftButtons, m_RightButtons;
-
-    FlipBook m_FanFlipBook;
 
     std::shared_ptr<sf::Music> m_FreddyNose;
     std::shared_ptr<sf::Music> m_DoorNoise;

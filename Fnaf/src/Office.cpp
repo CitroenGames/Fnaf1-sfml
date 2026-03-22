@@ -39,6 +39,8 @@ Office::Office()
 
     m_FreddyNoseButton.SetTexture(Resources::GetTexture("Graphics/ClickTeamFusion/1.png"));
     m_FreddyNoseButton.SetPosition(sf::Vector2f(667, 212.5));
+    // Remove from LayerManager — nose button is an invisible clickable hitbox, not a visible sprite
+    LayerManager::RemoveDrawable(&m_FreddyNoseButton);
 
     m_LeftButtons.SetLayer(2);
     m_LeftButtons.SetCallbacks(
@@ -74,7 +76,7 @@ Office::Office()
 
     m_LeftDoor = FlipBook(2, 0.016f, false);
     m_RightDoor = FlipBook(2, 0.016f, false);
-    for (int i = 1; i < 16; i++) {
+    for (int i = 1; i <= 16; i++) {
         m_LeftDoor.AddFrame(Resources::GetTexture("Graphics/Office/LeftDoor/Frame" + std::to_string(i) + ".png"));
         m_RightDoor.AddFrame(Resources::GetTexture("Graphics/Office/RightDoor/Frame" + std::to_string(i) + ".png"));
     }
@@ -100,8 +102,6 @@ void Office::Init() {
     m_LightSound->setLoop(true);
     m_LightSound->setVolume(50.0f);
 
-    auto FanEnt = SceneManager::GetActiveScene()->CreateEntity("Fan");
-
     // Subscribe to power outage event
     GameEvents::Subscribe(GameEvent::POWER_OUTAGE, [this]() {
         HandlePowerOutage();
@@ -121,6 +121,10 @@ void Office::HandlePowerOutage() {
         m_RightButtons.updateBottomState(false);
         player.m_RightLightOn = false;
     }
+
+    // Reset door animations — doors open when power dies
+    m_LeftDoor.Stop();
+    m_RightDoor.Stop();
 
     // Update usage level
     player.UpdateUsageLevel();
@@ -145,8 +149,9 @@ void Office::HideOfficeElements() {
     m_LeftButtons.SetLayer(-1); // Use a non-visible layer
     m_RightButtons.SetLayer(-1);
 
-    // Hide Freddy nose button
-    LayerManager::RemoveDrawable(&m_FreddyNoseButton);
+    // Hide door FlipBook frames
+    m_LeftDoor.UnregisterFromLayerManager();
+    m_RightDoor.UnregisterFromLayerManager();
 }
 
 void Office::ShowOfficeElements() {
@@ -159,8 +164,13 @@ void Office::ShowOfficeElements() {
     m_LeftButtons.SetLayer(BUTTON_LAYER);
     m_RightButtons.SetLayer(BUTTON_LAYER);
 
-    // Show Freddy nose button
-    LayerManager::AddDrawable(BUTTON_LAYER, &m_FreddyNoseButton);
+    // Re-register door FlipBooks if doors are closed
+    if (player.m_LeftDoorClosed) {
+        m_LeftDoor.RegisterToLayerManager();
+    }
+    if (player.m_RightDoorClosed) {
+        m_RightDoor.RegisterToLayerManager();
+    }
 }
 
 void Office::Update(double deltaTime) {
@@ -210,7 +220,6 @@ void Office::ToggleLeftLight(bool active) {
 
         // Start looping light sound
         if (m_LightSound->getStatus() != sf::Music::Playing) {
-            m_LightSound->setLoop(true);
             m_LightSound->play();
         }
     } else {
@@ -253,7 +262,6 @@ void Office::ToggleRightLight(bool active) {
 
         // Start looping light sound
         if (m_LightSound->getStatus() != sf::Music::Playing) {
-            m_LightSound->setLoop(true);
             m_LightSound->play();
         }
     } else {

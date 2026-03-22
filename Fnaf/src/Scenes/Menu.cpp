@@ -36,7 +36,7 @@ Menu::Menu() {
 
     // Load & Setup Freddy glitch effect
     m_FreddyGlitchEffect = GlitchEffect(0);
-    for (int i = 1; i < 4; i++) {
+    for (int i = 1; i <= 4; i++) {
         m_FreddyGlitchEffect.AddFrame(Resources::GetTexture(
             "Graphics/MainMenu/FreddyBackground/Frame" + std::to_string(i) + ".png"
         ));

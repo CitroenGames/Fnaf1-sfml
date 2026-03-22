@@ -28,6 +28,7 @@ void Gameplay::Init() {
 
     // Set the game reference in the Office component
     officeComponent->SetGameReference(gameplay);
+    m_OfficeComponent = officeComponent;
 
     // Add camera system
     auto cameraEntity = CreateEntity("Camera System");
@@ -35,6 +36,7 @@ void Gameplay::Init() {
     m_CameraSystem = cameraEntity->GetComponent<CameraSystem>();
 
     gameplay->SetCameraSystem(m_CameraSystem);
+    m_CameraSystem->SetOfficeComponent(m_OfficeComponent);
 
     // HUD STUFF
     {
@@ -87,6 +89,7 @@ void Gameplay::FixedUpdate() {
     auto window = Window::GetWindow(); // TODO: We REALLY should get rid of this shitty mess but who cares for now
 
     // Check for main camera button press
+    // Office hide/show is handled by CameraSystem in sync with the flip animation
     if (m_CameraButton->IsClicked(*window)) {
         m_CameraSystem->ToggleCamera();
     }
@@ -283,13 +286,9 @@ void Gameplay::Render() {
             // Display power outage info if applicable
             if (gameplay->IsPowerOutage()) {
                 ImGui::Separator();
-                ImGui::Text("POWER OUTAGE");
-
-                if (gameplay->GetFreddyMusicBoxTimer() > 0) {
-                    ImGui::Text("Freddy Music Box: %.2f seconds", gameplay->GetFreddyMusicBoxTimer());
-                } else {
-                    ImGui::Text("Freddy is coming...");
-                }
+                const char* phaseNames[] = { "DARK_WAIT", "FREDDY_FACE", "LIGHTS_OFF", "JUMPSCARE" };
+                ImGui::Text("POWER OUTAGE - Phase: %s", phaseNames[static_cast<int>(gameplay->GetPowerOutagePhase())]);
+                ImGui::Text("Phase Timer: %.2f seconds", gameplay->GetPhaseTimer());
             }
         } else {
             ImGui::Text("Gameplay not initialized!");
@@ -304,6 +303,8 @@ void Gameplay::Destroy() {
         m_CameraSystem->Destroy();
     }
 
-    m_Office.Destroy();
+    if (m_OfficeComponent) {
+        m_OfficeComponent->Destroy();
+    }
     Scene::Destroy();
 }

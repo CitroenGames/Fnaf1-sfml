@@ -1,6 +1,6 @@
 #pragma once
 
-#define INITIAL_POWER_LEVEL 99
+#define INITIAL_POWER_LEVEL 99.9f
 
 struct Player {
     bool m_UsingCamera = false;
@@ -22,7 +22,8 @@ struct Player {
         if (m_UsingCamera) usage++;
         if (m_LeftDoorClosed) usage++;
         if (m_RightDoorClosed) usage++;
-        if (m_LeftLightOn || m_RightLightOn) usage++;
+        if (m_LeftLightOn) usage++;
+        if (m_RightLightOn) usage++;
 
         return std::min(5, usage);
     }
