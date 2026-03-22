@@ -12,3 +12,4 @@ imgui.ini
 /Fnaf-SFML
 /profile_results.json
 /cmake-build-*
+.DS_Store

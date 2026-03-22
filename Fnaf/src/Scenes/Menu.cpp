@@ -7,8 +7,6 @@
 #include "Utils/Helpers.h"
 #include "Audio/AudioManager.h"
 
-int NewsPaperTimer = 0;
-
 // NOTE: this is in ticks not seconds so 66 ticks = 1 second
 #if _DEBUG
 #define SHOWNEWPAPERTIME 0.5 * 66 // 0.5 seconds
@@ -68,6 +66,8 @@ Menu::Menu() {
 }
 
 void Menu::Init() {
+    m_NewsPaperTimer = 0;
+    m_GameplayTransitionState = MAIN_MENU;
     ShowMainMenuElements();
 
     // Start audio using AudioManager
@@ -147,7 +147,7 @@ void Menu::ShowGlitchEffects() {
 
 void Menu::SwitchState(GameplayTransitionState state) {
     m_GameplayTransitionState = state;
-    NewsPaperTimer = 0; // Reset timer
+    m_NewsPaperTimer = 0; // Reset timer
 }
 
 void Menu::HideAllMenuElements() {
@@ -214,8 +214,8 @@ void Menu::SwitchToGameplay() {
 
 void Menu::FixedUpdate() {
     // TODO: idk remove this stupid seconds thing
-    NewsPaperTimer += 1;
-    const float seconds = NewsPaperTimer / 66.0f; // Convert ticks to seconds
+    m_NewsPaperTimer += 1;
+    const float seconds = m_NewsPaperTimer / 66.0f; // Convert ticks to seconds
     switch (m_GameplayTransitionState) {
         case MAIN_MENU: {
             m_FreddyGlitchEffect.Update();

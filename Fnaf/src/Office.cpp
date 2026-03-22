@@ -165,9 +165,7 @@ void Office::ShowOfficeElements() {
 
 void Office::Update(double deltaTime) {
     m_RightDoor.Update(deltaTime);
-    m_RightDoor.RegisterToLayerManager();
     m_LeftDoor.Update(deltaTime);
-    m_LeftDoor.RegisterToLayerManager();
 }
 
 void Office::FixedUpdate() {

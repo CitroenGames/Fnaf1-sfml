@@ -65,6 +65,7 @@ private:
     sf::Time accumulatedTime = sf::Time::Zero;
     FadeEffect fadeEffect;
 
+    int m_NewsPaperTimer = 0;
     float m_WarningMessageTimer = 0.0f;
     const float WARNING_MESSAGE_DURATION = 4.0f; // 4 seconds
     const float NEWSPAPER_DURATION = 3.0f; // 3 seconds for newspaper display

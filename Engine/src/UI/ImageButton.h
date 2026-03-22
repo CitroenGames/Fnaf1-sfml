@@ -27,9 +27,9 @@ public:
 
     void SetVisible(bool visible) {
         if (visible) {
-            LayerManager::RemoveDrawable(this);
-        } else {
             LayerManager::AddDrawable(m_Layer, this);
+        } else {
+            LayerManager::RemoveDrawable(this);
         }
     }
 

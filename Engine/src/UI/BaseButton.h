@@ -7,5 +7,5 @@ public:
     virtual bool IsClicked(sf::RenderWindow& window) { return false; }
 
 protected:
-    bool m_IsPressed;
+    bool m_IsPressed = false;
 };

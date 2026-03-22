@@ -36,6 +36,7 @@ public:
         : m_Layer(layer)
         , m_CurrentFrame(0)
         , m_PreviousFrame(-1)  // Initialize to invalid frame
+        , m_IsRunning(true)
         , m_IsGlitching(false)
         , m_GlitchTimer(0.0f)
         , m_GlitchChance(0.001f)
@@ -57,7 +58,9 @@ public:
 
     void Kill() {
         m_IsRunning = false;
-        LayerManager::RemoveDrawable(m_Frames[m_CurrentFrame].get());
+        if (!m_Frames.empty() && m_CurrentFrame < static_cast<int>(m_Frames.size())) {
+            LayerManager::RemoveDrawable(m_Frames[m_CurrentFrame].get());
+        }
     }
 
     void AddFrame(std::shared_ptr<sf::Texture> texture) {
@@ -110,7 +113,7 @@ public:
     }
 
     void Update() {
-        if (m_Frames.empty() || m_IsRunning) return;
+        if (m_Frames.empty() || !m_IsRunning) return;
 
         if (m_IsGlitching) {
             m_GlitchTimer += 1.0f / 66.0f;  // Fixed timestep for 66 tickrate
@@ -153,7 +156,7 @@ private:
     void UpdateLayerManager() {
         if (!m_Frames.empty()) {
             // Only remove previous frame if it's valid and different
-            if (m_PreviousFrame >= 0 && m_PreviousFrame < m_Frames.size() && 
+            if (m_PreviousFrame >= 0 && m_PreviousFrame < static_cast<int>(m_Frames.size()) &&
                 m_PreviousFrame != m_CurrentFrame) {
                 LayerManager::RemoveDrawable(m_Frames[m_PreviousFrame].get());
             }
@@ -166,6 +169,8 @@ private:
 
 public:
     void StartGlitch() {
+        if (m_Frames.size() <= 1) return;  // Need at least 2 frames to glitch
+
         m_IsGlitching = true;
         m_GlitchTimer = 0.0f;
         m_GlitchSequence.clear();
@@ -185,7 +190,7 @@ public:
         for (int i = 0; i < numGlitchFrames; i++) {
             int randomFrame;
             do {
-                randomFrame = rand() % m_Frames.size();
+                randomFrame = rand() % static_cast<int>(m_Frames.size());
             } while (randomFrame == 0);  // Don't include the normal frame
             m_GlitchSequence.push_back(randomFrame);
         }
