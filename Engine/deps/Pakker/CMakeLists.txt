@@ -8,10 +8,18 @@ set(CMAKE_CXX_STANDARD 20)
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.h" "src/*.c")
 
 option(BUILD_EXAMPLES "Build examples" ON)
+option(PAK_NO_MMAP "Disable memory-mapped I/O" OFF)
+
+find_package(Threads REQUIRED)
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
+
+if(PAK_NO_MMAP)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC PAK_NO_MMAP)
+endif()
 
 if(BUILD_EXAMPLES)
 # Example executable
