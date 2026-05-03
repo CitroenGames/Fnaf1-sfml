@@ -1,5 +1,11 @@
 #pragma once
 
+#include <memory>
+#include <string>
+
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/View.hpp>
+
 constexpr float VIEWPORT_WIDTH = 1280.0f;
 constexpr float VIEWPORT_HEIGHT = 720.0f;
 

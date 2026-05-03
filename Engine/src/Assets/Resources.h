@@ -1,10 +1,21 @@
 #pragma once
 
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <SFML/Audio/Music.hpp>
+#include <SFML/Audio/SoundBuffer.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Texture.hpp>
+
 #include "Pak.h"
 
 class Resources {
 public:
-    // TODO: currently you can only have 1 Pak file attached to the Resources class
+    // Resources currently binds one Pak file at a time.
     static void BindPakFile(const std::string &pakFilename);
 
     static void Unload();
@@ -15,7 +26,6 @@ public:
 
     static std::shared_ptr<sf::Music> GetMusic(const std::string &filename);
 
-    // Load font from a PAK file and return a shared pointer to sf::Font
     static std::shared_ptr<sf::Font> GetFont(const std::string &filename);
 
     static void SetPakker(Pakker *pakker) { m_PakHandler = pakker; }
@@ -28,9 +38,6 @@ private:
     static std::map<std::string, std::shared_ptr<sf::SoundBuffer> > m_SoundBuffers;
     static std::map<std::string, std::shared_ptr<std::vector<uint8_t> > > m_MusicBuffers;
 
-    // Store the loaded fonts
     static std::map<std::string, std::shared_ptr<sf::Font> > m_Fonts;
-    
-    // Store font data buffers to keep them alive
     static std::map<std::string, std::shared_ptr<std::vector<uint8_t> > > m_FontBuffers;
 };

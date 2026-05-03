@@ -1,5 +1,13 @@
 #pragma once
 
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+
 #ifdef _WIN32
 #include <Windows.h>
 #include <DbgHelp.h>
@@ -107,9 +115,7 @@ namespace Paingine2D {
 #else
             std::string mkdirCmd = "mkdir -p \"" + m_crashReportFolder + "\"";
             int ret = system(mkdirCmd.c_str());
-            if (ret != 0) {
-                // TODO: handle error
-            }
+            (void) ret;
 #endif
 
             // Set up platform-specific exception handlers
@@ -494,6 +500,5 @@ namespace Paingine2D {
 #endif
     };
 
-    // Initialize static member
-    CrashHandler *CrashHandler::s_instance = nullptr;
-} // namespace Paingine
+    inline CrashHandler *CrashHandler::s_instance = nullptr;
+} // namespace Paingine2D

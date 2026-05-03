@@ -1,5 +1,9 @@
 #include "Window.h"
 
+#include <memory>
+
+#include <SFML/Window/VideoMode.hpp>
+
 std::shared_ptr<sf::RenderWindow> Window::m_Window = nullptr;
 sf::View Window::m_GameView;
 

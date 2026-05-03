@@ -1,5 +1,10 @@
 #pragma once
 
+#include <map>
+
+#include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+
 #include "Graphics/Layer.h"
 
 class LayerManager {

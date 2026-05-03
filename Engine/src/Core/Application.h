@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <string>
+
+#include <SFML/Graphics/RenderWindow.hpp>
+
 class Application {
 public:
     static void Init(const int width = 1280, const int height = 720, const std::string &title = "Window");

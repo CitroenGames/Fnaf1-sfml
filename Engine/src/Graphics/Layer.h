@@ -1,5 +1,11 @@
 #pragma once
 
+#include <algorithm>
+#include <vector>
+
+#include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+
 class Layer {
 public:
     Layer() = default;

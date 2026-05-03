@@ -1,5 +1,11 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Texture.hpp>
+
 class FlipBook {
 public:
     FlipBook();
@@ -43,5 +49,7 @@ private:
     int m_Layer;
     bool m_IsForward;
 
+    void AddSpriteFrame(std::shared_ptr<sf::Sprite> sprite);
+    bool HasCurrentFrame() const;
     void UpdateLayerManagerRegistration();
 };

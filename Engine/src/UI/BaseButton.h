@@ -1,5 +1,8 @@
 #pragma once
 
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+
 class BaseButton : public sf::Sprite {
 public:
     virtual bool IsMouseOver(sf::RenderWindow& window) const { return false; }

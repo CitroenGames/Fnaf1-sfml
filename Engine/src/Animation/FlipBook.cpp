@@ -1,4 +1,7 @@
 #include "FlipBook.h"
+
+#include <utility>
+
 #include "Graphics/LayerManager.h"
 
 FlipBook::FlipBook()
@@ -8,7 +11,7 @@ FlipBook::FlipBook()
 }
 
 FlipBook::~FlipBook() {
-    Cleanup();  // Make sure to clean up all frames
+    Cleanup();
 }
 
 FlipBook::FlipBook(int layer, float frameDuration, bool loop)
@@ -19,23 +22,16 @@ FlipBook::FlipBook(int layer, float frameDuration, bool loop)
 
 void FlipBook::AddFrame(std::shared_ptr<sf::Texture> texture) {
     auto sprite = std::make_shared<sf::Sprite>(*texture);
-    if (!m_Frames.empty()) {
-        // Inherit position from existing frames
-        sprite->setPosition(m_Frames[0]->getPosition());
-    }
-    m_Frames.push_back(sprite);
+    AddSpriteFrame(std::move(sprite));
 }
 
 void FlipBook::AddFrame(std::shared_ptr<sf::Sprite> sprite) {
-    if (!m_Frames.empty()) {
-        sprite->setPosition(m_Frames[0]->getPosition());
-    }
-    m_Frames.push_back(sprite);
+    AddSpriteFrame(std::move(sprite));
 }
 
 void FlipBook::AddFrames(const std::vector<std::shared_ptr<sf::Sprite>>& sprites) {
-    for (auto sprite : sprites) {
-        AddFrame(sprite);  // Use AddFrame to ensure consistent positioning
+    for (const auto& sprite : sprites) {
+        AddFrame(sprite);
     }
 }
 
@@ -92,15 +88,13 @@ void FlipBook::Update(float deltaTime) {
 }
 
 void FlipBook::RegisterToLayerManager() {
-    if (!m_Frames.empty() && m_CurrentFrame < m_Frames.size()) {
-        // Make sure no other frames are registered first
+    if (HasCurrentFrame()) {
         UnregisterFromLayerManager();
         LayerManager::AddDrawable(m_Layer, m_Frames[m_CurrentFrame].get());
     }
 }
 
 void FlipBook::UnregisterFromLayerManager() {
-    // Remove all frames from the LayerManager
     for (const auto& frame : m_Frames) {
         LayerManager::RemoveDrawable(frame.get());
     }
@@ -109,7 +103,6 @@ void FlipBook::UnregisterFromLayerManager() {
 void FlipBook::Play(bool forward) {
     if (m_Frames.empty()) return;
 
-    // If we're already playing and changing direction, cleanup current frame
     if (m_IsPlayingFlag && forward != m_IsForward) {
         UnregisterFromLayerManager();
     }
@@ -117,7 +110,6 @@ void FlipBook::Play(bool forward) {
     m_IsPlayingFlag = true;
     m_IsForward = forward;
 
-    // Register only the current frame
     RegisterToLayerManager();
 }
 
@@ -149,14 +141,14 @@ void FlipBook::SetPosition(float x, float y) {
 }
 
 sf::Sprite* FlipBook::GetCurrentFrame() {
-    if (!m_Frames.empty() && m_CurrentFrame < m_Frames.size()) {
+    if (HasCurrentFrame()) {
         return m_Frames[m_CurrentFrame].get();
     }
     return nullptr;
 }
 
 const sf::Sprite* FlipBook::GetCurrentFrame() const {
-    if (!m_Frames.empty() && m_CurrentFrame < m_Frames.size()) {
+    if (HasCurrentFrame()) {
         return m_Frames[m_CurrentFrame].get();
     }
     return nullptr;
@@ -174,9 +166,20 @@ bool FlipBook::IsPlaying() const {
     return m_IsPlayingFlag;
 }
 
+void FlipBook::AddSpriteFrame(std::shared_ptr<sf::Sprite> sprite) {
+    if (!m_Frames.empty()) {
+        sprite->setPosition(m_Frames[0]->getPosition());
+    }
+    m_Frames.push_back(std::move(sprite));
+}
+
+bool FlipBook::HasCurrentFrame() const {
+    return !m_Frames.empty() && m_CurrentFrame < m_Frames.size();
+}
+
 void FlipBook::UpdateLayerManagerRegistration() {
     UnregisterFromLayerManager();
-    if (!m_Frames.empty() && m_CurrentFrame < m_Frames.size()) {
+    if (HasCurrentFrame()) {
         LayerManager::AddDrawable(m_Layer, m_Frames[m_CurrentFrame].get());
     }
 }

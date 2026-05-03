@@ -1,6 +1,12 @@
 #pragma once
 
+#include <iostream>
+#include <memory>
+#include <string>
+
 #include <box2d/box2d.h>
+#include <SFML/Graphics/Sprite.hpp>
+
 #include "Graphics/LayerManager.h"
 #include "Assets/Resources.h"
 
@@ -28,7 +34,6 @@ public:
     }
 
     virtual void Init() {
-        // Override this in derived classes for custom initialization
     }
 
     bool LoadTexture(const std::string &texturePath) {
@@ -113,7 +118,6 @@ public:
         UpdateGraphics();
     }
 
-    // Getters
     b2BodyId GetBodyId() const { return m_BodyId; }
     b2ShapeId GetShapeId() const { return m_ShapeId; }
     const sf::Sprite &GetSprite() const { return m_Sprite; }
@@ -156,8 +160,7 @@ protected:
             b2Rot rotation = b2Body_GetRotation(m_BodyId);
             float angle = b2Rot_GetAngle(rotation);
 
-            // Convert Box2D coordinates to SFML coordinates (pixels)
-            constexpr float SCALE = 30.0f; // Adjust this scale factor as needed
+            constexpr float SCALE = 30.0f;
             m_Sprite.setPosition(position.x * SCALE, position.y * SCALE);
             m_Sprite.setRotation(angle * 180.0f / b2_pi);
         }

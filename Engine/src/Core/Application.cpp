@@ -1,5 +1,8 @@
 #include "Window.h"
 #include "Application.h"
+
+#include <chrono>
+
 #include "Scene/SceneManager.h"
 #include "Graphics/LayerManager.h"
 #include "imgui/imgui-SFML.h"
@@ -67,7 +70,6 @@ void Application::Run() {
 
 void Application::Destroy() {
     PROFILE_BEGIN("Application Shutdown");
-    //TODO: Add a proper way to close the application
     LayerManager::Clear();
     SceneManager::Destroy();
     ImGui::SFML::Shutdown();
