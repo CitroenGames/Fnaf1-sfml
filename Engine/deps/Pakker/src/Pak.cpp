@@ -549,6 +549,52 @@ bool Pakker::ListPak(const std::string& pakFilename) const
     return true;
 }
 
+std::vector<std::string> Pakker::ListFiles(const std::string& pakFilename) const
+{
+    std::ifstream pakStream(pakFilename, std::ios::binary);
+    if (!pakStream) {
+        Log(PakLogLevel::Error, "ListFiles: Unable to open pak file: " + pakFilename);
+        return {};
+    }
+
+    PakHeader header;
+    if (!ReadPakHeader(pakStream, header)) return {};
+
+    pakStream.seekg(header.fileTableOffset, std::ios::beg);
+    if (!pakStream) {
+        Log(PakLogLevel::Error, "ListFiles: Failed to seek to fileTableOffset.");
+        return {};
+    }
+
+    std::vector<PakEntry> entries;
+    if (!ReadFileTable(pakStream, header.numFiles, header.version, entries)) return {};
+
+    std::vector<std::string> files;
+    files.reserve(entries.size());
+    for (const auto& entry : entries) {
+        files.push_back(entry.filename);
+    }
+
+    std::sort(files.begin(), files.end());
+    return files;
+}
+
+std::vector<std::string> Pakker::ListFilesWithPrefix(const std::string& pakFilename,
+                                                     const std::string& prefix) const
+{
+    const std::string normalizedPrefix = NormalizePathSeparators(prefix);
+    const auto files = ListFiles(pakFilename);
+
+    std::vector<std::string> matchingFiles;
+    for (const auto& file : files) {
+        if (file.starts_with(normalizedPrefix)) {
+            matchingFiles.push_back(file);
+        }
+    }
+
+    return matchingFiles;
+}
+
 std::vector<uint8_t> Pakker::ReadFileFromPak(const std::string& pakFilename,
                                               const std::string& filename) const
 {

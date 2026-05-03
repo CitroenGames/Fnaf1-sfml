@@ -28,6 +28,10 @@ public:
 
     static std::shared_ptr<sf::Font> GetFont(const std::string &filename);
 
+    static std::vector<std::string> ListFiles();
+
+    static std::vector<std::string> ListFilesWithPrefix(const std::string &prefix);
+
     static void SetPakker(Pakker *pakker) { m_PakHandler = pakker; }
 
 private:

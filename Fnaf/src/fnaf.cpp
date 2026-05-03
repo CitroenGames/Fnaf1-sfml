@@ -108,6 +108,7 @@ void FNAFGame::InitializeGame(int night) {
     m_TimeProgress = 0.0f;
     m_CurrentHourDuration = BASE_SECONDS_PER_HOUR;
     m_GameOver = false;
+    m_PendingJumpscare = JumpscareType::None;
     m_PowerOutage = false;
     m_LastHourAIUpdated = 0;
     m_PowerTickAccumulator = 0.0f;
@@ -531,8 +532,40 @@ bool FNAFGame::IsDefendedAgainst(const Animatronic &animatronic) const {
 }
 
 void FNAFGame::TriggerJumpscare(const Animatronic &character) {
-    PlaySound("JumpScare/AllAnimitronics");
+    if (HasPendingJumpscare()) {
+        return;
+    }
+
+    if (character.name == "Bonnie") {
+        m_PendingJumpscare = JumpscareType::Bonnie;
+    } else if (character.name == "Chika") {
+        m_PendingJumpscare = JumpscareType::Chika;
+    } else if (character.name == "Foxy") {
+        m_PendingJumpscare = JumpscareType::Foxy;
+    } else if (character.name == "Freddy" && m_PowerOutage && m_PowerOutagePhase == PowerOutagePhase::JUMPSCARE) {
+        m_PendingJumpscare = JumpscareType::FreddyPowerOut;
+    } else {
+        m_PendingJumpscare = JumpscareType::FreddyInOffice;
+    }
+
     m_GameOver = true;
+    GameEvents::TriggerEvent(GameEvent::JUMPSCARE);
+}
+
+void FNAFGame::DebugTriggerJumpscare(JumpscareType type) {
+    if (type == JumpscareType::None || HasPendingJumpscare()) {
+        return;
+    }
+
+    m_PendingJumpscare = type;
+    m_GameOver = true;
+
+    if (type == JumpscareType::FreddyPowerOut) {
+        m_PowerOutage = true;
+        m_PowerOutagePhase = PowerOutagePhase::JUMPSCARE;
+    }
+
+    GameEvents::TriggerEvent(GameEvent::JUMPSCARE);
 }
 
 // ============================================================================

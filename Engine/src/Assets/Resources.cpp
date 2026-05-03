@@ -121,3 +121,21 @@ std::shared_ptr<sf::Font> Resources::GetFont(const std::string &filename) {
 
     return fontIt->second;
 }
+
+std::vector<std::string> Resources::ListFiles() {
+    if (m_PakHandler == nullptr) {
+        std::cerr << "Resources::ListFiles: Pakker instance not set." << std::endl;
+        return {};
+    }
+
+    return m_PakHandler->ListFiles(m_PakFile);
+}
+
+std::vector<std::string> Resources::ListFilesWithPrefix(const std::string &prefix) {
+    if (m_PakHandler == nullptr) {
+        std::cerr << "Resources::ListFilesWithPrefix: Pakker instance not set." << std::endl;
+        return {};
+    }
+
+    return m_PakHandler->ListFilesWithPrefix(m_PakFile, prefix);
+}

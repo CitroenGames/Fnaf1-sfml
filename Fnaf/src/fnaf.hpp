@@ -75,6 +75,16 @@ enum class PowerOutagePhase {
     JUMPSCARE     // Freddy attacks
 };
 
+enum class JumpscareType {
+    None,
+    Bonnie,
+    Chika,
+    Foxy,
+    FreddyInOffice,
+    FreddyPowerOut,
+    GoldenFreddy
+};
+
 // Game events that can be subscribed to
 enum class GameEvent {
     POWER_OUTAGE,
@@ -113,6 +123,11 @@ public:
     void Update(float deltaTime);
 
     bool IsGameOver() const { return m_GameOver; }
+
+    bool HasPendingJumpscare() const { return m_PendingJumpscare != JumpscareType::None; }
+    JumpscareType GetPendingJumpscare() const { return m_PendingJumpscare; }
+    void ClearPendingJumpscare() { m_PendingJumpscare = JumpscareType::None; }
+    void DebugTriggerJumpscare(JumpscareType type);
 
     void SetCameraSystem(std::shared_ptr<CameraSystem> cameraSystem) {
         m_CameraSystem = cameraSystem;
@@ -174,6 +189,7 @@ public:
 private:
     // Game state
     bool m_GameOver;
+    JumpscareType m_PendingJumpscare = JumpscareType::None;
     bool m_PowerOutage;
     PowerOutagePhase m_PowerOutagePhase;
     float m_PhaseTimer;        // Time spent in current outage phase

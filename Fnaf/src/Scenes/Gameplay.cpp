@@ -10,8 +10,115 @@
 #include "CameraSystem.h"
 #include "Utils/Helpers.h"
 
+#include <cctype>
+#include <string_view>
+
 constexpr float m_OfficeWidth = 1600.0f;
 constexpr float m_ViewportWidth = 1280.0f;
+
+namespace {
+    constexpr float GAME_VIEW_WIDTH = 1280.0f;
+    constexpr float GAME_VIEW_HEIGHT = 720.0f;
+    constexpr float GAME_OVER_DURATION = 2.0f;
+
+    struct JumpscareSequenceConfig {
+        const char *folder;
+        const char *sound;
+        float frameDuration;
+        float minimumDuration;
+    };
+
+    JumpscareSequenceConfig GetJumpscareSequenceConfig(JumpscareType type) {
+        switch (type) {
+            case JumpscareType::Bonnie:
+                return {"Graphics/JumpScares/Bonnie/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.0f};
+            case JumpscareType::Chika:
+                return {"Graphics/JumpScares/Chika/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.0f};
+            case JumpscareType::Foxy:
+                return {"Graphics/JumpScares/Foxy/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.0f};
+            case JumpscareType::FreddyPowerOut:
+                return {"Graphics/JumpScares/FreddyPoweOut/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.0f};
+            case JumpscareType::GoldenFreddy:
+                return {"Graphics/JumpScares/Gfreddy/", "Audio/JumpScare/GoldenFreddy.wav", 1.0f / 30.0f, 2.0f};
+            case JumpscareType::FreddyInOffice:
+            case JumpscareType::None:
+            default:
+                return {"Graphics/JumpScares/FreddyInOffice/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.0f};
+        }
+    }
+
+    bool TryGetFrameIndex(const std::string &filename, int &frameIndex) {
+        const auto slash = filename.find_last_of("/\\");
+        const std::string leaf = slash == std::string::npos ? filename : filename.substr(slash + 1);
+        constexpr std::string_view prefix = "Frame";
+        constexpr std::string_view extension = ".png";
+
+        if (!leaf.starts_with(prefix) || !leaf.ends_with(extension)) {
+            return false;
+        }
+
+        const std::string number = leaf.substr(prefix.size(), leaf.size() - prefix.size() - extension.size());
+        if (number.empty() || !std::ranges::all_of(number, [](unsigned char c) { return std::isdigit(c); })) {
+            return false;
+        }
+
+        frameIndex = std::stoi(number);
+        return true;
+    }
+
+    std::vector<std::shared_ptr<sf::Texture>> LoadJumpscareFrames(const std::string &folder) {
+        std::vector<std::pair<int, std::string>> frameFiles;
+        for (const auto &file : Resources::ListFilesWithPrefix(folder)) {
+            int frameIndex = 0;
+            if (TryGetFrameIndex(file, frameIndex)) {
+                frameFiles.emplace_back(frameIndex, file);
+            }
+        }
+
+        std::ranges::sort(frameFiles, {}, &std::pair<int, std::string>::first);
+
+        std::vector<std::shared_ptr<sf::Texture>> frames;
+        frames.reserve(frameFiles.size());
+
+        int expectedIndex = 0;
+        for (const auto &[frameIndex, file] : frameFiles) {
+            if (frameIndex != expectedIndex) {
+                std::cerr << "Jumpscare sequence gap in " << folder << ": expected Frame"
+                          << expectedIndex << ".png, found Frame" << frameIndex << ".png" << std::endl;
+                expectedIndex = frameIndex;
+            }
+
+            if (auto texture = Resources::GetTexture(file)) {
+                frames.push_back(texture);
+            }
+            ++expectedIndex;
+        }
+
+        if (frames.empty()) {
+            std::cerr << "No jumpscare frames found in pak folder: " << folder << std::endl;
+        }
+
+        return frames;
+    }
+
+    void CoverGameView(sf::Sprite &sprite) {
+        const sf::FloatRect bounds = sprite.getLocalBounds();
+        if (bounds.width <= 0.0f || bounds.height <= 0.0f) {
+            return;
+        }
+
+        const float scale = std::max(GAME_VIEW_WIDTH / bounds.width, GAME_VIEW_HEIGHT / bounds.height);
+        sprite.setOrigin(bounds.left + bounds.width * 0.5f, bounds.top + bounds.height * 0.5f);
+        sprite.setScale(scale, scale);
+        sprite.setPosition(GAME_VIEW_WIDTH * 0.5f, GAME_VIEW_HEIGHT * 0.5f);
+    }
+
+    void CenterSprite(sf::Sprite &sprite) {
+        const sf::FloatRect bounds = sprite.getLocalBounds();
+        sprite.setOrigin(bounds.left + bounds.width * 0.5f, bounds.top + bounds.height * 0.5f);
+        sprite.setPosition(GAME_VIEW_WIDTH * 0.5f, GAME_VIEW_HEIGHT * 0.5f);
+    }
+}
 
 void Gameplay::Init() {
     gameplay = std::make_shared<FNAFGame>();
@@ -79,6 +186,21 @@ void Gameplay::Init() {
         m_PowerPercentText.setPosition(powerLabelRight, 585.f);
     }
 
+    // Game over screen
+    {
+        m_GameOverBackgroundTexture = Resources::GetTexture("Graphics/Gameplay/GameOverBackground.png");
+        if (m_GameOverBackgroundTexture) {
+            m_GameOverBackgroundSprite.setTexture(*m_GameOverBackgroundTexture);
+            CoverGameView(m_GameOverBackgroundSprite);
+        }
+
+        m_GameOverTextTexture = ProcessText(Resources::GetTexture("Graphics/Gameplay/GameOver.png"));
+        if (m_GameOverTextTexture) {
+            m_GameOverTextSprite.setTexture(*m_GameOverTextTexture);
+            CenterSprite(m_GameOverTextSprite);
+        }
+    }
+
     // Load music
     {
         bgaudio1 = Resources::GetMusic("Audio/Ambience/ambience2.wav");
@@ -117,6 +239,10 @@ void Gameplay::Init() {
 }
 
 void Gameplay::FixedUpdate() {
+    if (IsDeathSequenceActive()) {
+        return;
+    }
+
     Scene::FixedUpdate();
 
     // Check for main camera button press
@@ -127,11 +253,21 @@ void Gameplay::FixedUpdate() {
 }
 
 void Gameplay::Update(double deltaTime) {
-    Scene::Update(deltaTime);
-
     const float frameDelta = static_cast<float>(deltaTime);
 
+    if (IsDeathSequenceActive()) {
+        UpdateDeathSequence(frameDelta);
+        return;
+    }
+
+    Scene::Update(deltaTime);
+
     gameplay->Update(frameDelta);
+    if (gameplay->HasPendingJumpscare()) {
+        StartPendingJumpscare();
+        return;
+    }
+
     if (gameplay->IsGameOver()) {
         SceneManager::QueueSwitchScene(std::make_shared<Menu>());
     }
@@ -228,12 +364,12 @@ void Gameplay::Render() {
     auto window = Window::GetWindow();
 
     // Now draw HUD elements in screen space
-    if (m_CameraButton) {
+    if (!IsDeathSequenceActive() && m_CameraButton) {
         m_CameraButton->Draw(*window);
     }
 
     // Draw power HUD in screen space
-    if (gameplay && !gameplay->IsPowerOutage()) {
+    if (!IsDeathSequenceActive() && gameplay && !gameplay->IsPowerOutage()) {
         sf::View currentView = window->getView();
         sf::FloatRect viewport = currentView.getViewport();
         window->setView(window->getDefaultView());
@@ -273,7 +409,30 @@ void Gameplay::Render() {
         window->setView(currentView);
     }
 
+    if (IsDeathSequenceActive()) {
+        DrawDeathSequence(*window);
+    }
+
 #if defined(_DEBUG)
+    ImGui::Begin("Jumpscare Debug"); {
+        if (gameplay) {
+            const bool canTrigger = !IsDeathSequenceActive() && !gameplay->HasPendingJumpscare();
+            if (canTrigger) {
+                if (ImGui::Button("Bonnie")) gameplay->DebugTriggerJumpscare(JumpscareType::Bonnie);
+                if (ImGui::Button("Chika")) gameplay->DebugTriggerJumpscare(JumpscareType::Chika);
+                if (ImGui::Button("Foxy")) gameplay->DebugTriggerJumpscare(JumpscareType::Foxy);
+                if (ImGui::Button("Freddy In Office")) gameplay->DebugTriggerJumpscare(JumpscareType::FreddyInOffice);
+                if (ImGui::Button("Freddy Power Outage")) gameplay->DebugTriggerJumpscare(JumpscareType::FreddyPowerOut);
+                if (ImGui::Button("Golden Freddy")) gameplay->DebugTriggerJumpscare(JumpscareType::GoldenFreddy);
+            } else {
+                ImGui::Text("Death sequence active");
+            }
+        } else {
+            ImGui::Text("Gameplay not initialized!");
+        }
+    }
+    ImGui::End();
+
     // Render UI debug information
     ImGui::Begin("PlayerInfo"); {
         ImGui::Text("Night: %d", player.m_Night);
@@ -386,6 +545,11 @@ void Gameplay::Render() {
 }
 
 void Gameplay::Destroy() {
+    if (m_JumpscareSound) {
+        m_JumpscareSound->stop();
+        m_JumpscareSound.reset();
+    }
+
     if (m_CameraSystem) {
         m_CameraSystem->Destroy();
     }
@@ -394,4 +558,120 @@ void Gameplay::Destroy() {
         m_OfficeComponent->Destroy();
     }
     Scene::Destroy();
+}
+
+void Gameplay::StartPendingJumpscare() {
+    if (!gameplay || !gameplay->HasPendingJumpscare()) {
+        return;
+    }
+
+    const JumpscareType type = gameplay->GetPendingJumpscare();
+    gameplay->ClearPendingJumpscare();
+    StartJumpscare(type);
+}
+
+void Gameplay::StartJumpscare(JumpscareType type) {
+    const JumpscareSequenceConfig config = GetJumpscareSequenceConfig(type);
+
+    if (m_CameraSystem) {
+        m_CameraSystem->ForceClose();
+    }
+
+    if (bgaudio1) bgaudio1->stop();
+    if (bgaudio2) bgaudio2->stop();
+    if (m_FanBuzzing) m_FanBuzzing->stop();
+
+    player.m_UsingCamera = false;
+    player.m_LeftLightOn = false;
+    player.m_RightLightOn = false;
+    player.UpdateUsageLevel();
+
+    m_ActiveJumpscare = type;
+    m_JumpscareFrames = LoadJumpscareFrames(config.folder);
+    m_JumpscareFrameTimer = 0.0f;
+    m_JumpscareTotalTimer = 0.0f;
+    m_JumpscareFrameDuration = config.frameDuration;
+    m_JumpscareMinimumDuration = config.minimumDuration;
+    m_JumpscareFrameIndex = 0;
+    m_DiscardNextJumpscareDelta = true;
+
+    m_JumpscareSound = Resources::GetMusic(config.sound);
+    if (m_JumpscareSound) {
+        m_JumpscareSound->setLoop(false);
+        m_JumpscareSound->setVolume(100.0f);
+        m_JumpscareSound->play();
+    }
+
+    if (m_JumpscareFrames.empty()) {
+        SwitchToGameOver();
+        return;
+    }
+
+    m_JumpscareSprite.setTexture(*m_JumpscareFrames.front(), true);
+    CoverGameView(m_JumpscareSprite);
+    m_DeathSequenceState = DeathSequenceState::Jumpscare;
+}
+
+void Gameplay::UpdateDeathSequence(float deltaTime) {
+    if (m_DeathSequenceState == DeathSequenceState::Jumpscare) {
+        if (m_DiscardNextJumpscareDelta) {
+            m_DiscardNextJumpscareDelta = false;
+            return;
+        }
+
+        const float animationDelta = std::min(deltaTime, m_JumpscareFrameDuration);
+        m_JumpscareTotalTimer += animationDelta;
+        m_JumpscareFrameTimer += animationDelta;
+
+        while (m_JumpscareFrameTimer >= m_JumpscareFrameDuration &&
+               m_JumpscareFrameIndex + 1 < m_JumpscareFrames.size()) {
+            m_JumpscareFrameTimer -= m_JumpscareFrameDuration;
+            ++m_JumpscareFrameIndex;
+            m_JumpscareSprite.setTexture(*m_JumpscareFrames[m_JumpscareFrameIndex], true);
+            CoverGameView(m_JumpscareSprite);
+        }
+
+        const float sequenceDuration = std::max(
+            m_JumpscareMinimumDuration,
+            static_cast<float>(m_JumpscareFrames.size()) * m_JumpscareFrameDuration
+        );
+        if (m_JumpscareFrameIndex + 1 >= m_JumpscareFrames.size() &&
+            m_JumpscareTotalTimer >= sequenceDuration) {
+            SwitchToGameOver();
+        }
+        return;
+    }
+
+    if (m_DeathSequenceState == DeathSequenceState::GameOver) {
+        m_GameOverTimer += deltaTime;
+        if (m_GameOverTimer >= GAME_OVER_DURATION) {
+            SceneManager::QueueSwitchScene(std::make_shared<Menu>());
+        }
+    }
+}
+
+void Gameplay::SwitchToGameOver() {
+    m_DeathSequenceState = DeathSequenceState::GameOver;
+    m_GameOverTimer = 0.0f;
+    m_JumpscareFrames.clear();
+    m_ActiveJumpscare = JumpscareType::None;
+    m_DiscardNextJumpscareDelta = false;
+}
+
+void Gameplay::DrawDeathSequence(sf::RenderWindow &window) {
+    const sf::View previousView = window.getView();
+    window.setView(window.getDefaultView());
+
+    if (m_DeathSequenceState == DeathSequenceState::Jumpscare && m_JumpscareFrames.size() > 0) {
+        window.draw(m_JumpscareSprite);
+    } else if (m_DeathSequenceState == DeathSequenceState::GameOver) {
+        if (m_GameOverBackgroundTexture) {
+            window.draw(m_GameOverBackgroundSprite);
+        }
+        if (m_GameOverTextTexture) {
+            window.draw(m_GameOverTextSprite);
+        }
+    }
+
+    window.setView(previousView);
 }

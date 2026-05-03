@@ -6,6 +6,7 @@
 #include "Office.h"
 #include "fnaf.hpp"
 #include <array>
+#include <vector>
 
 class Gameplay : public Scene {
 public:
@@ -46,4 +47,35 @@ private:
     sf::Sprite m_UsageBarsSprite;
     std::shared_ptr<sf::Font> m_PowerFont;
     sf::Text m_PowerPercentText;
+
+    enum class DeathSequenceState {
+        None,
+        Jumpscare,
+        GameOver
+    };
+
+    DeathSequenceState m_DeathSequenceState = DeathSequenceState::None;
+    JumpscareType m_ActiveJumpscare = JumpscareType::None;
+    std::vector<std::shared_ptr<sf::Texture>> m_JumpscareFrames;
+    sf::Sprite m_JumpscareSprite;
+    std::shared_ptr<sf::Music> m_JumpscareSound;
+    float m_JumpscareFrameTimer = 0.0f;
+    float m_JumpscareTotalTimer = 0.0f;
+    float m_JumpscareFrameDuration = 1.0f / 30.0f;
+    float m_JumpscareMinimumDuration = 1.0f;
+    std::size_t m_JumpscareFrameIndex = 0;
+    bool m_DiscardNextJumpscareDelta = false;
+
+    std::shared_ptr<sf::Texture> m_GameOverBackgroundTexture;
+    std::shared_ptr<sf::Texture> m_GameOverTextTexture;
+    sf::Sprite m_GameOverBackgroundSprite;
+    sf::Sprite m_GameOverTextSprite;
+    float m_GameOverTimer = 0.0f;
+
+    void StartPendingJumpscare();
+    void StartJumpscare(JumpscareType type);
+    void UpdateDeathSequence(float deltaTime);
+    void SwitchToGameOver();
+    void DrawDeathSequence(sf::RenderWindow &window);
+    bool IsDeathSequenceActive() const { return m_DeathSequenceState != DeathSequenceState::None; }
 };

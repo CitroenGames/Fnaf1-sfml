@@ -184,6 +184,10 @@ public:
 
     bool ListPak(const std::string& pakFilename) const;
 
+    std::vector<std::string> ListFiles(const std::string& pakFilename) const;
+    std::vector<std::string> ListFilesWithPrefix(const std::string& pakFilename,
+                                                 const std::string& prefix) const;
+
     std::vector<uint8_t> ReadFileFromPak(const std::string& pakFilename,
                                           const std::string& filename) const;
 
