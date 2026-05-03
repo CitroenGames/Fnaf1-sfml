@@ -2,7 +2,6 @@
 #include "SFML/Window.hpp"
 #include <SFML/Graphics.hpp>
 #include "Core/Window.h"
-#include "Graphics/LayerManager.h"
 #include "Assets/Resources.h"
 #include "imgui.h"
 #include "Scenes/Menu.h"
@@ -120,11 +119,9 @@ void Gameplay::Init() {
 void Gameplay::FixedUpdate() {
     Scene::FixedUpdate();
 
-    auto window = Window::GetWindow(); // TODO: We REALLY should get rid of this shitty mess but who cares for now
-
     // Check for main camera button press
     // Office hide/show is handled by CameraSystem in sync with the flip animation
-    if (m_CameraButton->IsClicked(*window)) {
+    if (m_CameraButton->IsClicked()) {
         m_CameraSystem->ToggleCamera();
     }
 }
@@ -132,7 +129,9 @@ void Gameplay::FixedUpdate() {
 void Gameplay::Update(double deltaTime) {
     Scene::Update(deltaTime);
 
-    gameplay->Update(deltaTime);
+    const float frameDelta = static_cast<float>(deltaTime);
+
+    gameplay->Update(frameDelta);
     if (gameplay->IsGameOver()) {
         SceneManager::QueueSwitchScene(std::make_shared<Menu>());
     }
@@ -199,7 +198,7 @@ void Gameplay::Update(double deltaTime) {
         }
 
         // Update scroll offset
-        scrollOffset += scrollSpeed * deltaTime;
+        scrollOffset += scrollSpeed * frameDelta;
         // Clamp scroll offset to image bounds
         scrollOffset = std::clamp(
             scrollOffset,
@@ -215,7 +214,7 @@ void Gameplay::Update(double deltaTime) {
     }
 
     // Always update the camera (needed for animations and transitions)
-    m_Camera->update(deltaTime);
+    m_Camera->update(frameDelta);
 
     // Apply camera to the render window for game elements
     m_Camera->applyTo(*window);

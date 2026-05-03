@@ -14,6 +14,9 @@ public:
     HUDButton();
     ~HUDButton();
 
+    using BaseButton::IsClicked;
+    using BaseButton::IsMouseOver;
+
     void SetPosition(float x, float y);
     void SetPosition(sf::Vector2f position);
 
@@ -32,7 +35,6 @@ public:
     void Hide();
 
 protected:
-    std::shared_ptr<sf::Texture> m_ButtonTexture;
     int m_Layer = 0;
     sf::Vector2f m_ScreenPosition; // Position relative to screen
     bool m_IsVisible = false;

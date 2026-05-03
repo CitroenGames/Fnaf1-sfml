@@ -1,6 +1,9 @@
 #pragma once
 
-#define INITIAL_POWER_LEVEL 99.9f
+#include <algorithm>
+#include <cstdint>
+
+inline constexpr float INITIAL_POWER_LEVEL = 99.9f;
 
 struct Player {
     bool m_UsingCamera = false;

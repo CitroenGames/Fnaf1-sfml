@@ -141,10 +141,15 @@ namespace Paingine2D {
         std::string GenerateCrashReportPath() {
             // Generate a filename with timestamp
             time_t now = time(0);
-            tm *timeinfo = localtime(&now);
+            tm timeinfo{};
+#ifdef _WIN32
+            localtime_s(&timeinfo, &now);
+#else
+            localtime_r(&now, &timeinfo);
+#endif
 
             char timestamp[80];
-            strftime(timestamp, sizeof(timestamp), "%Y%m%d_%H%M%S", timeinfo);
+            strftime(timestamp, sizeof(timestamp), "%Y%m%d_%H%M%S", &timeinfo);
 
             std::stringstream ss;
             ss << m_crashReportFolder << m_applicationName << "_" << timestamp;

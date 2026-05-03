@@ -7,7 +7,7 @@
 
 class Application {
 public:
-    static void Init(const int width = 1280, const int height = 720, const std::string &title = "Window");
+    static void Init(int width = 1280, int height = 720, const std::string &title = "Window");
 
     static void Run();
 

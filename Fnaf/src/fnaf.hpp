@@ -202,7 +202,7 @@ private:
     void UpdateFoxy(Animatronic &foxy, float deltaTime);
 
     // Utility functions
-    int GetAILevel(int night, const std::string &character) const;
+    int GetAILevel(int night, const std::string &character);
     float CalculatePowerDrain() const;
     bool IsCameraViewingLocation(Room location) const;
     void PlaySound(const std::string &soundName) const;

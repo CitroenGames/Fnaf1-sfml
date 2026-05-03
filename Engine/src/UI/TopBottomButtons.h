@@ -26,6 +26,7 @@ public:
     );
 
     void SetTextures(const std::vector<std::shared_ptr<sf::Texture> > &textures);
+    void updateButton();
     void updateButton(sf::RenderWindow &window);
 
     ButtonState GetCurrentState() const;

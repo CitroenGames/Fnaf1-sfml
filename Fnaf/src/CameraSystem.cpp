@@ -1,7 +1,6 @@
 #include "CameraSystem.h"
 #include "Office.h"
 #include "Assets/Resources.h"
-#include "Core/Window.h"
 #include "Graphics/LayerManager.h"
 #include "LayerDefines.h"
 #include "GameState.h"
@@ -91,17 +90,17 @@ void CameraSystem::InitializeCameraViews()
         }
     }
 
-    // TODO: we need the put all of the camera states ;-; this is going to be hell maybe we should use scripting language for this...
+    // Additional camera state sprites can be registered here as assets are added.
 }
 
 void CameraSystem::InitializeCameraButtons()
 {
     // Create camera selection buttons
-    // Map is 400x400, centered at (830, 450) → top-left at (630, 250)
+    // Map is 400x400, centered at (830, 450), so top-left is (630, 250).
     // Room centers measured from map image pixels, converted to screen coords:
     //   screen = map_pixel + (630, 250), then offset (-15, -12) for button centering (31x25px)
 
-    // 1A - Show Stage: map center ~(200, 60) → screen (830, 310) → button (815, 298)
+    // 1A - Show Stage: map center ~(200, 60), screen (830, 310), button (815, 298).
     m_CameraButtons["1A"] = std::make_shared<ImageButton>();
     m_CameraButtons["1A"]->SetTexture("Graphics/CameraSystem/Cam1AButton.png");
     m_CameraButtons["1A"]->SetPosition(815.0f, 298.0f);
@@ -222,8 +221,10 @@ void CameraSystem::InitializeCameraOverlays()
 
 void CameraSystem::Update(double deltaTime)
 {
+    const float frameDelta = static_cast<float>(deltaTime);
+
     // Update flip animation
-    m_CameraFlipAnimation.Update(deltaTime);
+    m_CameraFlipAnimation.Update(frameDelta);
 
     // Handle open animation completion
     if (m_IsAnimatingOpen && !m_CameraFlipAnimation.IsPlaying()) {
@@ -254,7 +255,7 @@ void CameraSystem::Update(double deltaTime)
     }
 
     if (m_IsActive && !m_IsAnimatingOpen) {
-        m_StaticAnimation.Update(deltaTime);
+        m_StaticAnimation.Update(frameDelta);
         UpdateCameraMovement(deltaTime);
         UpdateUIPositions();
     }
@@ -262,12 +263,10 @@ void CameraSystem::Update(double deltaTime)
 
 void CameraSystem::FixedUpdate()
 {
-    const auto window = Window::GetWindow();
-
     // Only check for camera selection buttons if camera is active and not animating
     if (m_IsActive && !m_IsAnimatingOpen) {
         for (const auto& [id, button] : m_CameraButtons) {
-            if (button->IsClicked(*window)) {
+            if (button->IsClicked()) {
                 if (m_CurrentCamera != id) {
                     m_CameraSwitchSound->play();
                     m_CurrentCamera = id;

@@ -84,15 +84,7 @@ bool HUDButton::IsMouseOver(sf::RenderWindow& window) const {
 }
 
 bool HUDButton::IsClicked(sf::RenderWindow& window) {
-    const bool isCurrentlyPressed = IsMouseOver(window) && sf::Mouse::isButtonPressed(sf::Mouse::Left);
-    if (isCurrentlyPressed && !m_IsPressed) {
-        m_IsPressed = true;
-        return true;
-    }
-    if (!isCurrentlyPressed) {
-        m_IsPressed = false;
-    }
-    return false;
+    return HandleLeftClick(IsMouseOver(window));
 }
 
 void HUDButton::UpdatePosition() {
@@ -155,9 +147,7 @@ sf::Vector2f HUDButton::AdjustForViewport(const sf::Vector2f& position) const {
 }
 
 void HUDButton::ApplyTexture(std::shared_ptr<sf::Texture> texture, const std::string& errorMessage) {
-    m_ButtonTexture = std::move(texture);
-    if (m_ButtonTexture) {
-        sf::Sprite::setTexture(*m_ButtonTexture);
+    if (SetOwnedTexture(std::move(texture))) {
         CenterOrigin();
     } else {
         std::cerr << errorMessage << std::endl;

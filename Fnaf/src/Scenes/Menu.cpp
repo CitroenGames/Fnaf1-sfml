@@ -2,17 +2,16 @@
 #include "Scene/SceneManager.h"
 #include "Scenes/Gameplay.h"
 #include "Assets/Resources.h"
+#include "Core/Window.h"
 #include "Graphics/LayerManager.h"
 #include "LayerDefines.h"
 #include "Utils/Helpers.h"
 #include "Audio/AudioManager.h"
+#include "UiLayout.h"
 
-// NOTE: this is in ticks not seconds so 66 ticks = 1 second
-#if _DEBUG
-#define SHOWNEWPAPERTIME 0.5 * 66 // 0.5 seconds
-#else
-#define SHOWNEWPAPERTIME 12 * 66 // 12 seconds
-#endif
+namespace {
+    constexpr float FIXED_TICK_RATE = 66.0f;
+}
 
 Menu::Menu() {
     // Preload audio - no longer keeping music objects directly in the Menu class
@@ -49,10 +48,8 @@ Menu::Menu() {
 
     // Setup warning message sprite
     m_WarningMessageSprite.setTexture(*m_WarningMessageTexture);
-    m_WarningMessageSprite.setPosition(
-        (Window::GetWindow()->getSize().x - m_WarningMessageSprite.getGlobalBounds().width) / 2,
-        (Window::GetWindow()->getSize().y - m_WarningMessageSprite.getGlobalBounds().height) / 2
-    );
+    const sf::Vector2u windowSize = Window::GetWindow()->getSize();
+    m_WarningMessageSprite.setPosition(UiLayout::CenteredPosition(windowSize, m_WarningMessageSprite.getGlobalBounds()));
 
     // load loading screen sprite
     m_LoadingScreenTexture = Resources::GetTexture("Graphics/Loading.png");
@@ -78,9 +75,10 @@ void Menu::Init() {
     m_TimeText.setString("12:00 AM");
     m_TimeText.setCharacterSize(75);
     m_TimeText.setFillColor(sf::Color::White);
+    const sf::Vector2u windowSize = Window::GetWindow()->getSize();
     m_TimeText.setPosition(
-        (Window::GetWindow()->getSize().x - m_TimeText.getGlobalBounds().width) / 2,
-        Window::GetWindow()->getSize().y / 2 - 25
+        UiLayout::CenteredX(windowSize, m_TimeText.getGlobalBounds()),
+        static_cast<float>(windowSize.y) / 2.0f - 25.0f
     );
 
     m_NightText.setFont(*font);
@@ -88,15 +86,15 @@ void Menu::Init() {
     m_NightText.setCharacterSize(75);
     m_NightText.setFillColor(sf::Color::White);
     m_NightText.setPosition(
-        (Window::GetWindow()->getSize().x - m_NightText.getGlobalBounds().width) / 2,
-        Window::GetWindow()->getSize().y / 2 + 25
+        UiLayout::CenteredX(windowSize, m_NightText.getGlobalBounds()),
+        static_cast<float>(windowSize.y) / 2.0f + 25.0f
     );
 
     // Setup loading screen sprite
     m_LoadingScreenSprite.setTexture(*m_LoadingScreenTexture);
     m_LoadingScreenSprite.setPosition(
-        Window::GetWindow()->getSize().x - m_LoadingScreenSprite.getGlobalBounds().width,
-        Window::GetWindow()->getSize().y - m_LoadingScreenSprite.getGlobalBounds().height
+        static_cast<float>(windowSize.x) - m_LoadingScreenSprite.getGlobalBounds().width,
+        static_cast<float>(windowSize.y) - m_LoadingScreenSprite.getGlobalBounds().height
     );
 
     // Setup white glitch effect
@@ -118,10 +116,7 @@ void Menu::Init() {
 
     // Prepare newspaper sprite
     NewsPaperSprite = sf::Sprite(*NewsPaperTexture);
-    NewsPaperSprite.setPosition(
-        (Window::GetWindow()->getSize().x - NewsPaperSprite.getGlobalBounds().width) / 2,
-        (Window::GetWindow()->getSize().y - NewsPaperSprite.getGlobalBounds().height) / 2
-    );
+    NewsPaperSprite.setPosition(UiLayout::CenteredPosition(windowSize, NewsPaperSprite.getGlobalBounds()));
 
     // Setup new game button
     newbutton.SetTexture(ProcessText(Resources::GetTexture("Graphics/MainMenu/NewGame.png")));
@@ -178,30 +173,7 @@ void Menu::ShowMainMenuElements() {
 }
 
 void Menu::Update(double deltaTime) {
-    //accumulatedTime += (float)deltaTime;
-
-    //switch (m_State) {
-    //case FADE_IN:
-    //    if (fadeIn.update(deltaTime)) {
-    //        m_State = WAIT;
-    //    }
-    //    break;
-    //case WAIT:
-    //    accumulatedTime += deltaTime;
-    //    if (accumulatedTime >= waitTime) {
-    //        m_State = FADE_OUT;
-    //        accumulatedTime = sf::Time::Zero;
-    //    }
-    //    break;
-    //case FADE_OUT:
-    //    if (fadeOut.update(deltaTime)) {
-    //        m_State = DONE;
-    //    }
-    //    break;
-    //case DONE:
-    //    // Fade out completed, you can do other things here or exit the application.
-    //    break;
-    //}
+    (void) deltaTime;
 }
 
 void Menu::SwitchToGameplay() {
@@ -213,23 +185,20 @@ void Menu::SwitchToGameplay() {
 }
 
 void Menu::FixedUpdate() {
-    // TODO: idk remove this stupid seconds thing
     m_NewsPaperTimer += 1;
-    const float seconds = m_NewsPaperTimer / 66.0f; // Convert ticks to seconds
+    const float seconds = static_cast<float>(m_NewsPaperTimer) / FIXED_TICK_RATE;
     switch (m_GameplayTransitionState) {
         case MAIN_MENU: {
             m_FreddyGlitchEffect.Update();
             m_StaticGlitchEffect.Update();
             m_WhiteGlitchEffect.Update();
 
-            auto window = Window::GetWindow();
-
-            if (newbutton.IsClicked(*window)) {
+            if (newbutton.IsClicked()) {
                 // Hide all menu elements when transitioning to newspaper
                 HideAllMenuElements();
 
                 // Show only the newspaper
-                LayerManager::AddDrawable(4, &NewsPaperSprite);
+                LayerManager::AddDrawable(MENU_BUTTON_LAYER, &NewsPaperSprite);
                 SwitchState(NEWSPAPER);
             }
             break;

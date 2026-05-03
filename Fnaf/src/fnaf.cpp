@@ -6,7 +6,7 @@
 
 namespace {
     constexpr float FREDDY_LAUGH_CHANCE = 0.1f;
-constexpr float BASE_SECONDS_PER_HOUR = 89.0f;
+    constexpr float BASE_SECONDS_PER_HOUR = 89.0f;
 
     // Hour-based AI increments - from real FNAF 1
     // At 2AM: Bonnie +1
@@ -130,12 +130,13 @@ void FNAFGame::InitializeGame(int night) {
 void FNAFGame::Update(float deltaTime) {
     if (m_GameOver) return;
 
-    float clampedDelta = std::min(deltaTime, MAX_DELTA_TIME);
+    const float clampedDelta = std::min(deltaTime, MAX_DELTA_TIME);
 
     UpdatePower(clampedDelta);
 
     // Calculate hour progress with time acceleration
-    float acceleratedDelta = clampedDelta * std::pow(TIME_ACCELERATION_FACTOR, player.m_Time);
+    const float acceleratedDelta =
+        clampedDelta * static_cast<float>(std::pow(TIME_ACCELERATION_FACTOR, player.m_Time));
     m_TimeProgress += acceleratedDelta / m_CurrentHourDuration;
 
     if (m_TimeProgress >= 1.0f) {
@@ -583,7 +584,7 @@ void FNAFGame::HandlePowerOutage(float deltaTime) {
 // AI LEVELS - Real FNAF 1 starting values per night
 // ============================================================================
 
-int FNAFGame::GetAILevel(int night, const std::string &character) const {
+int FNAFGame::GetAILevel(int night, const std::string &character) {
     struct NightLevels {
         int freddy, bonnie, chica, foxy;
     };
@@ -604,7 +605,7 @@ int FNAFGame::GetAILevel(int night, const std::string &character) const {
 
     // Night 4 Freddy: 50/50 chance of 1 or 2
     if (night == 4 && character == "Freddy") {
-        return std::uniform_int_distribution<int>(1, 2)(const_cast<std::mt19937&>(m_RNG));
+        return std::uniform_int_distribution<int>(1, 2)(m_RNG);
     }
 
     if (character == "Freddy") return config.freddy;

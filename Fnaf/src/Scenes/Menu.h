@@ -2,12 +2,11 @@
 
 #include "Scene/Scene.h"
 #include "Animation/GlitchEffect.h"
+#include "Graphics/LayerManager.h"
 #include "UI/ImageButton.h"
-#include "Graphics/FadeEffect.h"
 
-// Audio keys - store just the identifiers
-#define STATIC_AUDIO_KEY "Audio/static2.wav"
-#define MENU_MUSIC_KEY "Audio/Menu/darknessmusic.wav"
+inline constexpr const char *STATIC_AUDIO_KEY = "Audio/static2.wav";
+inline constexpr const char *MENU_MUSIC_KEY = "Audio/Menu/darknessmusic.wav";
 
 class Menu : public Scene
 {
@@ -20,16 +19,12 @@ public:
     void Destroy() override {LayerManager::Clear();}
     void SwitchToGameplay();
 
-    void ShowNewsPaper();
     void HideAllMenuElements();
     void ShowMainMenuElements();
 
     // Methods to handle glitch effects
     void HideGlitchEffects();
     void ShowGlitchEffects();
-
-
-
 private:
     // Textures
     std::shared_ptr<sf::Texture> m_Logo;
@@ -61,13 +56,7 @@ private:
 
     inline void SwitchState(GameplayTransitionState state);
 
-    sf::Time waitTime = sf::seconds(5);
-    sf::Time accumulatedTime = sf::Time::Zero;
-    FadeEffect fadeEffect;
-
     int m_NewsPaperTimer = 0;
-    float m_WarningMessageTimer = 0.0f;
-    const float WARNING_MESSAGE_DURATION = 4.0f; // 4 seconds
     const float NEWSPAPER_DURATION = 3.0f; // 3 seconds for newspaper display
     const float TIME_DISPLAY_DURATION = 3.0f; // 3 seconds for time and night text
     const float LOADING_SCREEN_DURATION = 2.0f; // 2 seconds wait for gameplay

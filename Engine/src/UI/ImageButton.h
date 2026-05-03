@@ -14,6 +14,9 @@ public:
     ImageButton();
     ~ImageButton();
 
+    using BaseButton::IsClicked;
+    using BaseButton::IsMouseOver;
+
     void SetPosition(float x, float y);
     void SetPosition(sf::Vector2f position);
 
@@ -29,7 +32,6 @@ public:
     void SetLayer(int layer);
 
 protected:
-    std::shared_ptr<sf::Texture> m_ButtonTexture;
     int m_Layer = 0;
 
 private:

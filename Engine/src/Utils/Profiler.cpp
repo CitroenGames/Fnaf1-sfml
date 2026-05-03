@@ -5,7 +5,7 @@
 #include <functional>
 #include <thread>
 
-InstrumentationTimer *ManualInstrumentationScope::s_CurrentTimer = nullptr;
+std::unique_ptr<InstrumentationTimer> ManualInstrumentationScope::s_CurrentTimer;
 
 Instrumentor::Instrumentor()
     : m_CurrentSession(nullptr), m_ProfileCount(0), m_Active(false) {
@@ -20,14 +20,14 @@ Instrumentor::~Instrumentor() {
 void Instrumentor::BeginSession(const std::string &name, const std::string &filepath) {
     std::lock_guard<std::mutex> lock(m_Mutex);
     if (m_Active) {
-        EndSession();
+        EndSessionUnlocked();
     }
 
-    m_Active = true;
     m_OutputStream.open(filepath);
     if (m_OutputStream.is_open()) {
+        m_Active = true;
         WriteHeader();
-        m_CurrentSession = new InstrumentationSession{name};
+        m_CurrentSession = std::make_unique<InstrumentationSession>(InstrumentationSession{name});
     } else {
         m_Active = false;
     }
@@ -35,6 +35,10 @@ void Instrumentor::BeginSession(const std::string &name, const std::string &file
 
 void Instrumentor::EndSession() {
     std::lock_guard<std::mutex> lock(m_Mutex);
+    EndSessionUnlocked();
+}
+
+void Instrumentor::EndSessionUnlocked() {
     if (!m_Active) {
         return;
     }
@@ -42,8 +46,7 @@ void Instrumentor::EndSession() {
     WriteFooter();
     m_OutputStream.flush();
     m_OutputStream.close();
-    delete m_CurrentSession;
-    m_CurrentSession = nullptr;
+    m_CurrentSession.reset();
     m_ProfileCount = 0;
     m_Active = false;
 }
@@ -115,19 +118,17 @@ void InstrumentationTimer::Stop() {
 }
 
 void ManualInstrumentationScope::Begin(const char *name) {
-    if (s_CurrentTimer != nullptr) {
+    if (s_CurrentTimer) {
         s_CurrentTimer->Stop();
-        delete s_CurrentTimer;
     }
 
-    s_CurrentTimer = new InstrumentationTimer(name);
+    s_CurrentTimer = std::make_unique<InstrumentationTimer>(name);
 }
 
 void ManualInstrumentationScope::End() {
-    if (s_CurrentTimer != nullptr) {
+    if (s_CurrentTimer) {
         s_CurrentTimer->Stop();
-        delete s_CurrentTimer;
-        s_CurrentTimer = nullptr;
+        s_CurrentTimer.reset();
     }
 }
 

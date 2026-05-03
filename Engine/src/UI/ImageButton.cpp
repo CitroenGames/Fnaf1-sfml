@@ -4,7 +4,6 @@
 #include <utility>
 
 #include <SFML/Graphics/Rect.hpp>
-#include <SFML/Window/Mouse.hpp>
 
 #include "Assets/Resources.h"
 #include "Graphics/LayerManager.h"
@@ -53,15 +52,7 @@ bool ImageButton::IsMouseOver(sf::RenderWindow& window) const {
 }
 
 bool ImageButton::IsClicked(sf::RenderWindow& window) {
-    const bool isCurrentlyPressed = IsMouseOver(window) && sf::Mouse::isButtonPressed(sf::Mouse::Left);
-    if (isCurrentlyPressed && !m_IsPressed) {
-        m_IsPressed = true;
-        return true;
-    }
-    if (!isCurrentlyPressed) {
-        m_IsPressed = false;
-    }
-    return false;
+    return HandleLeftClick(IsMouseOver(window));
 }
 
 void ImageButton::SetLayer(int layer) {
@@ -72,10 +63,7 @@ void ImageButton::SetLayer(int layer) {
 }
 
 void ImageButton::ApplyTexture(std::shared_ptr<sf::Texture> texture, const std::string& errorMessage) {
-    m_ButtonTexture = std::move(texture);
-    if (m_ButtonTexture) {
-        sf::Sprite::setTexture(*m_ButtonTexture);
-    } else {
+    if (!SetOwnedTexture(std::move(texture))) {
         std::cerr << errorMessage << std::endl;
     }
 }

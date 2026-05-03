@@ -40,4 +40,7 @@ private:
 
     static std::map<std::string, std::shared_ptr<sf::Font> > m_Fonts;
     static std::map<std::string, std::shared_ptr<std::vector<uint8_t> > > m_FontBuffers;
+
+    static std::shared_ptr<std::vector<uint8_t> > LoadPakAsset(const std::string &filename,
+                                                               const char *errorPrefix);
 };

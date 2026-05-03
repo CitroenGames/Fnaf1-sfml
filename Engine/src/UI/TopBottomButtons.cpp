@@ -6,6 +6,8 @@
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Window/Mouse.hpp>
 
+#include "Core/Window.h"
+
 TopBottomButtons::TopBottomButtons()
     : m_CurrentState(ButtonState::NoActive)
     , m_WasMousePressed(false) {
@@ -28,6 +30,13 @@ void TopBottomButtons::SetTextures(const std::vector<std::shared_ptr<sf::Texture
 
     m_Textures = textures;
     SetTexture(m_Textures[static_cast<int>(ButtonState::NoActive)]);
+}
+
+void TopBottomButtons::updateButton() {
+    const auto window = Window::GetWindow();
+    if (window) {
+        updateButton(*window);
+    }
 }
 
 void TopBottomButtons::updateButton(sf::RenderWindow &window) {

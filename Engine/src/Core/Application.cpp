@@ -13,14 +13,18 @@ std::shared_ptr<sf::RenderWindow> Application::m_Window = nullptr;
 constexpr int TICKRATE = 66; // Desired tickrate (ticks per second)
 constexpr double FRAME_TIME = 1.0 / TICKRATE; // Time per tick (seconds)
 
-void Application::Init(const int width, const int height, const std::string &title) {
-    m_Window = Window::Init(width, height, title.data());
+void Application::Init(int width, int height, const std::string &title) {
+    m_Window = Window::Init(width, height, title);
     m_Window->setVerticalSyncEnabled(true);
     ImGui::SFML::Init(*m_Window, true);
     Window::UpdateViewport();
 }
 
 void Application::Run() {
+    if (!m_Window) {
+        return;
+    }
+
     auto previousTime = std::chrono::high_resolution_clock::now();
     double accumulator = 0.0;
 

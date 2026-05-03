@@ -1,10 +1,22 @@
 #include "Office.h"
-#include "Core/Window.h"
 #include "Graphics/LayerManager.h"
 #include "Assets/Resources.h"
-#include "Scene/SceneManager.h"
 #include "GameState.h"
 #include "LayerDefines.h"
+
+#include <string>
+#include <vector>
+
+namespace {
+    std::vector<std::shared_ptr<sf::Texture>> LoadButtonTextures(const std::string &folder) {
+        return {
+            Resources::GetTexture("Graphics/Office/" + folder + "/NoActive.png"),
+            Resources::GetTexture("Graphics/Office/" + folder + "/TopActive.png"),
+            Resources::GetTexture("Graphics/Office/" + folder + "/BothActive.png"),
+            Resources::GetTexture("Graphics/Office/" + folder + "/BottomActive.png")
+        };
+    }
+}
 
 Office::Office()
     : m_IsVisible(true)
@@ -20,30 +32,15 @@ Office::Office()
     m_LeftLightBonnieTexture = Resources::GetTexture("Graphics/Office/Light/Office_LightBonnie.png");
     m_RightLightChicaTexture = Resources::GetTexture("Graphics/Office/Light/Office_LightChicka.png");
 
-    {
-        std::vector<std::shared_ptr<sf::Texture> > LeftButtonsTextures;
-
-        LeftButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsLeft/NoActive.png"));
-        LeftButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsLeft/TopActive.png"));
-        LeftButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsLeft/BothActive.png"));
-        LeftButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsLeft/BottomActive.png"));
-        m_LeftButtons.SetTextures(LeftButtonsTextures);
-
-        std::vector<std::shared_ptr<sf::Texture> > RightButtonsTextures;
-
-        RightButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsRight/NoActive.png"));
-        RightButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsRight/TopActive.png"));
-        RightButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsRight/BothActive.png"));
-        RightButtonsTextures.push_back(Resources::GetTexture("Graphics/Office/ButtonsRight/BottomActive.png"));
-        m_RightButtons.SetTextures(RightButtonsTextures);
-    }
+    m_LeftButtons.SetTextures(LoadButtonTextures("ButtonsLeft"));
+    m_RightButtons.SetTextures(LoadButtonTextures("ButtonsRight"));
 
     m_FreddyNoseButton.SetTexture(Resources::GetTexture("Graphics/ClickTeamFusion/1.png"));
     m_FreddyNoseButton.SetPosition(sf::Vector2f(667, 212.5));
-    // Remove from LayerManager — nose button is an invisible clickable hitbox, not a visible sprite
+    // The nose button is an invisible clickable hitbox, not a visible sprite.
     LayerManager::RemoveDrawable(&m_FreddyNoseButton);
 
-    m_LeftButtons.SetLayer(2);
+    m_LeftButtons.SetLayer(BUTTON_LAYER);
     m_LeftButtons.SetCallbacks(
         [&](bool active) {
             // Door callback
@@ -59,7 +56,7 @@ Office::Office()
         }
     );
 
-    m_RightButtons.SetLayer(2);
+    m_RightButtons.SetLayer(BUTTON_LAYER);
     m_RightButtons.SetCallbacks(
         [&](bool active) {
             // Door callback
@@ -91,7 +88,7 @@ void Office::Init() {
     // Create sprites
     m_OfficeSprite = sf::Sprite(*m_OfficeTexture);
 
-    LayerManager::AddDrawable(0, &m_OfficeSprite);
+    LayerManager::AddDrawable(OFFICE_LAYER, &m_OfficeSprite);
 
     // Set positions
     m_LeftButtons.SetPosition(-12.5, 250);
@@ -125,7 +122,7 @@ void Office::HandlePowerOutage() {
         player.m_RightLightOn = false;
     }
 
-    // Reset door animations — doors open when power dies
+    // Doors open when power dies.
     m_LeftDoor.Stop();
     m_RightDoor.Stop();
 
@@ -177,15 +174,17 @@ void Office::ShowOfficeElements() {
 }
 
 void Office::Update(double deltaTime) {
-    m_RightDoor.Update(deltaTime);
-    m_LeftDoor.Update(deltaTime);
+    const float frameDelta = static_cast<float>(deltaTime);
+
+    m_RightDoor.Update(frameDelta);
+    m_LeftDoor.Update(frameDelta);
 
     // Flicker Freddy's face during power outage FREDDY_FACE phase
     if (m_PowerOutage && m_GameRef) {
         auto phase = m_GameRef->GetPowerOutagePhase();
 
         if (phase == PowerOutagePhase::FREDDY_FACE) {
-            m_FlickerTimer += static_cast<float>(deltaTime);
+            m_FlickerTimer += frameDelta;
             if (m_FlickerTimer >= 0.25f) {
                 m_FlickerTimer = 0.0f;
                 m_FlickerState = !m_FlickerState;
@@ -203,12 +202,10 @@ void Office::FixedUpdate() {
     if (player.m_UsingCamera)
         return;
 
-    const auto window = Window::GetWindow();
+    m_LeftButtons.updateButton();
+    m_RightButtons.updateButton();
 
-    m_LeftButtons.updateButton(*window);
-    m_RightButtons.updateButton(*window);
-
-    if (m_FreddyNoseButton.IsClicked(*window)) {
+    if (m_FreddyNoseButton.IsClicked()) {
         // play click sound
         m_FreddyNose->play();
     }

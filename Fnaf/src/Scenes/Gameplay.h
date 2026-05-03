@@ -23,7 +23,7 @@ private:
     std::shared_ptr<sf::Music> bgaudio1;
     std::shared_ptr<sf::Music> bgaudio2;
 
-    //TODO: MOVE THIS TO OFFICE
+    // Office ambience currently follows the gameplay scene lifetime.
     std::shared_ptr<sf::Music> m_FanBuzzing;
 
     float scrollOffset = 175.0f; // Initial scroll offset

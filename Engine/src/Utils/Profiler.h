@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdint>
 #include <fstream>
+#include <memory>
 #include <mutex>
 #include <string>
 
@@ -20,7 +21,9 @@ struct InstrumentationSession {
 
 class Instrumentor {
 private:
-    InstrumentationSession *m_CurrentSession;
+    void EndSessionUnlocked();
+
+    std::unique_ptr<InstrumentationSession> m_CurrentSession;
     std::ofstream m_OutputStream;
     int m_ProfileCount;
     std::mutex m_Mutex;
@@ -54,7 +57,7 @@ private:
 
 class ManualInstrumentationScope {
 private:
-    static InstrumentationTimer *s_CurrentTimer;
+    static std::unique_ptr<InstrumentationTimer> s_CurrentTimer;
 
 public:
     static void Begin(const char *name);
