@@ -21,6 +21,8 @@ public:
     void ForceClose();
     void SetActiveCamera(const std::string& cameraId);
     bool IsActive() const { return m_IsActive; }
+    bool IsTransitioning() const { return m_IsAnimatingOpen || m_IsAnimatingClose; }
+    bool IsCameraFeedVisible() const { return m_IsActive && !m_IsAnimatingOpen; }
     void SetOfficeComponent(std::shared_ptr<Office> office) { m_OfficeRef = office; }
     float GetCameraPanOffset() const { return m_CameraPanOffset; }
     

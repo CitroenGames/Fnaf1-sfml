@@ -152,8 +152,11 @@ void Gameplay::Update(double deltaTime) {
     sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
     sf::Vector2u windowSize = window->getSize();
 
-    // Handle panning for office (when camera is down) or camera feed (when camera is up)
-    if (player.m_UsingCamera && m_CameraSystem) {
+    const bool cameraFeedVisible = m_CameraSystem && m_CameraSystem->IsCameraFeedVisible();
+    const bool cameraTransitioning = m_CameraSystem && m_CameraSystem->IsTransitioning();
+
+    // Handle panning for office, or camera feed once the monitor has fully covered the office.
+    if (cameraFeedVisible) {
         // Camera feed panning - Camera2D at 640 (center) + pan offset
         float panOffset = m_CameraSystem->GetCameraPanOffset();
         sf::Vector2f newCameraPos(
@@ -162,7 +165,7 @@ void Gameplay::Update(double deltaTime) {
         );
         m_Camera->setPosition(newCameraPos);
     }
-    else if (!player.m_UsingCamera) {
+    else {
         // Scrolling parameters
         const float scrollThreshold = 400.0f;
         const float maxScrollSpeed = 500.0f;
@@ -172,7 +175,8 @@ void Gameplay::Update(double deltaTime) {
         bool mouseInWindow = (mousePos.x >= 0 && mousePos.x < static_cast<int>(windowSize.x) &&
                               mousePos.y >= 0 && mousePos.y < static_cast<int>(windowSize.y));
 
-        if (mouseInWindow) {
+        const bool canScrollOffice = !player.m_UsingCamera && !cameraTransitioning;
+        if (canScrollOffice && mouseInWindow) {
             // Left edge scrolling with dynamic speed
             if (mousePos.x < scrollThreshold) {
                 // Calculate how far the mouse is from the edge (0 to scrollThreshold)
