@@ -8,10 +8,54 @@
 #include "Utils/Profiler.h"
 
 #include <filesystem>
+#include <iostream>
+#include <system_error>
+#include <vector>
+
+#if defined(__APPLE__)
+#include <mach-o/dyld.h>
+#elif defined(__linux__)
+#include <unistd.h>
+#endif
 
 namespace {
     constexpr bool CAN_BUILD_ASSET_PAK = true;
     constexpr const char *PAK_KEY = "example_key";
+
+    std::filesystem::path GetExecutablePath(const char *argv0) {
+#if defined(__APPLE__)
+        uint32_t size = 0;
+        _NSGetExecutablePath(nullptr, &size);
+
+        std::vector<char> buffer(size);
+        if (_NSGetExecutablePath(buffer.data(), &size) == 0) {
+            return std::filesystem::weakly_canonical(buffer.data());
+        }
+#elif defined(__linux__)
+        std::vector<char> buffer(4096);
+        const ssize_t length = readlink("/proc/self/exe", buffer.data(), buffer.size() - 1);
+        if (length > 0) {
+            buffer[static_cast<size_t>(length)] = '\0';
+            return std::filesystem::weakly_canonical(buffer.data());
+        }
+#endif
+
+        return std::filesystem::weakly_canonical(argv0);
+    }
+
+    void SetWorkingDirectoryToExecutable(const char *argv0) {
+        const auto executablePath = GetExecutablePath(argv0);
+        if (executablePath.empty()) {
+            return;
+        }
+
+        std::error_code error;
+        std::filesystem::current_path(executablePath.parent_path(), error);
+        if (error) {
+            std::cerr << "Warning: Failed to set working directory to executable folder: "
+                      << error.message() << std::endl;
+        }
+    }
 
     bool ShouldBuildAssetPak(const std::filesystem::path &pakFile, const std::filesystem::path &assetsFolder) {
         if (!std::filesystem::exists(pakFile)) {
@@ -47,7 +91,9 @@ namespace {
     }
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+    SetWorkingDirectoryToExecutable(argc > 0 ? argv[0] : "");
+
     PROFILE_BEGIN_SESSION("Application", "profile_results.json");
     Paingine2D::CrashHandler *crashHandler = Paingine2D::CrashHandler::GetInstance();
     crashHandler->Initialize("FNaF");

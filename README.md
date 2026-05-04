@@ -46,3 +46,19 @@ To get started with the game on Linux, follow these steps:
    ```
 
    This package contains tools to check and verify your OpenGL installation.
+
+### Build Instructions for macOS
+
+Install Xcode Command Line Tools and CMake, then run:
+
+```bash
+xcode-select --install
+brew install cmake
+./generatesolution-macos.sh
+```
+
+The executable is written to:
+
+```bash
+build/bin/Fnaf-SFML
+```
