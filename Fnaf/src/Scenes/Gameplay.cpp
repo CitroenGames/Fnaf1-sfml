@@ -31,19 +31,19 @@ namespace {
     JumpscareSequenceConfig GetJumpscareSequenceConfig(JumpscareType type) {
         switch (type) {
             case JumpscareType::Bonnie:
-                return {"Graphics/JumpScares/Bonnie/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.0f};
+                return {"Graphics/JumpScares/Bonnie/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.5f};
             case JumpscareType::Chika:
-                return {"Graphics/JumpScares/Chika/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.0f};
+                return {"Graphics/JumpScares/Chika/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.5f};
             case JumpscareType::Foxy:
-                return {"Graphics/JumpScares/Foxy/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.0f};
+                return {"Graphics/JumpScares/Foxy/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.5f};
             case JumpscareType::FreddyPowerOut:
-                return {"Graphics/JumpScares/FreddyPoweOut/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.0f};
+                return {"Graphics/JumpScares/FreddyPoweOut/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.5f};
             case JumpscareType::GoldenFreddy:
                 return {"Graphics/JumpScares/Gfreddy/", "Audio/JumpScare/GoldenFreddy.wav", 1.0f / 30.0f, 2.0f};
             case JumpscareType::FreddyInOffice:
             case JumpscareType::None:
             default:
-                return {"Graphics/JumpScares/FreddyInOffice/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.0f};
+                return {"Graphics/JumpScares/FreddyInOffice/", "Audio/JumpScare/AllAnimitronics.wav", 1.0f / 30.0f, 1.5f};
         }
     }
 
@@ -623,20 +623,19 @@ void Gameplay::UpdateDeathSequence(float deltaTime) {
         m_JumpscareTotalTimer += animationDelta;
         m_JumpscareFrameTimer += animationDelta;
 
-        while (m_JumpscareFrameTimer >= m_JumpscareFrameDuration &&
-               m_JumpscareFrameIndex + 1 < m_JumpscareFrames.size()) {
+        while (m_JumpscareFrameTimer >= m_JumpscareFrameDuration && !m_JumpscareFrames.empty()) {
             m_JumpscareFrameTimer -= m_JumpscareFrameDuration;
-            ++m_JumpscareFrameIndex;
+            m_JumpscareFrameIndex = (m_JumpscareFrameIndex + 1) % m_JumpscareFrames.size();
             m_JumpscareSprite.setTexture(*m_JumpscareFrames[m_JumpscareFrameIndex], true);
             CoverGameView(m_JumpscareSprite);
         }
 
-        const float sequenceDuration = std::max(
-            m_JumpscareMinimumDuration,
-            static_cast<float>(m_JumpscareFrames.size()) * m_JumpscareFrameDuration
-        );
-        if (m_JumpscareFrameIndex + 1 >= m_JumpscareFrames.size() &&
-            m_JumpscareTotalTimer >= sequenceDuration) {
+        if (m_JumpscareTotalTimer >= m_JumpscareMinimumDuration) {
+            if (m_ActiveJumpscare == JumpscareType::GoldenFreddy) {
+                Window::GetWindow()->close();
+                return;
+            }
+
             SwitchToGameOver();
         }
         return;
