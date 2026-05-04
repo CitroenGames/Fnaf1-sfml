@@ -65,7 +65,8 @@ int main() {
                 return 1;
             }
 
-            if (!p.CreatePakFromFolder(pakFile.string(), assetsFolder.string())) {
+            const PakOptions pakOptions{};
+            if (!p.CreatePakFromFolder(pakFile.string(), assetsFolder.string(), pakOptions)) {
                 std::cerr << "Error: Failed to create Assets.pak in current directory: "
                           << std::filesystem::current_path().string() << std::endl;
                 return 1;
