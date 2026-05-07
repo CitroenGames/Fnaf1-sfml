@@ -6,7 +6,7 @@
 #include "LayerDefines.h"
 #include "Utils/Helpers.h"
 #include "Scenes/Menu.h"
-#include "UiLayout.h"
+#include "UI/Layout.h"
 
 namespace {
     std::shared_ptr<Menu> MainMenuScene;
@@ -26,7 +26,7 @@ WarningMessage::WarningMessage() {
 
     // Center the warning message
     const sf::Vector2u windowSize = Window::GetWindow()->getSize();
-    m_WarningMessageSprite.setPosition(UiLayout::CenteredPosition(windowSize, m_WarningMessageSprite.getGlobalBounds()));
+    m_WarningMessageSprite.setPosition(UI::Layout::CenteredPosition(windowSize, m_WarningMessageSprite.getGlobalBounds()));
 
     // reason why we are doing this is to not waste time on loading the menu while we wait for the warning message
     MainMenuScene = std::make_shared<Menu>();

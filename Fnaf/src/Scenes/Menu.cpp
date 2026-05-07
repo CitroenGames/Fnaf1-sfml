@@ -7,7 +7,7 @@
 #include "LayerDefines.h"
 #include "Utils/Helpers.h"
 #include "Audio/AudioManager.h"
-#include "UiLayout.h"
+#include "UI/Layout.h"
 
 namespace {
     constexpr float FIXED_TICK_RATE = 66.0f;
@@ -49,7 +49,7 @@ Menu::Menu() {
     // Setup warning message sprite
     m_WarningMessageSprite.setTexture(*m_WarningMessageTexture);
     const sf::Vector2u windowSize = Window::GetWindow()->getSize();
-    m_WarningMessageSprite.setPosition(UiLayout::CenteredPosition(windowSize, m_WarningMessageSprite.getGlobalBounds()));
+    m_WarningMessageSprite.setPosition(UI::Layout::CenteredPosition(windowSize, m_WarningMessageSprite.getGlobalBounds()));
 
     // load loading screen sprite
     m_LoadingScreenTexture = Resources::GetTexture("Graphics/Loading.png");
@@ -77,7 +77,7 @@ void Menu::Init() {
     m_TimeText.setFillColor(sf::Color::White);
     const sf::Vector2u windowSize = Window::GetWindow()->getSize();
     m_TimeText.setPosition(
-        UiLayout::CenteredX(windowSize, m_TimeText.getGlobalBounds()),
+        UI::Layout::CenteredX(windowSize, m_TimeText.getGlobalBounds()),
         static_cast<float>(windowSize.y) / 2.0f - 25.0f
     );
 
@@ -86,7 +86,7 @@ void Menu::Init() {
     m_NightText.setCharacterSize(75);
     m_NightText.setFillColor(sf::Color::White);
     m_NightText.setPosition(
-        UiLayout::CenteredX(windowSize, m_NightText.getGlobalBounds()),
+        UI::Layout::CenteredX(windowSize, m_NightText.getGlobalBounds()),
         static_cast<float>(windowSize.y) / 2.0f + 25.0f
     );
 
@@ -116,7 +116,7 @@ void Menu::Init() {
 
     // Prepare newspaper sprite
     NewsPaperSprite = sf::Sprite(*NewsPaperTexture);
-    NewsPaperSprite.setPosition(UiLayout::CenteredPosition(windowSize, NewsPaperSprite.getGlobalBounds()));
+    NewsPaperSprite.setPosition(UI::Layout::CenteredPosition(windowSize, NewsPaperSprite.getGlobalBounds()));
 
     // Setup new game button
     newbutton.SetTexture(ProcessText(Resources::GetTexture("Graphics/MainMenu/NewGame.png")));

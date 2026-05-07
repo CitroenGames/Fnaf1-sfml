@@ -1,9 +1,13 @@
 #include "Resources.h"
 
+#include <algorithm>
 #include <cstdint>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <SFML/Graphics/Font.hpp>
@@ -14,6 +18,8 @@
 
 namespace {
     std::string g_PakFile;
+    std::string g_AssetRoot = "Assets";
+    bool g_FileSystemFallbackEnabled = true;
     Pakker *g_PakHandler = nullptr;
 
     std::map<std::string, std::shared_ptr<sf::Texture> > g_Textures;
@@ -21,28 +27,94 @@ namespace {
     std::map<std::string, std::shared_ptr<sf::Font> > g_Fonts;
     std::map<std::string, std::shared_ptr<std::vector<uint8_t> > > g_FontBuffers;
 
-    std::shared_ptr<std::vector<uint8_t> > LoadPakAsset(const std::string &filename,
-                                                        const char *errorPrefix) {
-        if (g_PakHandler == nullptr) {
-            std::cerr << "Resources::Load: Pakker instance not set." << std::endl;
+    std::string NormalizeAssetPath(std::filesystem::path path) {
+        return path.generic_string();
+    }
+
+    std::filesystem::path ResolveFilesystemAssetPath(const std::string &filename) {
+        const std::filesystem::path requestedPath(filename);
+        if (requestedPath.is_absolute()) {
+            return requestedPath;
+        }
+
+        const std::filesystem::path rootedPath = std::filesystem::path(g_AssetRoot) / requestedPath;
+        if (std::filesystem::exists(rootedPath)) {
+            return rootedPath;
+        }
+
+        return requestedPath;
+    }
+
+    std::shared_ptr<std::vector<uint8_t> > LoadPakAsset(const std::string &filename) {
+        if (g_PakHandler == nullptr || g_PakFile.empty()) {
             return nullptr;
         }
 
-        auto data = g_PakHandler->LoadFile(g_PakFile, filename);
-        if (!data) {
-            std::cerr << errorPrefix << filename << std::endl;
+        return g_PakHandler->LoadFile(g_PakFile, filename);
+    }
+
+    std::shared_ptr<std::vector<uint8_t> > LoadFilesystemAsset(const std::string &filename) {
+        if (!g_FileSystemFallbackEnabled) {
+            return nullptr;
+        }
+
+        const std::filesystem::path path = ResolveFilesystemAssetPath(filename);
+        std::ifstream file(path, std::ios::binary | std::ios::ate);
+        if (!file) {
+            return nullptr;
+        }
+
+        const std::streamsize size = file.tellg();
+        if (size < 0) {
+            return nullptr;
+        }
+
+        auto data = std::make_shared<std::vector<uint8_t> >(static_cast<size_t>(size));
+        file.seekg(0, std::ios::beg);
+        if (size > 0 && !file.read(reinterpret_cast<char *>(data->data()), size)) {
+            return nullptr;
         }
 
         return data;
     }
+
+    void AppendFilesystemFiles(std::vector<std::string> &files, const std::string &prefix) {
+        if (!g_FileSystemFallbackEnabled) {
+            return;
+        }
+
+        const std::filesystem::path root(g_AssetRoot);
+        if (!std::filesystem::exists(root)) {
+            return;
+        }
+
+        for (const auto &entry : std::filesystem::recursive_directory_iterator(root)) {
+            if (!entry.is_regular_file()) {
+                continue;
+            }
+
+            const auto relative = NormalizeAssetPath(std::filesystem::relative(entry.path(), root));
+            if (prefix.empty() || relative.starts_with(prefix)) {
+                files.push_back(relative);
+            }
+        }
+    }
 }
 
 void Resources::BindPakFile(const std::string &pakFilename) {
-    if (g_PakHandler == nullptr) {
-        std::cerr << "Resources::Load: Pakker instance not set." << std::endl;
-        return;
-    }
     g_PakFile = pakFilename;
+}
+
+void Resources::SetAssetRoot(const std::string &rootDirectory) {
+    g_AssetRoot = rootDirectory;
+}
+
+const std::string &Resources::GetAssetRoot() {
+    return g_AssetRoot;
+}
+
+void Resources::SetFileSystemFallbackEnabled(bool enabled) {
+    g_FileSystemFallbackEnabled = enabled;
 }
 
 void Resources::Unload() {
@@ -52,11 +124,24 @@ void Resources::Unload() {
     g_FontBuffers.clear();
 }
 
+std::shared_ptr<std::vector<uint8_t> > Resources::LoadBytes(const std::string &filename) {
+    if (auto data = LoadPakAsset(filename)) {
+        return data;
+    }
+
+    if (auto data = LoadFilesystemAsset(filename)) {
+        return data;
+    }
+
+    return nullptr;
+}
+
 std::shared_ptr<sf::Texture> Resources::GetTexture(const std::string &filename) {
     auto textureIt = g_Textures.find(filename);
     if (textureIt == g_Textures.end()) {
-        const auto textureData = LoadPakAsset(filename, "Resources::GetTexture: Failed to load texture: ");
+        const auto textureData = LoadBytes(filename);
         if (!textureData) {
+            std::cerr << "Resources::GetTexture: Failed to load texture: " << filename << std::endl;
             return nullptr;
         }
 
@@ -75,8 +160,9 @@ std::shared_ptr<sf::Texture> Resources::GetTexture(const std::string &filename) 
 std::shared_ptr<AudioClip> Resources::GetMusic(const std::string &filename) {
     auto bufferIt = g_AudioBuffers.find(filename);
     if (bufferIt == g_AudioBuffers.end()) {
-        const auto musicData = LoadPakAsset(filename, "Resources::GetMusic: Failed to load music: ");
+        const auto musicData = LoadBytes(filename);
         if (!musicData) {
+            std::cerr << "Resources::GetMusic: Failed to load music: " << filename << std::endl;
             return nullptr;
         }
 
@@ -94,8 +180,9 @@ std::shared_ptr<AudioClip> Resources::GetMusic(const std::string &filename) {
 std::shared_ptr<sf::Font> Resources::GetFont(const std::string &filename) {
     auto fontIt = g_Fonts.find(filename);
     if (fontIt == g_Fonts.end()) {
-        const auto fontData = LoadPakAsset(filename, "Resources::GetFont: Failed to load font: ");
+        const auto fontData = LoadBytes(filename);
         if (!fontData) {
+            std::cerr << "Resources::GetFont: Failed to load font: " << filename << std::endl;
             return nullptr;
         }
 
@@ -113,21 +200,27 @@ std::shared_ptr<sf::Font> Resources::GetFont(const std::string &filename) {
 }
 
 std::vector<std::string> Resources::ListFiles() {
-    if (g_PakHandler == nullptr) {
-        std::cerr << "Resources::ListFiles: Pakker instance not set." << std::endl;
-        return {};
+    std::vector<std::string> files;
+    if (g_PakHandler != nullptr && !g_PakFile.empty()) {
+        files = g_PakHandler->ListFiles(g_PakFile);
     }
 
-    return g_PakHandler->ListFiles(g_PakFile);
+    AppendFilesystemFiles(files, "");
+    std::sort(files.begin(), files.end());
+    files.erase(std::unique(files.begin(), files.end()), files.end());
+    return files;
 }
 
 std::vector<std::string> Resources::ListFilesWithPrefix(const std::string &prefix) {
-    if (g_PakHandler == nullptr) {
-        std::cerr << "Resources::ListFilesWithPrefix: Pakker instance not set." << std::endl;
-        return {};
+    std::vector<std::string> files;
+    if (g_PakHandler != nullptr && !g_PakFile.empty()) {
+        files = g_PakHandler->ListFilesWithPrefix(g_PakFile, prefix);
     }
 
-    return g_PakHandler->ListFilesWithPrefix(g_PakFile, prefix);
+    AppendFilesystemFiles(files, prefix);
+    std::sort(files.begin(), files.end());
+    files.erase(std::unique(files.begin(), files.end()), files.end());
+    return files;
 }
 
 void Resources::SetPakker(Pakker *pakker) {

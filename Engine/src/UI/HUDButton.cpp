@@ -9,6 +9,7 @@
 #include "Assets/Resources.h"
 #include "Core/Window.h"
 #include "Graphics/LayerManager.h"
+#include "Graphics/ScopedView.h"
 
 HUDButton::HUDButton() = default;
 
@@ -44,18 +45,16 @@ void HUDButton::SetTexture(std::shared_ptr<sf::Texture> texture) {
 }
 
 bool HUDButton::IsMouseOver(sf::RenderWindow& window) const {
-    sf::View currentView = window.getView();
-    window.setView(window.getDefaultView());
-
-    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-    sf::FloatRect viewport = currentView.getViewport();
-    sf::Vector2u windowSize = window.getSize();
+    const sf::View currentView = window.getView();
+    const sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+    const sf::FloatRect viewport = currentView.getViewport();
+    const sf::Vector2u windowSize = window.getSize();
+    ScopedView screenView(window, window.getDefaultView());
 
     sf::Vector2f viewPos;
     if (viewport.width < 1.0f) {
         if (mousePos.x < viewport.left * windowSize.x ||
             mousePos.x > (viewport.left + viewport.width) * windowSize.x) {
-            window.setView(currentView);
             return false;
         }
 
@@ -65,7 +64,6 @@ bool HUDButton::IsMouseOver(sf::RenderWindow& window) const {
     } else if (viewport.height < 1.0f) {
         if (mousePos.y < viewport.top * windowSize.y ||
             mousePos.y > (viewport.top + viewport.height) * windowSize.y) {
-            window.setView(currentView);
             return false;
         }
 
@@ -77,10 +75,7 @@ bool HUDButton::IsMouseOver(sf::RenderWindow& window) const {
     }
 
     const sf::FloatRect buttonBounds = getGlobalBounds();
-    const bool result = buttonBounds.contains(viewPos);
-
-    window.setView(currentView);
-    return result;
+    return buttonBounds.contains(viewPos);
 }
 
 bool HUDButton::IsClicked(sf::RenderWindow& window) {
@@ -92,8 +87,7 @@ void HUDButton::UpdatePosition() {
 }
 
 void HUDButton::Draw(sf::RenderWindow& window) {
-    sf::View currentView = window.getView();
-    window.setView(window.getDefaultView());
+    ScopedView screenView(window, window.getDefaultView());
 
     sf::Vector2f originalPos = sf::Sprite::getPosition();
     sf::Sprite::setPosition(AdjustForViewport(m_ScreenPosition));
@@ -101,7 +95,6 @@ void HUDButton::Draw(sf::RenderWindow& window) {
     window.draw(*this);
 
     sf::Sprite::setPosition(originalPos);
-    window.setView(currentView);
 }
 
 void HUDButton::Show() {

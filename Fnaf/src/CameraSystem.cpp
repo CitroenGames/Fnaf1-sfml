@@ -1,31 +1,17 @@
 #include "CameraSystem.h"
 #include "Office.h"
 #include "Assets/Resources.h"
+#include "Graphics/SpriteLayout.h"
 #include "Graphics/LayerManager.h"
 #include "LayerDefines.h"
 #include "GameState.h"
 #include "fnaf.hpp"
-
-#include <algorithm>
 
 namespace {
     constexpr float CameraViewWidth = 1280.0f;
     constexpr float CameraViewHeight = 720.0f;
     const sf::Vector2f CameraMapCenter{1012.0f, 515.0f};
     const sf::Vector2f CameraRoomNamePosition{815.0f, 285.0f};
-
-    void CoverCameraView(sf::Sprite& sprite)
-    {
-        const sf::FloatRect bounds = sprite.getLocalBounds();
-        if (bounds.width <= 0.0f || bounds.height <= 0.0f) {
-            return;
-        }
-
-        const float scale = std::max(CameraViewWidth / bounds.width, CameraViewHeight / bounds.height);
-        sprite.setOrigin(bounds.left + bounds.width * 0.5f, bounds.top + bounds.height * 0.5f);
-        sprite.setScale(scale, scale);
-        sprite.setPosition(CameraViewWidth * 0.5f, CameraViewHeight * 0.5f);
-    }
 }
 
 CameraSystem::CameraSystem()
@@ -203,7 +189,10 @@ void CameraSystem::InitializeAnimations()
         auto sprite = std::make_shared<sf::Sprite>(
             *Resources::GetTexture("Graphics/Static/Noise" + std::to_string(i) + ".png")
         );
-        CoverCameraView(*sprite);
+        SpriteLayout::FitToSizeCentered(
+            *sprite,
+            {CameraViewWidth, CameraViewHeight},
+            SpriteLayout::FitMode::Cover);
         m_StaticAnimation.AddFrame(sprite);
     }
     m_StaticAnimation.SetPosition(640.0f, 360.0f);

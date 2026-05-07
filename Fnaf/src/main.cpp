@@ -98,10 +98,11 @@ int main(int argc, char *argv[]) {
     Paingine2D::CrashHandler *crashHandler = Paingine2D::CrashHandler::GetInstance();
     crashHandler->Initialize("FNaF");
     Pakker p(PAK_KEY);
+    const std::filesystem::path assetsFolder = FindAssetsFolder();
+    Resources::SetAssetRoot(assetsFolder.string());
 
     if constexpr (CAN_BUILD_ASSET_PAK) {
         const std::filesystem::path pakFile = "Assets.pak";
-        const std::filesystem::path assetsFolder = FindAssetsFolder();
 
         if (ShouldBuildAssetPak(pakFile, assetsFolder)) {
             std::cout << "Packing Assets.pak" << std::endl;
@@ -134,7 +135,15 @@ int main(int argc, char *argv[]) {
 
     // Start profiling Application Init
     PROFILE_BEGIN("Application Initialization");
-    Application::Init(1280, 720, "Five Nights at Freddy's");
+    Application::Config appConfig;
+    appConfig.window.width = 1280;
+    appConfig.window.height = 720;
+    appConfig.window.title = "Five Nights at Freddy's";
+    appConfig.window.designResolution = {1280.0f, 720.0f};
+    appConfig.window.scaleMode = Window::ScaleMode::Expand;
+    appConfig.fixedTickRate = 66;
+    appConfig.verticalSync = true;
+    Application::Init(appConfig);
     PROFILE_END();
 
     PROFILE_BEGIN("Scene Initialization");

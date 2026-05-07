@@ -8,6 +8,8 @@
 #include "GameState.h"
 #include "Scene/SceneManager.h"
 #include "CameraSystem.h"
+#include "Graphics/ScopedView.h"
+#include "Graphics/SpriteLayout.h"
 #include "Utils/Helpers.h"
 
 #include <cctype>
@@ -101,22 +103,8 @@ namespace {
         return frames;
     }
 
-    void CoverGameView(sf::Sprite &sprite) {
-        const sf::FloatRect bounds = sprite.getLocalBounds();
-        if (bounds.width <= 0.0f || bounds.height <= 0.0f) {
-            return;
-        }
-
-        const float scale = std::max(GAME_VIEW_WIDTH / bounds.width, GAME_VIEW_HEIGHT / bounds.height);
-        sprite.setOrigin(bounds.left + bounds.width * 0.5f, bounds.top + bounds.height * 0.5f);
-        sprite.setScale(scale, scale);
-        sprite.setPosition(GAME_VIEW_WIDTH * 0.5f, GAME_VIEW_HEIGHT * 0.5f);
-    }
-
-    void CenterSprite(sf::Sprite &sprite) {
-        const sf::FloatRect bounds = sprite.getLocalBounds();
-        sprite.setOrigin(bounds.left + bounds.width * 0.5f, bounds.top + bounds.height * 0.5f);
-        sprite.setPosition(GAME_VIEW_WIDTH * 0.5f, GAME_VIEW_HEIGHT * 0.5f);
+    sf::Vector2f GameViewSize() {
+        return {GAME_VIEW_WIDTH, GAME_VIEW_HEIGHT};
     }
 }
 
@@ -191,13 +179,13 @@ void Gameplay::Init() {
         m_GameOverBackgroundTexture = Resources::GetTexture("Graphics/Gameplay/GameOverBackground.png");
         if (m_GameOverBackgroundTexture) {
             m_GameOverBackgroundSprite.setTexture(*m_GameOverBackgroundTexture);
-            CoverGameView(m_GameOverBackgroundSprite);
+            SpriteLayout::FitToSizeCentered(m_GameOverBackgroundSprite, GameViewSize(), SpriteLayout::FitMode::Cover);
         }
 
         m_GameOverTextTexture = ProcessText(Resources::GetTexture("Graphics/Gameplay/GameOver.png"));
         if (m_GameOverTextTexture) {
             m_GameOverTextSprite.setTexture(*m_GameOverTextTexture);
-            CenterSprite(m_GameOverTextSprite);
+            SpriteLayout::CenterAt(m_GameOverTextSprite, {GAME_VIEW_WIDTH * 0.5f, GAME_VIEW_HEIGHT * 0.5f});
         }
     }
 
@@ -374,9 +362,9 @@ void Gameplay::Render() {
 
     // Draw power HUD in screen space
     if (!IsDeathSequenceActive() && gameplay && !gameplay->IsPowerOutage()) {
-        sf::View currentView = window->getView();
-        sf::FloatRect viewport = currentView.getViewport();
-        window->setView(window->getDefaultView());
+        const sf::View currentView = window->getView();
+        const sf::FloatRect viewport = currentView.getViewport();
+        ScopedView screenView(*window, window->getDefaultView());
 
         // Compute viewport offset for letterboxing/pillarboxing
         sf::Vector2u winSize = window->getSize();
@@ -410,7 +398,6 @@ void Gameplay::Render() {
         window->draw(m_UsageLabelSprite);
         window->draw(m_UsageBarsSprite);
 
-        window->setView(currentView);
     }
 
     if (IsDeathSequenceActive()) {
@@ -612,7 +599,7 @@ void Gameplay::StartJumpscare(JumpscareType type) {
     }
 
     m_JumpscareSprite.setTexture(*m_JumpscareFrames.front(), true);
-    CoverGameView(m_JumpscareSprite);
+    SpriteLayout::FitToSizeCentered(m_JumpscareSprite, GameViewSize(), SpriteLayout::FitMode::Cover);
     m_DeathSequenceState = DeathSequenceState::Jumpscare;
 }
 
@@ -631,7 +618,7 @@ void Gameplay::UpdateDeathSequence(float deltaTime) {
             m_JumpscareFrameTimer -= m_JumpscareFrameDuration;
             m_JumpscareFrameIndex = (m_JumpscareFrameIndex + 1) % m_JumpscareFrames.size();
             m_JumpscareSprite.setTexture(*m_JumpscareFrames[m_JumpscareFrameIndex], true);
-            CoverGameView(m_JumpscareSprite);
+            SpriteLayout::FitToSizeCentered(m_JumpscareSprite, GameViewSize(), SpriteLayout::FitMode::Cover);
         }
 
         if (m_JumpscareTotalTimer >= m_JumpscareMinimumDuration) {
@@ -662,8 +649,7 @@ void Gameplay::SwitchToGameOver() {
 }
 
 void Gameplay::DrawDeathSequence(sf::RenderWindow &window) {
-    const sf::View previousView = window.getView();
-    window.setView(window.getDefaultView());
+    ScopedView screenView(window, window.getDefaultView());
 
     if (m_DeathSequenceState == DeathSequenceState::Jumpscare && m_JumpscareFrames.size() > 0) {
         window.draw(m_JumpscareSprite);
@@ -675,6 +661,4 @@ void Gameplay::DrawDeathSequence(sf::RenderWindow &window) {
             window.draw(m_GameOverTextSprite);
         }
     }
-
-    window.setView(previousView);
 }
