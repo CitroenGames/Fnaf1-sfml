@@ -24,7 +24,7 @@ public:
     bool IsTransitioning() const { return m_IsAnimatingOpen || m_IsAnimatingClose; }
     bool IsCameraFeedVisible() const { return m_IsActive && !m_IsAnimatingOpen; }
     void SetOfficeComponent(std::shared_ptr<Office> office) { m_OfficeRef = office; }
-    float GetCameraPanOffset() const { return m_CameraPanOffset; }
+    float GetCameraPanOffset() const;
     
     nlohmann::json Serialize() const override { return nlohmann::json(); }
     void Deserialize(const nlohmann::json& data) override {}
@@ -59,7 +59,7 @@ private:
     float m_PanPauseTimer = 0.0f;      // countdown at edges before reversing
 
     // Base screen positions for UI elements (repositioned when panning)
-    sf::Vector2f m_MapBasePos = {830.0f, 450.0f};
+    sf::Vector2f m_MapBasePos = {1012.0f, 515.0f};
     sf::Vector2f m_BorderBasePos = {640.0f, 360.0f};
     std::map<std::string, sf::Vector2f> m_ButtonBasePositions;
     std::map<std::string, sf::Vector2f> m_NameBasePositions;
@@ -75,6 +75,7 @@ private:
     void HideAllCameraElements();
     void UpdateCameraMovement(double deltaTime);
     void UpdateUIPositions();
+    bool IsCurrentCameraPannable() const;
     
     // Office reference for syncing visibility with animation
     std::shared_ptr<Office> m_OfficeRef;

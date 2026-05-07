@@ -150,7 +150,7 @@ void Gameplay::Init() {
         // Initialize camera button (to toggle camera view) as a HUD element
         m_CameraButton = std::make_shared<HUDButton>();
         m_CameraButton->SetTexture("Graphics/CameraSystem/CameraButton.png");
-        m_CameraButton->SetPosition(640.0f, 650.0f);
+        m_CameraButton->SetPosition(555.0f, 665.0f);
     }
 
     // Power HUD
@@ -263,6 +263,10 @@ void Gameplay::Update(double deltaTime) {
     Scene::Update(deltaTime);
 
     gameplay->Update(frameDelta);
+    if (gameplay->IsPowerOutage() && m_FanBuzzing && m_FanBuzzing->getStatus() == sf::Music::Playing) {
+        m_FanBuzzing->stop();
+    }
+
     if (gameplay->HasPendingJumpscare()) {
         StartPendingJumpscare();
         return;
@@ -364,7 +368,7 @@ void Gameplay::Render() {
     auto window = Window::GetWindow();
 
     // Now draw HUD elements in screen space
-    if (!IsDeathSequenceActive() && m_CameraButton) {
+    if (!IsDeathSequenceActive() && m_CameraButton && (!gameplay || !gameplay->IsPowerOutage())) {
         m_CameraButton->Draw(*window);
     }
 

@@ -6,6 +6,28 @@
 #include "GameState.h"
 #include "fnaf.hpp"
 
+#include <algorithm>
+
+namespace {
+    constexpr float CameraViewWidth = 1280.0f;
+    constexpr float CameraViewHeight = 720.0f;
+    const sf::Vector2f CameraMapCenter{1012.0f, 515.0f};
+    const sf::Vector2f CameraRoomNamePosition{815.0f, 285.0f};
+
+    void CoverCameraView(sf::Sprite& sprite)
+    {
+        const sf::FloatRect bounds = sprite.getLocalBounds();
+        if (bounds.width <= 0.0f || bounds.height <= 0.0f) {
+            return;
+        }
+
+        const float scale = std::max(CameraViewWidth / bounds.width, CameraViewHeight / bounds.height);
+        sprite.setOrigin(bounds.left + bounds.width * 0.5f, bounds.top + bounds.height * 0.5f);
+        sprite.setScale(scale, scale);
+        sprite.setPosition(CameraViewWidth * 0.5f, CameraViewHeight * 0.5f);
+    }
+}
+
 CameraSystem::CameraSystem()
     : m_IsActive(false)
     , m_CurrentCamera("1A")
@@ -16,7 +38,8 @@ void CameraSystem::Init()
 {
     // Load camera map - positioned in bottom-right like the real game
     m_CameraMapSprite = std::make_shared<sf::Sprite>(*Resources::GetTexture("Graphics/CameraSystem/CameraMap.png"));
-    m_CameraMapSprite->setPosition(830.0f, 450.0f);
+    m_MapBasePos = CameraMapCenter;
+    m_CameraMapSprite->setPosition(m_MapBasePos);
     m_CameraMapSprite->setOrigin(m_CameraMapSprite->getGlobalBounds().width / 2,
         m_CameraMapSprite->getGlobalBounds().height / 2);
 
@@ -95,65 +118,62 @@ void CameraSystem::InitializeCameraViews()
 
 void CameraSystem::InitializeCameraButtons()
 {
-    // Create camera selection buttons
-    // Map is 400x400, centered at (830, 450), so top-left is (630, 250).
-    // Room centers measured from map image pixels, converted to screen coords:
-    //   screen = map_pixel + (630, 250), then offset (-15, -12) for button centering (31x25px)
+    // Positions are top-left button coordinates in the 1280x720 camera overlay.
 
-    // 1A - Show Stage: map center ~(200, 60), screen (830, 310), button (815, 298).
+    // CAM 1A - Show Stage.
     m_CameraButtons["1A"] = std::make_shared<ImageButton>();
     m_CameraButtons["1A"]->SetTexture("Graphics/CameraSystem/Cam1AButton.png");
-    m_CameraButtons["1A"]->SetPosition(815.0f, 298.0f);
+    m_CameraButtons["1A"]->SetPosition(958.0f, 338.0f);
 
-    // 1B - Dining Area: map center ~(200, 130) → screen (830, 380) → button (815, 368)
+    // CAM 1B - Dining Area.
     m_CameraButtons["1B"] = std::make_shared<ImageButton>();
     m_CameraButtons["1B"]->SetTexture("Graphics/CameraSystem/Cam1BButton.png");
-    m_CameraButtons["1B"]->SetPosition(815.0f, 368.0f);
+    m_CameraButtons["1B"]->SetPosition(940.0f, 392.0f);
 
-    // 1C - Pirate Cove: map center ~(45, 95) → screen (675, 345) → button (660, 333)
+    // CAM 1C - Pirate Cove.
     m_CameraButtons["1C"] = std::make_shared<ImageButton>();
     m_CameraButtons["1C"]->SetTexture("Graphics/CameraSystem/Cam1CButton.png");
-    m_CameraButtons["1C"]->SetPosition(660.0f, 333.0f);
+    m_CameraButtons["1C"]->SetPosition(910.0f, 474.0f);
 
-    // 2A - West Hall: map center ~(75, 280) → screen (705, 530) → button (690, 518)
+    // CAM 2A - West Hall.
     m_CameraButtons["2A"] = std::make_shared<ImageButton>();
     m_CameraButtons["2A"]->SetTexture("Graphics/CameraSystem/Cam2AButton.png");
-    m_CameraButtons["2A"]->SetPosition(690.0f, 518.0f);
+    m_CameraButtons["2A"]->SetPosition(945.0f, 592.0f);
 
-    // 2B - West Hall Corner: map center ~(125, 325) → screen (755, 575) → button (740, 563)
+    // CAM 2B - West Hall Corner.
     m_CameraButtons["2B"] = std::make_shared<ImageButton>();
     m_CameraButtons["2B"]->SetTexture("Graphics/CameraSystem/Cam2BButton.png");
-    m_CameraButtons["2B"]->SetPosition(740.0f, 563.0f);
+    m_CameraButtons["2B"]->SetPosition(945.0f, 640.0f);
 
-    // 3 - Supply Closet: map center ~(45, 180) → screen (675, 430) → button (660, 418)
+    // CAM 3 - Supply Closet.
     m_CameraButtons["3"] = std::make_shared<ImageButton>();
     m_CameraButtons["3"]->SetTexture("Graphics/CameraSystem/Cam3Button.png");
-    m_CameraButtons["3"]->SetPosition(660.0f, 418.0f);
+    m_CameraButtons["3"]->SetPosition(862.0f, 575.0f);
 
-    // 4A - East Hall: map center ~(240, 290) → screen (870, 540) → button (855, 528)
+    // CAM 4A - East Hall.
     m_CameraButtons["4A"] = std::make_shared<ImageButton>();
     m_CameraButtons["4A"]->SetTexture("Graphics/CameraSystem/Cam4AButton.png");
-    m_CameraButtons["4A"]->SetPosition(855.0f, 528.0f);
+    m_CameraButtons["4A"]->SetPosition(1058.0f, 592.0f);
 
-    // 4B - East Hall Corner: map center ~(255, 325) → screen (885, 575) → button (870, 563)
+    // CAM 4B - East Hall Corner.
     m_CameraButtons["4B"] = std::make_shared<ImageButton>();
     m_CameraButtons["4B"]->SetTexture("Graphics/CameraSystem/Cam4BButton.png");
-    m_CameraButtons["4B"]->SetPosition(870.0f, 563.0f);
+    m_CameraButtons["4B"]->SetPosition(1058.0f, 640.0f);
 
-    // 5 - Backstage: map center ~(330, 115) → screen (960, 365) → button (945, 353)
+    // CAM 5 - Backstage.
     m_CameraButtons["5"] = std::make_shared<ImageButton>();
     m_CameraButtons["5"]->SetTexture("Graphics/CameraSystem/Cam5Button.png");
-    m_CameraButtons["5"]->SetPosition(945.0f, 353.0f);
+    m_CameraButtons["5"]->SetPosition(832.0f, 420.0f);
 
-    // 6 - Restrooms: map center ~(330, 240) → screen (960, 490) → button (945, 478)
+    // CAM 6 - Restrooms.
     m_CameraButtons["6"] = std::make_shared<ImageButton>();
     m_CameraButtons["6"]->SetTexture("Graphics/CameraSystem/Cam6Button.png");
-    m_CameraButtons["6"]->SetPosition(945.0f, 478.0f);
+    m_CameraButtons["6"]->SetPosition(1152.0f, 558.0f);
 
-    // 7 - Kitchen: map center ~(330, 155) → screen (960, 405) → button (945, 393)
+    // CAM 7 - Kitchen.
     m_CameraButtons["7"] = std::make_shared<ImageButton>();
     m_CameraButtons["7"]->SetTexture("Graphics/CameraSystem/Cam7Button.png");
-    m_CameraButtons["7"]->SetPosition(945.0f, 393.0f);
+    m_CameraButtons["7"]->SetPosition(1160.0f, 420.0f);
 
     // Set layer for all buttons and store base positions
     for (auto& [id, button] : m_CameraButtons) {
@@ -178,9 +198,11 @@ void CameraSystem::InitializeAnimations()
     // Static noise animation
     m_StaticAnimation = FlipBook(CAMERA_ANIM_LAYER, 0.05f, true);
     for (int i = 1; i <= 8; i++) {
-        m_StaticAnimation.AddFrame(
-            Resources::GetTexture("Graphics/Static/Noise" + std::to_string(i) + ".png")
+        auto sprite = std::make_shared<sf::Sprite>(
+            *Resources::GetTexture("Graphics/Static/Noise" + std::to_string(i) + ".png")
         );
+        CoverCameraView(*sprite);
+        m_StaticAnimation.AddFrame(sprite);
     }
     m_StaticAnimation.SetPosition(640.0f, 360.0f);
 }
@@ -212,9 +234,8 @@ void CameraSystem::InitializeCameraOverlays()
         auto tex = Resources::GetTexture("Graphics/CameraSystem/Text/" + filename + ".png");
         if (tex) {
             m_CameraNameSprites[camId] = std::make_shared<sf::Sprite>(*tex);
-            // Position in bottom-left area of the camera view (like the real game)
-            m_CameraNameSprites[camId]->setPosition(100.0f, 600.0f);
-            m_NameBasePositions[camId] = {100.0f, 600.0f};
+            m_CameraNameSprites[camId]->setPosition(CameraRoomNamePosition);
+            m_NameBasePositions[camId] = CameraRoomNamePosition;
         }
     }
 }
@@ -355,6 +376,11 @@ void CameraSystem::SetActiveCamera(const std::string& cameraId)
     }
 }
 
+float CameraSystem::GetCameraPanOffset() const
+{
+    return IsCurrentCameraPannable() ? m_CameraPanOffset : 0.0f;
+}
+
 void CameraSystem::ShowCameraView(const std::string& cameraId)
 {
     // Validate camera ID exists
@@ -448,6 +474,12 @@ void CameraSystem::HideAllCameraElements()
 void CameraSystem::UpdateCameraMovement(double deltaTime)
 {
     if (!m_IsActive || m_IsAnimatingOpen || m_IsAnimatingClose) return;
+    if (!IsCurrentCameraPannable()) {
+        m_CameraPanOffset = 0.0f;
+        m_PanDirection = 1.0f;
+        m_PanPauseTimer = 0.0f;
+        return;
+    }
 
     const float panSpeed = 15.0f;   // pixels per second
     const float panMax = 80.0f;     // max drift in each direction from center
@@ -476,7 +508,7 @@ void CameraSystem::UpdateCameraMovement(double deltaTime)
 
 void CameraSystem::UpdateUIPositions()
 {
-    float offsetX = m_CameraPanOffset;
+    float offsetX = GetCameraPanOffset();
 
     if (m_CameraMapSprite) {
         m_CameraMapSprite->setPosition(m_MapBasePos.x + offsetX, m_MapBasePos.y);
@@ -499,6 +531,11 @@ void CameraSystem::UpdateUIPositions()
 
     // Static animation follows the camera center so it always covers the viewport
     m_StaticAnimation.SetPosition(640.0f + offsetX, 360.0f);
+}
+
+bool CameraSystem::IsCurrentCameraPannable() const
+{
+    return m_CurrentCamera != "6";
 }
 
 void CameraSystem::UpdateCameraViewBasedOnAnimatronics()

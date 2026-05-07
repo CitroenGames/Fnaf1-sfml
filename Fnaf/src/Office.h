@@ -43,6 +43,7 @@ public:
 
 private:
     sf::Sprite m_OfficeSprite;
+    sf::RectangleShape m_PowerOutageDarknessOverlay;
     FlipBook m_LeftDoor, m_RightDoor;
 
     std::shared_ptr<sf::Texture> m_OfficeTexture;
@@ -60,6 +61,7 @@ private:
     bool m_PowerOutage = false;
     float m_FlickerTimer = 0.0f;
     bool m_FlickerState = false;  // false=NoPower1, true=NoPower2
+    bool m_DarknessOverlayVisible = false;
 
     ImageButton m_FreddyNoseButton;
 
@@ -80,4 +82,5 @@ private:
 
     // Power outage handling
     void HandlePowerOutage();
+    void SetDarknessOverlayVisible(bool visible);
 };

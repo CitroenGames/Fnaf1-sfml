@@ -71,7 +71,7 @@ public:
 enum class PowerOutagePhase {
     DARK_WAIT,    // Sit in darkness, 20% chance every 5s to advance (max 20s)
     FREDDY_FACE,  // Freddy appears in left door with music box, same timing
-    LIGHTS_OFF,   // Brief blackout before jumpscare
+    LIGHTS_OFF,   // Full blackout, 20% chance every 2s to jumpscare (max 20s)
     JUMPSCARE     // Freddy attacks
 };
 
@@ -193,13 +193,15 @@ private:
     bool m_PowerOutage;
     PowerOutagePhase m_PowerOutagePhase;
     float m_PhaseTimer;        // Time spent in current outage phase
-    float m_PhaseCheckTimer;   // Timer for 5-second probability checks
+    float m_PhaseCheckTimer;   // Timer for outage probability checks
     std::mt19937 m_RNG;
     float m_TimeProgress = 0.0f;
     float m_CurrentHourDuration;
     int m_LastHourAIUpdated = 0;
     std::shared_ptr<CameraSystem> m_CameraSystem;
     float m_PowerTickAccumulator = 0.0f;
+    std::shared_ptr<sf::Music> m_PowerOutageJingle;
+    std::vector<std::shared_ptr<sf::Music>> m_ActiveSounds;
 
     // Foxy camera tracking
     bool m_WasCameraUp = false; // Track camera state changes for Foxy cooldown
@@ -221,7 +223,11 @@ private:
     int GetAILevel(int night, const std::string &character);
     float CalculatePowerDrain() const;
     bool IsCameraViewingLocation(Room location) const;
-    void PlaySound(const std::string &soundName) const;
+    void PlaySound(const std::string &soundName);
+    void PlayPowerOutageJingle();
+    void StopPowerOutageJingle();
+    void StopActiveSounds();
+    void CleanupFinishedSounds();
 
     // AI roll check
     bool RollAICheck(int aiLevel);

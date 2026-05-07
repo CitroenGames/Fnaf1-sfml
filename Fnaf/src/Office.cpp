@@ -87,6 +87,9 @@ Office::Office()
 void Office::Init() {
     // Create sprites
     m_OfficeSprite = sf::Sprite(*m_OfficeTexture);
+    m_PowerOutageDarknessOverlay.setSize(sf::Vector2f(1600.0f, 720.0f));
+    m_PowerOutageDarknessOverlay.setPosition(0.0f, 0.0f);
+    m_PowerOutageDarknessOverlay.setFillColor(sf::Color(0, 0, 0, 215));
 
     LayerManager::AddDrawable(OFFICE_LAYER, &m_OfficeSprite);
 
@@ -108,6 +111,9 @@ void Office::Init() {
 
 void Office::HandlePowerOutage() {
     m_PowerOutage = true;
+    m_FlickerTimer = 0.0f;
+    m_FlickerState = false;
+    SetDarknessOverlayVisible(false);
 
     // Switch to power outage texture
     m_OfficeSprite.setTexture(*m_PowerOutageTexture);
@@ -144,6 +150,7 @@ void Office::HideOfficeElements() {
 
     // Remove office sprite from layer manager
     LayerManager::RemoveDrawable(&m_OfficeSprite);
+    LayerManager::RemoveDrawable(&m_PowerOutageDarknessOverlay);
 
     // Remove buttons from layer manager
     m_LeftButtons.SetLayer(-1); // Use a non-visible layer
@@ -159,6 +166,9 @@ void Office::ShowOfficeElements() {
 
     // Add office sprite back to layer manager
     LayerManager::AddDrawable(OFFICE_LAYER, &m_OfficeSprite);
+    if (m_DarknessOverlayVisible) {
+        LayerManager::AddDrawable(UI_LAYER - 1, &m_PowerOutageDarknessOverlay);
+    }
 
     // Add buttons back to layer manager
     m_LeftButtons.SetLayer(BUTTON_LAYER);
@@ -184,6 +194,7 @@ void Office::Update(double deltaTime) {
         auto phase = m_GameRef->GetPowerOutagePhase();
 
         if (phase == PowerOutagePhase::FREDDY_FACE) {
+            SetDarknessOverlayVisible(false);
             m_FlickerTimer += frameDelta;
             if (m_FlickerTimer >= 0.25f) {
                 m_FlickerTimer = 0.0f;
@@ -194,7 +205,26 @@ void Office::Update(double deltaTime) {
         }
         else if (phase == PowerOutagePhase::LIGHTS_OFF || phase == PowerOutagePhase::JUMPSCARE) {
             m_OfficeSprite.setTexture(*m_PowerOutageTexture);
+            SetDarknessOverlayVisible(true);
         }
+        else {
+            SetDarknessOverlayVisible(false);
+        }
+    }
+}
+
+void Office::SetDarknessOverlayVisible(bool visible) {
+    if (m_DarknessOverlayVisible == visible) {
+        return;
+    }
+
+    m_DarknessOverlayVisible = visible;
+    if (visible) {
+        if (m_IsVisible) {
+            LayerManager::AddDrawable(UI_LAYER - 1, &m_PowerOutageDarknessOverlay);
+        }
+    } else {
+        LayerManager::RemoveDrawable(&m_PowerOutageDarknessOverlay);
     }
 }
 

@@ -7,6 +7,10 @@
 namespace {
     constexpr float FREDDY_LAUGH_CHANCE = 0.1f;
     constexpr float BASE_SECONDS_PER_HOUR = 89.0f;
+    constexpr float POWER_OUTAGE_PHASE_MAX_SECONDS = 20.0f;
+    constexpr float POWER_OUTAGE_FACE_CHECK_INTERVAL = 5.0f;
+    constexpr float POWER_OUTAGE_DARK_CHECK_INTERVAL = 2.0f;
+    constexpr float POWER_OUTAGE_ADVANCE_CHANCE = 0.2f;
 
     // Hour-based AI increments - from real FNAF 1
     // At 2AM: Bonnie +1
@@ -102,6 +106,9 @@ FNAFGame::FNAFGame()
 }
 
 void FNAFGame::InitializeGame(int night) {
+    StopPowerOutageJingle();
+    StopActiveSounds();
+
     player.m_Night = night;
     player.m_PowerLevel = INITIAL_POWER_LEVEL;
     player.m_Time = 0;
@@ -110,6 +117,9 @@ void FNAFGame::InitializeGame(int night) {
     m_GameOver = false;
     m_PendingJumpscare = JumpscareType::None;
     m_PowerOutage = false;
+    m_PowerOutagePhase = PowerOutagePhase::DARK_WAIT;
+    m_PhaseTimer = 0.0f;
+    m_PhaseCheckTimer = 0.0f;
     m_LastHourAIUpdated = 0;
     m_PowerTickAccumulator = 0.0f;
 
@@ -134,6 +144,9 @@ void FNAFGame::Update(float deltaTime) {
     const float clampedDelta = std::min(deltaTime, MAX_DELTA_TIME);
 
     UpdatePower(clampedDelta);
+    CleanupFinishedSounds();
+
+    if (m_GameOver) return;
 
     // Calculate hour progress with time acceleration
     const float acceleratedDelta =
@@ -148,6 +161,10 @@ void FNAFGame::Update(float deltaTime) {
             m_GameOver = true;
             return;
         }
+    }
+
+    if (m_PowerOutage) {
+        return;
     }
 
     UpdateAnimatronics(clampedDelta);
@@ -176,6 +193,7 @@ void FNAFGame::UpdatePower(float deltaTime) {
             player.m_RightLightOn = false;
             player.UpdateUsageLevel();
 
+            PlaySound("Office/powerdown");
             GameEvents::TriggerEvent(GameEvent::POWER_OUTAGE);
         }
         return;
@@ -548,6 +566,11 @@ void FNAFGame::TriggerJumpscare(const Animatronic &character) {
         m_PendingJumpscare = JumpscareType::FreddyInOffice;
     }
 
+    if (m_PendingJumpscare == JumpscareType::FreddyPowerOut) {
+        StopPowerOutageJingle();
+        StopActiveSounds();
+    }
+
     m_GameOver = true;
     GameEvents::TriggerEvent(GameEvent::JUMPSCARE);
 }
@@ -563,6 +586,8 @@ void FNAFGame::DebugTriggerJumpscare(JumpscareType type) {
     if (type == JumpscareType::FreddyPowerOut) {
         m_PowerOutage = true;
         m_PowerOutagePhase = PowerOutagePhase::JUMPSCARE;
+        StopPowerOutageJingle();
+        StopActiveSounds();
     }
 
     GameEvents::TriggerEvent(GameEvent::JUMPSCARE);
@@ -581,30 +606,46 @@ void FNAFGame::HandlePowerOutage(float deltaTime) {
     switch (m_PowerOutagePhase) {
         case PowerOutagePhase::DARK_WAIT:
             // Every 5 seconds, 20% chance to advance. Force advance at 20s.
-            if (m_PhaseTimer >= 20.0f || (m_PhaseCheckTimer >= 5.0f && chance(m_RNG) < 0.2f)) {
+            if (m_PhaseTimer >= POWER_OUTAGE_PHASE_MAX_SECONDS ||
+                (m_PhaseCheckTimer >= POWER_OUTAGE_FACE_CHECK_INTERVAL &&
+                 chance(m_RNG) < POWER_OUTAGE_ADVANCE_CHANCE)) {
                 m_PowerOutagePhase = PowerOutagePhase::FREDDY_FACE;
                 m_PhaseTimer = 0.0f;
                 m_PhaseCheckTimer = 0.0f;
-                PlaySound("music_box");
+                PlayPowerOutageJingle();
             }
-            if (m_PhaseCheckTimer >= 5.0f) m_PhaseCheckTimer = 0.0f;
+            if (m_PhaseCheckTimer >= POWER_OUTAGE_FACE_CHECK_INTERVAL) m_PhaseCheckTimer = 0.0f;
             break;
 
         case PowerOutagePhase::FREDDY_FACE:
             // Every 5 seconds, 20% chance to advance. Force advance at 20s.
-            if (m_PhaseTimer >= 20.0f || (m_PhaseCheckTimer >= 5.0f && chance(m_RNG) < 0.2f)) {
+            if (m_PhaseTimer >= POWER_OUTAGE_PHASE_MAX_SECONDS ||
+                (m_PhaseCheckTimer >= POWER_OUTAGE_FACE_CHECK_INTERVAL &&
+                 chance(m_RNG) < POWER_OUTAGE_ADVANCE_CHANCE)) {
                 m_PowerOutagePhase = PowerOutagePhase::LIGHTS_OFF;
                 m_PhaseTimer = 0.0f;
                 m_PhaseCheckTimer = 0.0f;
+                StopPowerOutageJingle();
             }
-            if (m_PhaseCheckTimer >= 5.0f) m_PhaseCheckTimer = 0.0f;
+            if (m_PhaseCheckTimer >= POWER_OUTAGE_FACE_CHECK_INTERVAL) m_PhaseCheckTimer = 0.0f;
             break;
 
         case PowerOutagePhase::LIGHTS_OFF:
-            // Brief blackout then jumpscare
-            if (m_PhaseTimer >= 0.5f) {
+            // Every 2 seconds, 20% chance to attack. Failed rolls get a footstep cue.
+            if (m_PhaseTimer >= POWER_OUTAGE_PHASE_MAX_SECONDS) {
                 m_PowerOutagePhase = PowerOutagePhase::JUMPSCARE;
                 TriggerJumpscare(*m_Animatronics["Freddy"]);
+                break;
+            }
+
+            if (m_PhaseCheckTimer >= POWER_OUTAGE_DARK_CHECK_INTERVAL) {
+                m_PhaseCheckTimer = 0.0f;
+                if (chance(m_RNG) < POWER_OUTAGE_ADVANCE_CHANCE) {
+                    m_PowerOutagePhase = PowerOutagePhase::JUMPSCARE;
+                    TriggerJumpscare(*m_Animatronics["Freddy"]);
+                } else {
+                    PlaySound("deep steps");
+                }
             }
             break;
 
@@ -662,11 +703,48 @@ void FNAFGame::InitializeCustomNight(AILevels _AILevels) {
     m_Animatronics["Foxy"]->aiLevel = validateLevel(_AILevels.foxy);
 }
 
-void FNAFGame::PlaySound(const std::string &soundName) const {
+void FNAFGame::PlaySound(const std::string &soundName) {
+    CleanupFinishedSounds();
+
     auto sound = Resources::GetMusic("Audio/" + soundName + ".wav");
     if (sound) {
+        sound->setLoop(false);
         sound->play();
+        m_ActiveSounds.push_back(sound);
     }
+}
+
+void FNAFGame::PlayPowerOutageJingle() {
+    StopPowerOutageJingle();
+
+    m_PowerOutageJingle = Resources::GetMusic("Audio/music_box.wav");
+    if (m_PowerOutageJingle) {
+        m_PowerOutageJingle->setLoop(false);
+        m_PowerOutageJingle->setVolume(100.0f);
+        m_PowerOutageJingle->play();
+    }
+}
+
+void FNAFGame::StopPowerOutageJingle() {
+    if (m_PowerOutageJingle) {
+        m_PowerOutageJingle->stop();
+        m_PowerOutageJingle.reset();
+    }
+}
+
+void FNAFGame::StopActiveSounds() {
+    for (auto &sound : m_ActiveSounds) {
+        if (sound) {
+            sound->stop();
+        }
+    }
+    m_ActiveSounds.clear();
+}
+
+void FNAFGame::CleanupFinishedSounds() {
+    std::erase_if(m_ActiveSounds, [](const std::shared_ptr<sf::Music> &sound) {
+        return !sound || sound->getStatus() == sf::Music::Stopped;
+    });
 }
 
 bool FNAFGame::IsCameraViewingLocation(Room location) const {
