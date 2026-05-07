@@ -24,6 +24,20 @@ endif()
 
 # Handle Assets directory differently depending on platform
 if(WIN32)
+    if(TARGET SDL3::SDL3)
+        add_custom_command(
+            TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE:SDL3::SDL3>
+                $<TARGET_FILE_DIR:${PROJECT_NAME}>
+            COMMAND ${CMAKE_COMMAND} -E rm -f
+                $<TARGET_FILE_DIR:${PROJECT_NAME}>/openal32.dll
+            COMMENT "Copying SDL3 runtime to build location"
+            VERBATIM
+        )
+    endif()
+
     # On Windows, copy the assets
     add_custom_command(
         TARGET ${PROJECT_NAME}

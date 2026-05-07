@@ -25,12 +25,12 @@ add_library(${PROJECT_NAME} STATIC ${ENGINE_SOURCES})
 target_precompile_headers(${PROJECT_NAME} PUBLIC src/pch.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
+target_include_directories(${PROJECT_NAME} PRIVATE
+    deps/stb
+)
 
 set(LIBRARIES     
-    sfml-system 
-    sfml-window 
-    sfml-graphics 
-    sfml-network 
+    SDL3::SDL3
     miniaudio
     imgui
     ECS

@@ -4,6 +4,7 @@
 #include <chrono>
 
 #include "Scene/SceneManager.h"
+#include "Assets/Resources.h"
 #include "Graphics/LayerManager.h"
 #include "imgui/imgui-SFML.h"
 #include "Utils/Profiler.h"
@@ -77,6 +78,7 @@ void Application::Destroy() {
     LayerManager::Clear();
     SceneManager::Destroy();
     ImGui::SFML::Shutdown();
+    Resources::Unload();
     Window::Destroy();
     PROFILE_END();
 }
