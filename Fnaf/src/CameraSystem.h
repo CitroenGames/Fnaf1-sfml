@@ -85,4 +85,5 @@ private:
     std::shared_ptr<AudioClip> m_CameraOpenSound;
     std::shared_ptr<AudioClip> m_CameraCloseSound;
     std::shared_ptr<AudioClip> m_CameraSwitchSound;
+    std::shared_ptr<AudioClip> m_CameraMonitorUpSound;
 };

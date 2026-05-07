@@ -178,11 +178,21 @@ void AudioClip::play() {
         return;
     }
 
-    if (ma_sound_at_end(&m_Impl->sound)) {
-        ma_sound_seek_to_pcm_frame(&m_Impl->sound, 0);
+    ma_result result = ma_sound_stop(&m_Impl->sound);
+    if (result != MA_SUCCESS) {
+        std::cerr << "AudioClip: failed to stop before replaying " << m_Impl->debugName << ": "
+                  << ma_result_description(result) << std::endl;
+        return;
     }
 
-    const ma_result result = ma_sound_start(&m_Impl->sound);
+    result = ma_sound_seek_to_pcm_frame(&m_Impl->sound, 0);
+    if (result != MA_SUCCESS) {
+        std::cerr << "AudioClip: failed to rewind " << m_Impl->debugName << ": "
+                  << ma_result_description(result) << std::endl;
+        return;
+    }
+
+    result = ma_sound_start(&m_Impl->sound);
     if (result != MA_SUCCESS) {
         std::cerr << "AudioClip: failed to start " << m_Impl->debugName << ": "
                   << ma_result_description(result) << std::endl;

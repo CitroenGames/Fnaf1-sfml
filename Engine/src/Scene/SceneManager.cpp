@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 
 #include "Audio/AudioManager.h"
+#include "Core/Window.h"
 
 namespace {
     std::shared_ptr<Scene> g_ActiveScene;
@@ -50,6 +51,8 @@ void SceneManager::SwitchSceneNow(std::shared_ptr<Scene> queuedScene) {
     }
 
     g_ActiveScene = queuedScene;
+    Window::UpdateViewport();
+
     if (g_ActiveScene) {
         g_ActiveScene->Init();
     }

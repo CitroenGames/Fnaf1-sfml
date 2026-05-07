@@ -53,6 +53,8 @@ void CameraSystem::Init()
     m_CameraOpenSound = Resources::GetMusic("Audio/CameraSystem/Camera_Open.wav");
     m_CameraCloseSound = Resources::GetMusic("Audio/CameraSystem/Camera_Close.wav");
     m_CameraSwitchSound = Resources::GetMusic("Audio/CameraSystem/Camera_Switch.wav");
+    m_CameraMonitorUpSound = Resources::GetMusic("Audio/CameraSystem/MiniDV_Tape_Eject_1.wav");
+    m_CameraMonitorUpSound->setLoop(true);
 
     // Force-close camera when power runs out
     GameEvents::Subscribe(GameEvent::POWER_OUTAGE, [this]() {
@@ -266,6 +268,7 @@ void CameraSystem::Update(double deltaTime)
         m_StaticAnimation.Play();
         UpdateCameraViewBasedOnAnimatronics();
         ShowCameraOverlays();
+        m_CameraMonitorUpSound->play();
     }
 
     // Handle close animation completion
@@ -331,6 +334,7 @@ void CameraSystem::ToggleCamera()
     else {
         // Play camera close sound
         m_CameraCloseSound->play();
+        m_CameraMonitorUpSound->stop();
 
         m_IsAnimatingClose = true;
 
@@ -358,6 +362,7 @@ void CameraSystem::ForceClose()
     m_IsAnimatingClose = false;
 
     HideAllCameraElements();
+    m_CameraMonitorUpSound->stop();
     m_CameraFlipAnimation.Stop();
     m_CameraFlipAnimation.UnregisterFromLayerManager();
 
@@ -551,6 +556,7 @@ void CameraSystem::Destroy()
 {
     // Make sure to clean up everything when the scene is destroyed
     HideAllCameraElements();
+    m_CameraMonitorUpSound->stop();
 
     // Cleanup all animations
     m_CameraFlipAnimation.Cleanup();
