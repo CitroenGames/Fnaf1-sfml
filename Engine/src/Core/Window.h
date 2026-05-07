@@ -4,7 +4,6 @@
 #include <string>
 
 #include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/View.hpp>
 
 constexpr float VIEWPORT_WIDTH = 1280.0f;
 constexpr float VIEWPORT_HEIGHT = 720.0f;
@@ -17,11 +16,5 @@ public:
 
     static void Destroy();
 
-    static std::shared_ptr<sf::RenderWindow> GetWindow() {
-        return m_Window;
-    }
-
-private:
-    static std::shared_ptr<sf::RenderWindow> m_Window;
-    static sf::View m_GameView;
+    static std::shared_ptr<sf::RenderWindow> GetWindow();
 };

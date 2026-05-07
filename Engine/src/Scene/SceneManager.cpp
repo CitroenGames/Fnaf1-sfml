@@ -2,71 +2,73 @@
 
 #include "Audio/AudioManager.h"
 
-std::shared_ptr<Scene> SceneManager::m_ActiveScene = nullptr;
-std::shared_ptr<Scene> SceneManager::m_QueuedScene = nullptr;
+namespace {
+    std::shared_ptr<Scene> g_ActiveScene;
+    std::shared_ptr<Scene> g_QueuedScene;
+}
 
 void SceneManager::Update(double deltaTime) {
-    if (m_QueuedScene) {
-        SwitchSceneNow(m_QueuedScene);
-        m_QueuedScene = nullptr;
+    if (g_QueuedScene) {
+        SwitchSceneNow(g_QueuedScene);
+        g_QueuedScene = nullptr;
     }
 
-    if (m_ActiveScene) {
-        m_ActiveScene->Update(deltaTime);
+    if (g_ActiveScene) {
+        g_ActiveScene->Update(deltaTime);
     }
 }
 
 void SceneManager::FixedUpdate() {
-    if (m_ActiveScene) {
-        m_ActiveScene->FixedUpdate();
+    if (g_ActiveScene) {
+        g_ActiveScene->FixedUpdate();
     }
 }
 
 void SceneManager::Render() {
-    if (m_ActiveScene) {
-        m_ActiveScene->Render();
+    if (g_ActiveScene) {
+        g_ActiveScene->Render();
     }
 }
 
 void SceneManager::QueueSwitchScene(std::shared_ptr<Scene> scene) {
-    if (m_QueuedScene && m_QueuedScene != scene && m_QueuedScene != m_ActiveScene) {
-        m_QueuedScene->Destroy();
-        m_QueuedScene.reset();
+    if (g_QueuedScene && g_QueuedScene != scene && g_QueuedScene != g_ActiveScene) {
+        g_QueuedScene->Destroy();
+        g_QueuedScene.reset();
     }
 
-    m_QueuedScene = scene;
+    g_QueuedScene = scene;
 }
 
 void SceneManager::SwitchSceneNow(std::shared_ptr<Scene> queuedScene) {
-    if (m_ActiveScene == queuedScene) return;
+    if (g_ActiveScene == queuedScene) return;
 
     AudioManager::GetInstance().StopAllAudio();
 
-    if (m_ActiveScene) {
-        m_ActiveScene->Destroy();
-        m_ActiveScene.reset();
+    if (g_ActiveScene) {
+        g_ActiveScene->Destroy();
+        g_ActiveScene.reset();
     }
 
-    m_ActiveScene = queuedScene;
-    if (m_ActiveScene) {
-        m_ActiveScene->Init();
+    g_ActiveScene = queuedScene;
+    if (g_ActiveScene) {
+        g_ActiveScene->Init();
     }
 }
 
 std::shared_ptr<Scene> SceneManager::GetActiveScene() {
-    return m_ActiveScene;
+    return g_ActiveScene;
 }
 
 void SceneManager::Destroy() {
-    if (m_QueuedScene) {
-        if (m_QueuedScene != m_ActiveScene) {
-            m_QueuedScene->Destroy();
+    if (g_QueuedScene) {
+        if (g_QueuedScene != g_ActiveScene) {
+            g_QueuedScene->Destroy();
         }
-        m_QueuedScene.reset();
+        g_QueuedScene.reset();
     }
 
-    if (m_ActiveScene) {
-        m_ActiveScene->Destroy();
-        m_ActiveScene.reset();
+    if (g_ActiveScene) {
+        g_ActiveScene->Destroy();
+        g_ActiveScene.reset();
     }
 }

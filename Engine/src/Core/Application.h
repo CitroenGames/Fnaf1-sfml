@@ -1,9 +1,6 @@
 #pragma once
 
-#include <memory>
 #include <string>
-
-#include <SFML/Graphics/RenderWindow.hpp>
 
 class Application {
 public:
@@ -12,7 +9,4 @@ public:
     static void Run();
 
     static void Destroy();
-
-private:
-    static std::shared_ptr<sf::RenderWindow> m_Window;
 };

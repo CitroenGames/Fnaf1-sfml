@@ -1,29 +1,32 @@
 #include "Window.h"
 
+#include <SFML/Graphics/View.hpp>
 #include <SFML/Window/VideoMode.hpp>
 
-std::shared_ptr<sf::RenderWindow> Window::m_Window = nullptr;
-sf::View Window::m_GameView;
+namespace {
+    std::shared_ptr<sf::RenderWindow> g_Window;
+    sf::View g_GameView;
+}
 
 std::shared_ptr<sf::RenderWindow> Window::Init(int width, int height, const std::string &title) {
-    if (m_Window) {
-        return m_Window;
+    if (g_Window) {
+        return g_Window;
     }
 
-    m_Window = std::make_shared<sf::RenderWindow>(sf::VideoMode(width, height), title);
-    m_GameView.setSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+    g_Window = std::make_shared<sf::RenderWindow>(sf::VideoMode(width, height), title);
+    g_GameView.setSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 
-    m_GameView.setCenter(sf::Vector2f(VIEWPORT_WIDTH / 2.0f, VIEWPORT_HEIGHT / 2.0f));
-    m_Window->setView(m_GameView);
-    return m_Window;
+    g_GameView.setCenter(sf::Vector2f(VIEWPORT_WIDTH / 2.0f, VIEWPORT_HEIGHT / 2.0f));
+    g_Window->setView(g_GameView);
+    return g_Window;
 }
 
 void Window::UpdateViewport() {
-    if (!m_Window) {
+    if (!g_Window) {
         return;
     }
 
-    const sf::Vector2u windowSize = m_Window->getSize();
+    const sf::Vector2u windowSize = g_Window->getSize();
     if (windowSize.x == 0 || windowSize.y == 0) {
         return;
     }
@@ -42,21 +45,24 @@ void Window::UpdateViewport() {
         viewHeight = viewWidth / windowAspectRatio;
     }
 
-    // Keep the current camera position when updating the viewport
-    const sf::Vector2f currentCenter = m_GameView.getCenter();
-    m_GameView.setSize(viewWidth, viewHeight);
-    m_GameView.setCenter(currentCenter);
-    m_Window->setView(m_GameView);
+    const sf::Vector2f currentCenter = g_GameView.getCenter();
+    g_GameView.setSize(viewWidth, viewHeight);
+    g_GameView.setCenter(currentCenter);
+    g_Window->setView(g_GameView);
 }
 
 void Window::Destroy() {
-    if (!m_Window) {
+    if (!g_Window) {
         return;
     }
 
-    if (m_Window->isOpen()) {
-        m_Window->close();
+    if (g_Window->isOpen()) {
+        g_Window->close();
     }
 
-    m_Window.reset();
+    g_Window.reset();
+}
+
+std::shared_ptr<sf::RenderWindow> Window::GetWindow() {
+    return g_Window;
 }

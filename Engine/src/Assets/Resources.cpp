@@ -1,47 +1,60 @@
 #include "Resources.h"
 
+#include <cstdint>
 #include <iostream>
+#include <map>
+#include <memory>
+#include <vector>
 
-std::string Resources::m_PakFile;
-Pakker *Resources::m_PakHandler = nullptr;
-std::map<std::string, std::shared_ptr<sf::Texture> > Resources::m_Textures;
-std::map<std::string, std::shared_ptr<AudioBuffer> > Resources::m_AudioBuffers;
-std::map<std::string, std::shared_ptr<sf::Font> > Resources::m_Fonts;
-std::map<std::string, std::shared_ptr<std::vector<uint8_t> > > Resources::m_FontBuffers;
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Texture.hpp>
 
-std::shared_ptr<std::vector<uint8_t> > Resources::LoadPakAsset(const std::string &filename,
-                                                               const char *errorPrefix) {
-    if (m_PakHandler == nullptr) {
-        std::cerr << "Resources::Load: Pakker instance not set." << std::endl;
-        return nullptr;
+#include "Audio/AudioClip.h"
+#include "Pak.h"
+
+namespace {
+    std::string g_PakFile;
+    Pakker *g_PakHandler = nullptr;
+
+    std::map<std::string, std::shared_ptr<sf::Texture> > g_Textures;
+    std::map<std::string, std::shared_ptr<AudioBuffer> > g_AudioBuffers;
+    std::map<std::string, std::shared_ptr<sf::Font> > g_Fonts;
+    std::map<std::string, std::shared_ptr<std::vector<uint8_t> > > g_FontBuffers;
+
+    std::shared_ptr<std::vector<uint8_t> > LoadPakAsset(const std::string &filename,
+                                                        const char *errorPrefix) {
+        if (g_PakHandler == nullptr) {
+            std::cerr << "Resources::Load: Pakker instance not set." << std::endl;
+            return nullptr;
+        }
+
+        auto data = g_PakHandler->LoadFile(g_PakFile, filename);
+        if (!data) {
+            std::cerr << errorPrefix << filename << std::endl;
+        }
+
+        return data;
     }
-
-    auto data = m_PakHandler->LoadFile(m_PakFile, filename);
-    if (!data) {
-        std::cerr << errorPrefix << filename << std::endl;
-    }
-
-    return data;
 }
 
 void Resources::BindPakFile(const std::string &pakFilename) {
-    if (m_PakHandler == nullptr) {
+    if (g_PakHandler == nullptr) {
         std::cerr << "Resources::Load: Pakker instance not set." << std::endl;
         return;
     }
-    m_PakFile = pakFilename;
+    g_PakFile = pakFilename;
 }
 
 void Resources::Unload() {
-    m_Textures.clear();
-    m_AudioBuffers.clear();
-    m_Fonts.clear();
-    m_FontBuffers.clear();
+    g_Textures.clear();
+    g_AudioBuffers.clear();
+    g_Fonts.clear();
+    g_FontBuffers.clear();
 }
 
 std::shared_ptr<sf::Texture> Resources::GetTexture(const std::string &filename) {
-    auto textureIt = m_Textures.find(filename);
-    if (textureIt == m_Textures.end()) {
+    auto textureIt = g_Textures.find(filename);
+    if (textureIt == g_Textures.end()) {
         const auto textureData = LoadPakAsset(filename, "Resources::GetTexture: Failed to load texture: ");
         if (!textureData) {
             return nullptr;
@@ -53,15 +66,15 @@ std::shared_ptr<sf::Texture> Resources::GetTexture(const std::string &filename) 
             return nullptr;
         }
 
-        textureIt = m_Textures.emplace(filename, texture).first;
+        textureIt = g_Textures.emplace(filename, texture).first;
     }
 
     return textureIt->second;
 }
 
 std::shared_ptr<AudioClip> Resources::GetMusic(const std::string &filename) {
-    auto bufferIt = m_AudioBuffers.find(filename);
-    if (bufferIt == m_AudioBuffers.end()) {
+    auto bufferIt = g_AudioBuffers.find(filename);
+    if (bufferIt == g_AudioBuffers.end()) {
         const auto musicData = LoadPakAsset(filename, "Resources::GetMusic: Failed to load music: ");
         if (!musicData) {
             return nullptr;
@@ -72,15 +85,15 @@ std::shared_ptr<AudioClip> Resources::GetMusic(const std::string &filename) {
             return nullptr;
         }
 
-        bufferIt = m_AudioBuffers.emplace(filename, std::move(audioBuffer)).first;
+        bufferIt = g_AudioBuffers.emplace(filename, std::move(audioBuffer)).first;
     }
 
     return AudioClip::Create(bufferIt->second, filename);
 }
 
 std::shared_ptr<sf::Font> Resources::GetFont(const std::string &filename) {
-    auto fontIt = m_Fonts.find(filename);
-    if (fontIt == m_Fonts.end()) {
+    auto fontIt = g_Fonts.find(filename);
+    if (fontIt == g_Fonts.end()) {
         const auto fontData = LoadPakAsset(filename, "Resources::GetFont: Failed to load font: ");
         if (!fontData) {
             return nullptr;
@@ -92,27 +105,31 @@ std::shared_ptr<sf::Font> Resources::GetFont(const std::string &filename) {
             return nullptr;
         }
 
-        m_FontBuffers[filename] = fontData;
-        fontIt = m_Fonts.emplace(filename, font).first;
+        g_FontBuffers[filename] = fontData;
+        fontIt = g_Fonts.emplace(filename, font).first;
     }
 
     return fontIt->second;
 }
 
 std::vector<std::string> Resources::ListFiles() {
-    if (m_PakHandler == nullptr) {
+    if (g_PakHandler == nullptr) {
         std::cerr << "Resources::ListFiles: Pakker instance not set." << std::endl;
         return {};
     }
 
-    return m_PakHandler->ListFiles(m_PakFile);
+    return g_PakHandler->ListFiles(g_PakFile);
 }
 
 std::vector<std::string> Resources::ListFilesWithPrefix(const std::string &prefix) {
-    if (m_PakHandler == nullptr) {
+    if (g_PakHandler == nullptr) {
         std::cerr << "Resources::ListFilesWithPrefix: Pakker instance not set." << std::endl;
         return {};
     }
 
-    return m_PakHandler->ListFilesWithPrefix(m_PakFile, prefix);
+    return g_PakHandler->ListFilesWithPrefix(g_PakFile, prefix);
+}
+
+void Resources::SetPakker(Pakker *pakker) {
+    g_PakHandler = pakker;
 }

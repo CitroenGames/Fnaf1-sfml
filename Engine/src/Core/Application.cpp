@@ -1,28 +1,31 @@
-#include "Window.h"
 #include "Application.h"
 
 #include <chrono>
+#include <memory>
 
-#include "Scene/SceneManager.h"
 #include "Assets/Resources.h"
+#include "Core/Window.h"
 #include "Graphics/LayerManager.h"
+#include "Scene/SceneManager.h"
 #include "imgui/imgui-SFML.h"
 #include "Utils/Profiler.h"
 
-std::shared_ptr<sf::RenderWindow> Application::m_Window = nullptr;
+namespace {
+    std::shared_ptr<sf::RenderWindow> g_Window;
 
-constexpr int TICKRATE = 66; // Desired tickrate (ticks per second)
-constexpr double FRAME_TIME = 1.0 / TICKRATE; // Time per tick (seconds)
+    constexpr int TICKRATE = 66;
+    constexpr double FRAME_TIME = 1.0 / TICKRATE;
+}
 
 void Application::Init(int width, int height, const std::string &title) {
-    m_Window = Window::Init(width, height, title);
-    m_Window->setVerticalSyncEnabled(true);
-    ImGui::SFML::Init(*m_Window, true);
+    g_Window = Window::Init(width, height, title);
+    g_Window->setVerticalSyncEnabled(true);
+    ImGui::SFML::Init(*g_Window, true);
     Window::UpdateViewport();
 }
 
 void Application::Run() {
-    if (!m_Window) {
+    if (!g_Window) {
         return;
     }
 
@@ -32,11 +35,11 @@ void Application::Run() {
     sf::Event event;
     sf::Clock deltaClock;
 
-    while (m_Window->isOpen()) {
+    while (g_Window->isOpen()) {
         PROFILE_BEGIN("Application Loop");
-        while (m_Window->pollEvent(event)) {
+        while (g_Window->pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
-                m_Window->close();
+                g_Window->close();
                 break;
             } else if (event.type == sf::Event::Resized) {
                 Window::UpdateViewport();
@@ -49,24 +52,21 @@ void Application::Run() {
         previousTime = currentTime;
         accumulator += elapsedTime.count();
 
-        ImGui::SFML::Update(*m_Window, deltaClock.restart());
+        ImGui::SFML::Update(*g_Window, deltaClock.restart());
 
-        // Fixed Update
         while (accumulator >= FRAME_TIME) {
             SceneManager::FixedUpdate();
             accumulator -= FRAME_TIME;
         }
 
-        // Update
         double deltaTime = elapsedTime.count();
         SceneManager::Update(deltaTime);
 
-        // Render
-        m_Window->clear();
-        LayerManager::Draw(*m_Window);
+        g_Window->clear();
+        LayerManager::Draw(*g_Window);
         SceneManager::Render();
-        ImGui::SFML::Render(*m_Window);
-        m_Window->display();
+        ImGui::SFML::Render(*g_Window);
+        g_Window->display();
         PROFILE_END();
     }
 
@@ -80,5 +80,6 @@ void Application::Destroy() {
     ImGui::SFML::Shutdown();
     Resources::Unload();
     Window::Destroy();
+    g_Window.reset();
     PROFILE_END();
 }

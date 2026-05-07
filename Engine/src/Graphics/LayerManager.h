@@ -1,11 +1,7 @@
 #pragma once
 
-#include <map>
-
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
-
-#include "Graphics/Layer.h"
 
 class LayerManager {
 public:
@@ -18,8 +14,4 @@ public:
     static void Clear();
 
     static void Draw(sf::RenderWindow &window);
-
-private:
-    static std::map<int, Layer> m_Layers;
-    static std::map<const sf::Drawable *, int> m_DrawableToLayer;
 };

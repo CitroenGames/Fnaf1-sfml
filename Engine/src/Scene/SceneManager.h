@@ -19,8 +19,4 @@ public:
     static std::shared_ptr<Scene> GetActiveScene();
 
     static void Destroy();
-
-private:
-    static std::shared_ptr<Scene> m_ActiveScene;
-    static std::shared_ptr<Scene> m_QueuedScene;
 };
