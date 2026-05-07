@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Animation/FlipBook.h"
+#include "Audio/AudioClip.h"
 #include "UI/HUDButton.h"
 #include "Composable.h"
 #include "UI/ImageButton.h"
@@ -81,7 +82,7 @@ private:
     std::shared_ptr<Office> m_OfficeRef;
 
     // Sound effects
-    std::shared_ptr<sf::Music> m_CameraOpenSound;
-    std::shared_ptr<sf::Music> m_CameraCloseSound;
-    std::shared_ptr<sf::Music> m_CameraSwitchSound;
+    std::shared_ptr<AudioClip> m_CameraOpenSound;
+    std::shared_ptr<AudioClip> m_CameraCloseSound;
+    std::shared_ptr<AudioClip> m_CameraSwitchSound;
 };

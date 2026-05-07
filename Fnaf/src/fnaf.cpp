@@ -742,8 +742,8 @@ void FNAFGame::StopActiveSounds() {
 }
 
 void FNAFGame::CleanupFinishedSounds() {
-    std::erase_if(m_ActiveSounds, [](const std::shared_ptr<sf::Music> &sound) {
-        return !sound || sound->getStatus() == sf::Music::Stopped;
+    std::erase_if(m_ActiveSounds, [](const std::shared_ptr<AudioClip> &sound) {
+        return !sound || sound->getStatus() == AudioClip::Status::Stopped;
     });
 }
 

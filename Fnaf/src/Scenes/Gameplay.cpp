@@ -263,7 +263,7 @@ void Gameplay::Update(double deltaTime) {
     Scene::Update(deltaTime);
 
     gameplay->Update(frameDelta);
-    if (gameplay->IsPowerOutage() && m_FanBuzzing && m_FanBuzzing->getStatus() == sf::Music::Playing) {
+    if (gameplay->IsPowerOutage() && m_FanBuzzing && m_FanBuzzing->getStatus() == AudioClip::Status::Playing) {
         m_FanBuzzing->stop();
     }
 

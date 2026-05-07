@@ -20,6 +20,15 @@ if(NOT SFML_FOUND)
         message(FATAL_ERROR "SFML not found. Please install SFML or provide the SFML-2.6.2 directory.")
     endif()
 endif()
+
+set(MINIAUDIO_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(MINIAUDIO_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(MINIAUDIO_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
+set(MINIAUDIO_INSTALL OFF CACHE BOOL "" FORCE)
+set(MINIAUDIO_NO_LIBVORBIS ON CACHE BOOL "" FORCE)
+set(MINIAUDIO_NO_LIBOPUS ON CACHE BOOL "" FORCE)
+add_subdirectory(miniaudio-0.11.25)
+
 add_subdirectory(imgui)
 
 

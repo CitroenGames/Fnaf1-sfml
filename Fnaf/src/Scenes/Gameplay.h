@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Scene/Scene.h"
+#include "Audio/AudioClip.h"
 #include "Components/Camera.h"
 #include "CameraSystem.h"
 #include "Office.h"
@@ -21,11 +22,11 @@ public:
     void Destroy() override;
 
 private:
-    std::shared_ptr<sf::Music> bgaudio1;
-    std::shared_ptr<sf::Music> bgaudio2;
+    std::shared_ptr<AudioClip> bgaudio1;
+    std::shared_ptr<AudioClip> bgaudio2;
 
     // Office ambience currently follows the gameplay scene lifetime.
-    std::shared_ptr<sf::Music> m_FanBuzzing;
+    std::shared_ptr<AudioClip> m_FanBuzzing;
 
     float scrollOffset = 175.0f; // Initial scroll offset
 
@@ -58,7 +59,7 @@ private:
     JumpscareType m_ActiveJumpscare = JumpscareType::None;
     std::vector<std::shared_ptr<sf::Texture>> m_JumpscareFrames;
     sf::Sprite m_JumpscareSprite;
-    std::shared_ptr<sf::Music> m_JumpscareSound;
+    std::shared_ptr<AudioClip> m_JumpscareSound;
     float m_JumpscareFrameTimer = 0.0f;
     float m_JumpscareTotalTimer = 0.0f;
     float m_JumpscareFrameDuration = 1.0f / 30.0f;

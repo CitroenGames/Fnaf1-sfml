@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Audio/AudioClip.h"
+
 using Timestamp = std::chrono::system_clock::time_point;
 
 // Random check ceiling (for 1-20 roll)
@@ -200,8 +202,8 @@ private:
     int m_LastHourAIUpdated = 0;
     std::shared_ptr<CameraSystem> m_CameraSystem;
     float m_PowerTickAccumulator = 0.0f;
-    std::shared_ptr<sf::Music> m_PowerOutageJingle;
-    std::vector<std::shared_ptr<sf::Music>> m_ActiveSounds;
+    std::shared_ptr<AudioClip> m_PowerOutageJingle;
+    std::vector<std::shared_ptr<AudioClip>> m_ActiveSounds;
 
     // Foxy camera tracking
     bool m_WasCameraUp = false; // Track camera state changes for Foxy cooldown

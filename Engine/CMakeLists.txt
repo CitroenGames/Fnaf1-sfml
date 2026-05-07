@@ -31,7 +31,7 @@ set(LIBRARIES
     sfml-window 
     sfml-graphics 
     sfml-network 
-    sfml-audio
+    miniaudio
     imgui
     ECS
     Pakker

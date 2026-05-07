@@ -4,8 +4,7 @@
 #include <string>
 #include <vector>
 
-#include <SFML/Audio/Music.hpp>
-#include <SFML/Audio/Sound.hpp>
+#include "Audio/AudioClip.h"
 
 class AudioManager {
 public:
@@ -20,9 +19,8 @@ public:
 private:
     AudioManager();
 
-    std::shared_ptr<sf::Music> GetMusic(const std::string &id);
-    std::shared_ptr<sf::Sound> GetSound(const std::string &id);
+    std::shared_ptr<AudioClip> GetMusic(const std::string &id);
 
-    std::vector<std::shared_ptr<sf::Music> > m_ActiveMusic;
-    std::vector<std::shared_ptr<sf::Sound> > m_ActiveSounds;
+    std::vector<std::shared_ptr<AudioClip> > m_ActiveMusic;
+    std::vector<std::shared_ptr<AudioClip> > m_ActiveSounds;
 };

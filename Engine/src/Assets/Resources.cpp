@@ -5,8 +5,7 @@
 std::string Resources::m_PakFile;
 Pakker *Resources::m_PakHandler = nullptr;
 std::map<std::string, std::shared_ptr<sf::Texture> > Resources::m_Textures;
-std::map<std::string, std::shared_ptr<sf::SoundBuffer> > Resources::m_SoundBuffers;
-std::map<std::string, std::shared_ptr<std::vector<uint8_t> > > Resources::m_MusicBuffers;
+std::map<std::string, std::shared_ptr<AudioBuffer> > Resources::m_AudioBuffers;
 std::map<std::string, std::shared_ptr<sf::Font> > Resources::m_Fonts;
 std::map<std::string, std::shared_ptr<std::vector<uint8_t> > > Resources::m_FontBuffers;
 
@@ -35,8 +34,7 @@ void Resources::BindPakFile(const std::string &pakFilename) {
 
 void Resources::Unload() {
     m_Textures.clear();
-    m_SoundBuffers.clear();
-    m_MusicBuffers.clear();
+    m_AudioBuffers.clear();
     m_Fonts.clear();
     m_FontBuffers.clear();
 }
@@ -61,44 +59,23 @@ std::shared_ptr<sf::Texture> Resources::GetTexture(const std::string &filename) 
     return textureIt->second;
 }
 
-std::shared_ptr<sf::SoundBuffer> Resources::GetSoundBuffer(const std::string &filename) {
-    auto bufferIt = m_SoundBuffers.find(filename);
-    if (bufferIt == m_SoundBuffers.end()) {
-        const auto soundData = LoadPakAsset(filename, "Resources::GetSoundBuffer: Failed to load sound: ");
-        if (!soundData) {
-            return nullptr;
-        }
-
-        const auto buffer = std::make_shared<sf::SoundBuffer>();
-        if (!buffer->loadFromMemory(soundData->data(), soundData->size())) {
-            std::cerr << "Resources::GetSoundBuffer: Failed to load sound from memory: " << filename << std::endl;
-            return nullptr;
-        }
-
-        bufferIt = m_SoundBuffers.emplace(filename, buffer).first;
-    }
-
-    return bufferIt->second;
-}
-
-std::shared_ptr<sf::Music> Resources::GetMusic(const std::string &filename) {
-    auto bufferIt = m_MusicBuffers.find(filename);
-    if (bufferIt == m_MusicBuffers.end()) {
+std::shared_ptr<AudioClip> Resources::GetMusic(const std::string &filename) {
+    auto bufferIt = m_AudioBuffers.find(filename);
+    if (bufferIt == m_AudioBuffers.end()) {
         const auto musicData = LoadPakAsset(filename, "Resources::GetMusic: Failed to load music: ");
         if (!musicData) {
             return nullptr;
         }
 
-        bufferIt = m_MusicBuffers.emplace(filename, musicData).first;
+        auto audioBuffer = AudioBuffer::CreateFromMemory(musicData->data(), musicData->size(), filename);
+        if (!audioBuffer) {
+            return nullptr;
+        }
+
+        bufferIt = m_AudioBuffers.emplace(filename, std::move(audioBuffer)).first;
     }
 
-    auto music = std::make_shared<sf::Music>();
-    if (!music->openFromMemory(bufferIt->second->data(), bufferIt->second->size())) {
-        std::cerr << "Resources::GetMusic: Failed to open music from memory: " << filename << std::endl;
-        return nullptr;
-    }
-
-    return music;
+    return AudioClip::Create(bufferIt->second, filename);
 }
 
 std::shared_ptr<sf::Font> Resources::GetFont(const std::string &filename) {

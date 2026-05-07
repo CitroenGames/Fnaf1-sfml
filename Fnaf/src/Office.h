@@ -2,6 +2,7 @@
 
 #include "Composable.h"
 #include "nlohmann/json.hpp"
+#include "Audio/AudioClip.h"
 #include "UI/TopBottomButtons.h"
 #include "Animation/FlipBook.h"
 #include "fnaf.hpp"
@@ -67,9 +68,9 @@ private:
 
     TopBottomButtons m_LeftButtons, m_RightButtons;
 
-    std::shared_ptr<sf::Music> m_FreddyNose;
-    std::shared_ptr<sf::Music> m_DoorNoise;
-    std::shared_ptr<sf::Music> m_LightSound;
+    std::shared_ptr<AudioClip> m_FreddyNose;
+    std::shared_ptr<AudioClip> m_DoorNoise;
+    std::shared_ptr<AudioClip> m_LightSound;
     bool m_IsVisible;
 
     // Game reference for power system integration

@@ -136,7 +136,7 @@ void Office::HandlePowerOutage() {
     player.UpdateUsageLevel();
 
     // Stop light sound if playing
-    if (m_LightSound->getStatus() == sf::Music::Playing) {
+    if (m_LightSound->getStatus() == AudioClip::Status::Playing) {
         m_LightSound->stop();
     }
 
@@ -267,7 +267,7 @@ void Office::ToggleLeftLight(bool active) {
         }
 
         // Start looping light sound
-        if (m_LightSound->getStatus() != sf::Music::Playing) {
+        if (m_LightSound->getStatus() != AudioClip::Status::Playing) {
             m_LightSound->play();
         }
     } else {
@@ -309,7 +309,7 @@ void Office::ToggleRightLight(bool active) {
         }
 
         // Start looping light sound
-        if (m_LightSound->getStatus() != sf::Music::Playing) {
+        if (m_LightSound->getStatus() != AudioClip::Status::Playing) {
             m_LightSound->play();
         }
     } else {

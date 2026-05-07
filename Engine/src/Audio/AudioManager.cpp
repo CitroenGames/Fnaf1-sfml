@@ -17,8 +17,9 @@ void AudioManager::PlayMusic(const std::string &id, bool loop, float volume) {
 }
 
 void AudioManager::PlaySFX(const std::string &id, float volume) {
-    if (const auto sound = GetSound(id)) {
+    if (const auto sound = GetMusic(id)) {
         sound->setVolume(volume);
+        sound->setLoop(false);
         sound->play();
         m_ActiveSounds.push_back(sound);
     }
@@ -53,11 +54,6 @@ void AudioManager::Preload() {
 AudioManager::AudioManager() {
 }
 
-std::shared_ptr<sf::Music> AudioManager::GetMusic(const std::string &id) {
+std::shared_ptr<AudioClip> AudioManager::GetMusic(const std::string &id) {
     return Resources::GetMusic(id);
-}
-
-std::shared_ptr<sf::Sound> AudioManager::GetSound(const std::string &id) {
-    (void) id;
-    return nullptr;
 }
