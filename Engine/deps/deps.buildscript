@@ -1,0 +1,7 @@
+include = SDL3-3.4.4/sdl3.buildscript
+include = miniaudio-0.11.25/miniaudio.buildscript
+include = imgui-1.92.7/imgui.buildscript
+include = Pakker/Pakker.buildscript
+include = ECS/deps/json-3.11.3/nlohmann_json.buildscript
+include = ECS/ECS.buildscript
+include = FunctionSpeaker/FunctionSpeaker.buildscript

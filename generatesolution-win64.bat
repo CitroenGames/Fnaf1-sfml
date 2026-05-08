@@ -1,2 +1,3 @@
-cmake -B build
+@echo off
+sighmake Fnaf-SFML.buildscript
 pause

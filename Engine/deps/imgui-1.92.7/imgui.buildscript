@@ -1,0 +1,32 @@
+[project:imgui]
+type = lib
+sources = {
+    imgui.cpp
+    imgui_demo.cpp
+    imgui_draw.cpp
+    imgui_tables.cpp
+    imgui_widgets.cpp
+    backends/imgui_impl_sdl3.cpp
+    backends/imgui_impl_sdlrenderer3.cpp
+}
+headers = *.h, backends/*.h
+includes = ., backends
+public_includes = ., backends
+std = 20
+
+outdir[Debug|x64] = ../../../build/lib/Debug
+outdir[Release|x64] = ../../../build/lib/Release
+intdir[Debug|x64] = ../../../build/obj/imgui/Debug
+intdir[Release|x64] = ../../../build/obj/imgui/Release
+
+outdir[Debug|Linux] = ../../../build/lib/Debug
+outdir[Release|Linux] = ../../../build/lib/Release
+intdir[Debug|Linux] = ../../../build/obj/imgui/Debug
+intdir[Release|Linux] = ../../../build/obj/imgui/Release
+
+outdir[Debug|macOS] = ../../../build/lib/Debug
+outdir[Release|macOS] = ../../../build/lib/Release
+intdir[Debug|macOS] = ../../../build/obj/imgui/Debug
+intdir[Release|macOS] = ../../../build/obj/imgui/Release
+
+target_link_libraries(PUBLIC SDL3)

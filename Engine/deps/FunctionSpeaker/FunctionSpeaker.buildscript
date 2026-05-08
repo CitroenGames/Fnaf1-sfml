@@ -1,0 +1,22 @@
+[project:FunctionSpeaker]
+type = lib
+sources = src/**/*.cpp
+headers = src/**/*.h, src/**/*.hpp
+includes = src
+public_includes = src
+std = 20
+
+outdir[Debug|x64] = ../../../build/lib/Debug
+outdir[Release|x64] = ../../../build/lib/Release
+intdir[Debug|x64] = ../../../build/obj/FunctionSpeaker/Debug
+intdir[Release|x64] = ../../../build/obj/FunctionSpeaker/Release
+
+outdir[Debug|Linux] = ../../../build/lib/Debug
+outdir[Release|Linux] = ../../../build/lib/Release
+intdir[Debug|Linux] = ../../../build/obj/FunctionSpeaker/Debug
+intdir[Release|Linux] = ../../../build/obj/FunctionSpeaker/Release
+
+outdir[Debug|macOS] = ../../../build/lib/Debug
+outdir[Release|macOS] = ../../../build/lib/Release
+intdir[Debug|macOS] = ../../../build/obj/FunctionSpeaker/Debug
+intdir[Release|macOS] = ../../../build/obj/FunctionSpeaker/Release

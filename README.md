@@ -28,7 +28,7 @@ To get started with the game on Linux, follow these steps:
 
    ```bash
     sudo apt update
-    sudo apt install build-essential cmake glew-utils libglew-dev libsfml-dev libopenal-dev libsndfile1
+    sudo apt install build-essential glew-utils libglew-dev libsfml-dev libopenal-dev libsndfile1
    ```
 
    This will install the necessary packages:
@@ -49,16 +49,24 @@ To get started with the game on Linux, follow these steps:
 
 ### Build Instructions for macOS
 
-Install Xcode Command Line Tools and CMake, then run:
+Install Xcode Command Line Tools and sighmake, then run:
 
 ```bash
 xcode-select --install
-brew install cmake
 ./generatesolution-macos.sh
 ```
 
 The executable is written to:
 
 ```bash
-build/bin/Fnaf-SFML
+build/bin/Release/Fnaf-SFML
 ```
+
+### Build Instructions for Windows
+
+```bat
+generatesolution-win64.bat
+sighmake --build . --config Release --parallel 8
+```
+
+The executable is written to `build\bin\Release\Fnaf-SFML.exe`.

@@ -13,3 +13,9 @@ imgui.ini
 /profile_results.json
 /cmake-build-*
 .DS_Store
+.sighmake_cache
+*.sln
+*.slnx
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user

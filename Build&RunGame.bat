@@ -2,15 +2,15 @@
 echo Building Fnaf-SFML project...
 echo.
 
-REM Build the project
-cmake -B build
+REM Generate and build the project
+sighmake Fnaf-SFML.buildscript
 if %ERRORLEVEL% NEQ 0 (
-    echo CMake configuration failed!
+    echo sighmake generation failed!
     pause
     exit /b 1
 )
 
-cmake --build build --config Release
+sighmake --build . --config Release --parallel 8
 if %ERRORLEVEL% NEQ 0 (
     echo Build failed!
     pause
@@ -23,23 +23,12 @@ echo Starting game...
 echo.
 
 REM Run the executable
-cd build\bin
-if exist "Fnaf-SFML.exe" (
-    start "Fnaf-SFML" "Fnaf-SFML.exe"
+if exist "build\bin\Release\Fnaf-SFML.exe" (
+    start "Fnaf-SFML" "build\bin\Release\Fnaf-SFML.exe"
 ) else (
-    echo Error: Fnaf-SFML.exe not found in build\bin directory
-    echo Checking for executable in other locations...
-    if exist "Release\Fnaf-SFML.exe" (
-        cd Release
-        start "Fnaf-SFML" "Fnaf-SFML.exe"
-    ) else if exist "..\Release\Fnaf-SFML.exe" (
-        cd ..\Release
-        start "Fnaf-SFML" "Fnaf-SFML.exe"
-    ) else (
-        echo Could not find executable. Please check build output.
-        pause
-        exit /b 1
-    )
+    echo Could not find build\bin\Release\Fnaf-SFML.exe. Please check build output.
+    pause
+    exit /b 1
 )
 
 echo Game launched!

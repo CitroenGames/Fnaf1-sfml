@@ -1,0 +1,24 @@
+[project:ECS]
+type = lib
+sources = src/**/*.cpp
+headers = src/**/*.h, src/**/*.hpp
+includes = src
+public_includes = src
+std = 20
+
+outdir[Debug|x64] = ../../../build/lib/Debug
+outdir[Release|x64] = ../../../build/lib/Release
+intdir[Debug|x64] = ../../../build/obj/ECS/Debug
+intdir[Release|x64] = ../../../build/obj/ECS/Release
+
+outdir[Debug|Linux] = ../../../build/lib/Debug
+outdir[Release|Linux] = ../../../build/lib/Release
+intdir[Debug|Linux] = ../../../build/obj/ECS/Debug
+intdir[Release|Linux] = ../../../build/obj/ECS/Release
+
+outdir[Debug|macOS] = ../../../build/lib/Debug
+outdir[Release|macOS] = ../../../build/lib/Release
+intdir[Debug|macOS] = ../../../build/obj/ECS/Debug
+intdir[Release|macOS] = ../../../build/obj/ECS/Release
+
+target_link_libraries(PUBLIC nlohmann_json)

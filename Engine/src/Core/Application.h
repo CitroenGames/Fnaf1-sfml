@@ -18,6 +18,11 @@ public:
 
     static void Init(int width = 1280, int height = 720, const std::string &title = "Window");
     static void Init(const Config &config);
+    static Config NativeResolutionConfig(
+        int width,
+        int height,
+        const std::string &title,
+        int fixedTickRate = 60);
 
     static void Run();
 

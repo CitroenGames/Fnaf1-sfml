@@ -1,0 +1,36 @@
+[project:Engine]
+type = lib
+sources = src/**/*.cpp
+headers = src/**/*.h, src/**/*.hpp
+includes = src, deps/stb
+public_includes = src
+forced_includes[x64] = pch.h
+cflags[x64] = /FS
+cflags[Linux] = -include pch.h
+cflags[macOS] = -include pch.h
+std = 20
+
+outdir[Debug|x64] = ../build/lib/Debug
+outdir[Release|x64] = ../build/lib/Release
+intdir[Debug|x64] = ../build/obj/Engine/Debug
+intdir[Release|x64] = ../build/obj/Engine/Release
+
+outdir[Debug|Linux] = ../build/lib/Debug
+outdir[Release|Linux] = ../build/lib/Release
+intdir[Debug|Linux] = ../build/obj/Engine/Debug
+intdir[Release|Linux] = ../build/obj/Engine/Release
+
+outdir[Debug|macOS] = ../build/lib/Debug
+outdir[Release|macOS] = ../build/lib/Release
+intdir[Debug|macOS] = ../build/obj/Engine/Debug
+intdir[Release|macOS] = ../build/obj/Engine/Release
+
+target_link_libraries(
+    PUBLIC
+        SDL3
+        miniaudio
+        imgui
+        ECS
+        Pakker
+        FunctionSpeaker
+)

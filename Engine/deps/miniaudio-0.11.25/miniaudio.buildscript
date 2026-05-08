@@ -1,0 +1,30 @@
+[project:miniaudio]
+type = lib
+sources = miniaudio.c
+headers = miniaudio.h
+includes = .
+public_includes = .
+
+outdir[Debug|x64] = ../../../build/lib/Debug
+outdir[Release|x64] = ../../../build/lib/Release
+intdir[Debug|x64] = ../../../build/obj/miniaudio/Debug
+intdir[Release|x64] = ../../../build/obj/miniaudio/Release
+
+outdir[Debug|Linux] = ../../../build/lib/Debug
+outdir[Release|Linux] = ../../../build/lib/Release
+intdir[Debug|Linux] = ../../../build/obj/miniaudio/Debug
+intdir[Release|Linux] = ../../../build/obj/miniaudio/Release
+
+outdir[Debug|macOS] = ../../../build/lib/Debug
+outdir[Release|macOS] = ../../../build/lib/Release
+intdir[Debug|macOS] = ../../../build/obj/miniaudio/Debug
+intdir[Release|macOS] = ../../../build/obj/miniaudio/Release
+
+if(Linux)
+{
+    libs = dl, pthread, m
+}
+if(macOS)
+{
+    libs = pthread
+}

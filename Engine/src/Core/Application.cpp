@@ -7,6 +7,7 @@
 #include "Assets/Resources.h"
 #include "Core/Window.h"
 #include "Graphics/LayerManager.h"
+#include "Input/InputActionMap.h"
 #include "Scene/SceneManager.h"
 #include "imgui/imgui-SFML.h"
 #include "Utils/Profiler.h"
@@ -44,6 +45,27 @@ void Application::Init(const Config &config) {
     Window::UpdateViewport();
 }
 
+Application::Config Application::NativeResolutionConfig(
+    int width,
+    int height,
+    const std::string &title,
+    int fixedTickRate) {
+    const int safeWidth = std::max(width, 1);
+    const int safeHeight = std::max(height, 1);
+
+    Config config;
+    config.window.width = safeWidth;
+    config.window.height = safeHeight;
+    config.window.title = title;
+    config.window.designResolution = {
+        static_cast<float>(safeWidth),
+        static_cast<float>(safeHeight)
+    };
+    config.window.scaleMode = Window::ScaleMode::Letterbox;
+    config.fixedTickRate = fixedTickRate > 0 ? fixedTickRate : 60;
+    return config;
+}
+
 void Application::Run() {
     if (!g_Window) {
         return;
@@ -69,6 +91,8 @@ void Application::Run() {
                 ImGui::SFML::ProcessEvent(event);
             }
         }
+
+        Input::Update();
 
         auto currentTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsedTime = currentTime - previousTime;

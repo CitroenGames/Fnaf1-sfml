@@ -1,0 +1,31 @@
+[project:Pakker]
+type = lib
+sources = src/**/*.cpp, src/**/*.c
+headers = src/**/*.h, src/**/*.hpp
+includes = src
+public_includes = src
+std = 20
+
+outdir[Debug|x64] = ../../../build/lib/Debug
+outdir[Release|x64] = ../../../build/lib/Release
+intdir[Debug|x64] = ../../../build/obj/Pakker/Debug
+intdir[Release|x64] = ../../../build/obj/Pakker/Release
+
+outdir[Debug|Linux] = ../../../build/lib/Debug
+outdir[Release|Linux] = ../../../build/lib/Release
+intdir[Debug|Linux] = ../../../build/obj/Pakker/Debug
+intdir[Release|Linux] = ../../../build/obj/Pakker/Release
+
+outdir[Debug|macOS] = ../../../build/lib/Debug
+outdir[Release|macOS] = ../../../build/lib/Release
+intdir[Debug|macOS] = ../../../build/obj/Pakker/Debug
+intdir[Release|macOS] = ../../../build/obj/Pakker/Release
+
+if(Linux)
+{
+    libs = pthread
+}
+if(macOS)
+{
+    libs = pthread
+}

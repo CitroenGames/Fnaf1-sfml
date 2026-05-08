@@ -1,0 +1,5 @@
+[project:nlohmann_json]
+type = interface
+headers = include/**/*.hpp, include/**/*.h
+includes = include
+public_includes = include

@@ -1,3 +1,4 @@
-rm -rf build
-mkdir build
-cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -B build
+#!/usr/bin/env bash
+set -euo pipefail
+
+sighmake Fnaf-SFML.buildscript -g makefile
